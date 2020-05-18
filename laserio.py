@@ -8,16 +8,19 @@ def warm_up_laser():
 
 """
 """
-def arm_laser():
+def laser_arm():
 
 """
 """
-def disarm_laser():
+def laser_disarm():
 
 """
 """
-def fire_laser():
+def laser_fire():
 
 """
 """
 def laser_off():
+
+"""
+"""
