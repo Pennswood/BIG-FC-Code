@@ -1,3 +1,5 @@
+import serial
+
 """
 Task: checks for existing rover command and read command if it exists
 Inputs: none
@@ -7,8 +9,8 @@ def read_command():
 
 """
 Task: writes a response to the rover.
-Input: array of hex numbers to be sent to the rover,
-with the number in index 1 to be sent first and last index sent last.
+Input: array of bytes to be sent to the rover,
+with the number in index 0 to be sent first and last index sent last.
 Returns: a boolean value, True for success and False for unsuccessful (line occupied, etc for debugging purposes)
 """
 def write_response(response):
