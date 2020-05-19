@@ -1,5 +1,9 @@
 import serial
 
+def setup_serial():
+	global roverSerial, tlcSerial
+	roverSerial = serial.Serial("/dev/ttyS1")
+
 """
 Task: checks for existing rover command and read command if it exists
 Inputs: none
