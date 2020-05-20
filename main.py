@@ -18,40 +18,43 @@ states_TLC = False
 
 files_transferring = False
 
-
+threads = []
 def main_loop():
 	"""This will be the main loop that checks for and processes commands"""
 	print("Main loop entered")
 	    command = read_command()
-	    if command == 0:
+	    if command == '\x01':
 	        rover.ping()
-	    if command == 1:
+	    if command == '\x02':
 	        laser.warm_up_laser()
-	    if command == 2:
+	    if command == '\x03':
 	        laser.laser_arm()
-	    if command == 3
+	    if command == '\x04':
 	        laser.laserlaser_disarm()
-	    if command == 4:
-	        laser.laser_fire()
-	    if command == 5:
+	    if command == '\x05':
+			t1 = threading.Thread(target=spectrometer.sample, args=(10,))
+			threads.append(t1)
+			t1.start()
+			t2 = Timer(.01, laser.laser_fire)
+	    if command == '\x06':
 	        laser.laser_off()
-	    if command == 6:
+	    if command == '\x07':
 	        spectrometer.sample(10)
-	    if command == 7:
+	    if command == '\x08':
 	        spectrometer.sample(20)
-	    if command == 8
+	    if command == '\x09':
 	    	rover.all_spectrometer_data()
-	    if command == 9:
+	    if command == '\x0A':
 	        rover.status_request()
-	    if command == 10:
+	    if command == '\x0B':
 	        rover.status_dump()
-	    if command == 11:
+	    if command == '\x0C':
 	        rover.manifest_request()
-	    if command == 12:
+	    if command == '\x0D':
 	        rover.transfer_sample()
-	    if command == 13:
+	    if command == '\x0E':
 	        clock_sync()
-	    if command == 14:
+	    if command == '\xF0':
 	        pi_tune()
 while(True):
 	main_loop()

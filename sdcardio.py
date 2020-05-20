@@ -34,7 +34,7 @@ def last_two_spectrometer_file():
 """
 Task: Returns all strings of all spectrometer sample files.
 Inputs: N/A
-Outputs: a nx1 String array of all n spectrometer sample files, with the first being the most recent and the last being the least recent
+Returns: a nx1 String array of all n spectrometer sample files, with the first being the most recent and the last being the least recent
 The string will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], ...}
 """
 def all_spectrometer_files():
@@ -42,14 +42,14 @@ def all_spectrometer_files():
 """
 Task: Append data into the log file. May automatically create a new file.
 Inputs: Bit string data to input.
-Outputs: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
+Returns: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
 """
 def append_log_file(data):
 
 """
 Task: Returns all strings of all log files.
 Inputs: N/A
-Outputs: a nx1 String array of all n log files, with the first being the most recent and the last being the least recent
+Returns: a nx1 String array of all n log files, with the first being the most recent and the last being the least recent
 The string will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], ...}
 """
 def read_all_log_file():
@@ -57,7 +57,7 @@ def read_all_log_file():
 """
 Task: Returns manifest data.
 Inputs: N/A
-Outputs: a nx3 array of all n entries/lines in the manifest catalog, with the first being the most recent entry and the last being the least recent.
+Returns: a nx3 array of all n entries/lines in the manifest catalog, with the first being the most recent entry and the last being the least recent.
 Each column will be in the format {{(String)[name].[extension],(Integer) file size in bits, (integer} milliseconds since last time sync}
 """
 def read_manifest():
