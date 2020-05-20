@@ -7,7 +7,7 @@ def setup_serial():
 """
 Task: checks for existing rover command and read command if it exists
 Inputs: none
-Returns: an integer value for the command number sent, or -1 for no commands sent
+Returns: a 8 bit hex value for the command number sent, 0x00 for no commands sent
 """
 def read_command():
 
@@ -29,10 +29,16 @@ def ping():
     return write_response(hex(0x01))
 
 """
+Task: sends all spectrometer data to the rover
+Input: none
+Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 """
 def all_spectrometer_data():
 
 """
+Task: sends back a byte list of status data (in accordance to table III in rover commands) to the rover)
+Input: none
+Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 """
 def status_request():
 
