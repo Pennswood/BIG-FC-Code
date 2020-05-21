@@ -5,6 +5,9 @@ import socketserver
 
 BUFFER_SIZE = 1024
 
+# Number of bytes that an integer (signed or unsigned) takes up.
+INTEGER_SIZE = 4
+
 # Unless Tyler tells you to, DONT touch this file. If you are getting errors in your code its probably because your code is wrong :) If you really think it's this code, message me
 
 def DebugUDPHandlerFactory(oserial):
@@ -30,17 +33,17 @@ class OasisSerial():
 
 	#Sends a signed (positive or negative), big endian integer
 	def sendInteger(self, i):
-		b = i.to_bytes(2, byteorder="big", signed=True)
+		b = i.to_bytes(INTEGER_SIZE, byteorder="big", signed=True)
 		self.sendBytes(b)
 		
 	#Sends a signed (positive or negative), big endian integer
 	def sendSignedInteger(self, i):
-		b = i.to_bytes(2, byteorder="big", signed=True)
+		b = i.to_bytes(INTEGER_SIZE, byteorder="big", signed=True)
 		self.sendBytes(b)
 		
 	#Sends an unsigned (positive only), big endian integer
 	def sendUnsignedInteger(self, i):
-		b = i.to_bytes(2, byteorder="big", signed=False)
+		b = i.to_bytes(INTEGER_SIZE, byteorder="big", signed=False)
 		self.sendBytes(b)
 		
 	#This is our "ASCII encoded float" way of sending floats. This may be changed in the future.
@@ -71,17 +74,17 @@ class OasisSerial():
 	
 	# Returns a signed (positive or negative) integer read from the serial connection
 	def readSignedInteger(self):
-		b = self.readBytes(2)
+		b = self.readBytes(INTEGER_SIZE)
 		return int.from_bytes(b, byteorder="big", signed=True)
 	
 	# Returns a signed (positive only) integer read from the serial connection
 	def readUnsignedInteger(self):
-		b = self.readBytes(2)
+		b = self.readBytes(INTEGER_SIZE)
 		return int.from_bytes(b, byteorder="big", signed=False)
 	
 	# Returns a signed (positive or negative) integer read from the serial connection
 	def readInteger(self):
-		b = self.readBytes(2)
+		b = self.readBytes(INTEGER_SIZE)
 		return int.from_bytes(b, byteorder="big", signed=True)
 		
 	# Returns a float read from the serial connection that was represented in our special ASCII encoded format
