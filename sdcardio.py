@@ -1,3 +1,6 @@
+import csv
+
+
 """
 If you need to save a file please use/call functions here"
 """
@@ -6,8 +9,11 @@ If you need to save a file please use/call functions here"
 For internal use only!
 Task:
 """
-def append_manifest_file(data):
-    #TODO
+PATH = "/home"
+def append_manifest_file(fileName, time, bits):
+    with open(PATH+"manifest.csv", 'a', newline='') as csvFile:
+        writer = csv.writer(csvFile, delimiter=",")
+        writer.writerow(str(fileName)+","+str(time)+","+str(bits))
     return
 
 """
