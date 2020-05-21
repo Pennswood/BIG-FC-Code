@@ -27,9 +27,9 @@ class TLCTCPHandler(socketserver.BaseRequestHandler):
 		print("TLC]\t Received data: " + str(self.data))
 
 def main():
-	global rover_sock, tlc_sock, ROVER_PORT, TLC_PORT
+	global ROVER_PORT, TLC_PORT
 	print("Setting up TCP Rover socket...")
-	rover_serv = socketserver.TCPServer((IP_ADDRESS, ROVER_PORT),RoverTCPHandler)
+	rover_serv = socketserver.TCPServer((IP_ADDRESS, ROVER_PORT), RoverTCPHandler)
 
 	print("Setting up TCP TLC socket....")
 	tlc_serv = socketserver.TCPServer((IP_ADDRESS, TLC_PORT), TLCTCPHandler)
