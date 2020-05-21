@@ -24,7 +24,7 @@ def print_received(oserial, prefix):
 
 def main():
 	global ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT
-	print("Setting up Rover TCP sockets...")
+	print("Setting up UDP sockets...")
 	rover_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT)
 
 	tlc_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
@@ -46,9 +46,23 @@ def main():
 			print("Help:\t\tAvailable Commands\n")
 			print("\t:exit\t\tExits the program")
 			print("\t:quit\t\tSame as :exit\n")
-			print("\t:ping\t\tPing the BBB\n")
+			print("\t:ping\t\tPing the BBB")
+			print("\t:status\t\tSend a STATUS REQUEST command the BBB\n")
+			print("\t:send_ascii\tSend an ASCII string the BBB")
+			print("\t:send_sint\tSend a signed integer to the BBB")
+			print("\t:send_uint\tSend an unsigned integer to the BBB")
+			
 		elif command == ":exit" or command == ":quit":
 			done = True
 		elif command == ":ping":
 			rover_serial.sendBytes(b'\x01')
+		elif command == ":status":
+			rover_serial.sendBytes(b'\x0A')
+		elif command == ":send_ascii":
+			rover_serial.sendString(input("Input string to send and press enter:"))
+		elif command == ":send_sint":
+			rover_serial.sendSignedInteger(int(input("Input integer: ")))
+		elif command == ":send_uint":
+			rover_serial.sendUnsignedInteger(int(input("Input integer: ")))
+		
 main()
