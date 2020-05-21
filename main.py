@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 import time
 import serial
-import roverio as rover
+from roverio import rover_serial
 import laserio as laser
 import debug
 import threading
 import spectrometerio as spectrometer
 
+#Set this to False when testing on the Beagle Bone Black
+DEBUG_SERIAL = True
 
 #States:
 #0 = off, 1 = warming up, 2 = warmed up, 3 = arming, 4 = armed, 5 = firing
@@ -71,6 +73,9 @@ def main_loop():
 
 	if command == '\xF0':
 		rover.pi_tune()
+
+
+rover_serial = RoverSerial(DEBUG_SERIAL)
 
 while(True):
 	main_loop()

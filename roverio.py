@@ -5,9 +5,6 @@ import socket
 TLC_TCP_PORT = 321
 ROVER_TCP_PORT = 654
 
-#Set this to False when testing on the Beagle Bone Black
-DEBUG_SERIAL = True
-
 class RoverSerial():
 	def sendByte(self, b):
 		if self.debug:
@@ -47,9 +44,6 @@ class RoverSerial():
 		else:
 			self.rover_serial = serial.Serial("/dev/ttyS1")
 			print("Created serial connection to /dev/ttyS1")
-
-rover_serial = RoverSerial(DEBUG_SERIAL)
-
 
 """
 Task: sends a response to the rover.
