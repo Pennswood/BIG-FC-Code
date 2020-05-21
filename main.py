@@ -15,7 +15,7 @@ DEBUG_SERIAL = True
 #0 = off, 1 = warming up, 2 = warmed up, 3 = arming, 4 = armed, 5 = firing
 states_laser = 0
 #0 = standby, 1 = integrating, 2 = disconnected
-states_spectrometer = False
+states_spectrometer = 0
 
 #False = storage mode, True = operations mode
 states_TLC = False
@@ -33,6 +33,11 @@ def main_loop():
 	"""This will be the main loop that checks for and processes commands"""
 	#print("Main loop entered")
 	command = rover_serial.readByte()
+	
+	#Adds the command into the status list
+	status.insert(0, command)
+	if len(status) > 2:
+		status.pop(2)
 	
 	if command == b'\x01':
 		roverio.ping(rover_serial)
