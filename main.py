@@ -14,13 +14,19 @@ DEBUG_SERIAL = True
 #States:
 #0 = off, 1 = warming up, 2 = warmed up, 3 = arming, 4 = armed, 5 = firing
 states_laser = 0
-#False = standby, True = integrating
+#0 = standby, 1 = integrating, 2 = disconnected
 states_spectrometer = False
 
 #False = storage mode, True = operations mode
 states_TLC = False
 
 files_transferring = False
+
+#21X1 boolean array. False for non-active error, True for active errors
+active_errors = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+
+#Last 2 rover commands. First being most recent, second next recent.
+status = []
 
 threads = []
 def main_loop():
