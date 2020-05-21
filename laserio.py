@@ -5,22 +5,27 @@ Input: none
 Output: Integer. 0 = laser warmed up, 1 = laser warming up, 2 = TLC warming module up, >2 = some sort of error.
 """
 def warm_up_laser():
-
+    # TODO
+    return
 """
 """
 def laser_arm():
-
+    # TODO
+    return
 """
 """
 def laser_disarm():
-
+    # TODO
+    return
 """
 """
 def laser_fire():
-
+    # TODO
+    return
 """
 """
 def laser_off():
-
+    # TODO
+    return
 """
 """
