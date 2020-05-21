@@ -20,7 +20,7 @@ def print_received(oserial, prefix):
 			oserial.rx_buffer.clear()
 		oserial.rx_buffer_lock.release()
 		if d != b'':
-			print(prefix + " RX] " + str(d))
+			print(prefix + " RX]\t" + str(bytes(d)))
 
 def main():
 	global ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT
