@@ -76,10 +76,10 @@ def main_loop():
 		roverio.pi_tune(rover_serial)
 
 # Talk to Tyler to learn what this line does :)
-rover_serial = oasis_serial.OasisSerial(debug_mode=True,debug_input_buffer=[b'\x01'],debug_port=oasis_serial.ROVER_TCP_PORT)
+rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=True,debug_input_buffer=[b'\x01'],debug_port=oasis_serial.ROVER_TCP_PORT)
 
 # Talk to Tyler to learn what this line does :)
-tlc_serial = oasis_serial.OasisSerial(debug_mode=True,debug_input_buffer=[],debug_port=oasis_serial.TLC_TCP_PORT)
+tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=True,debug_input_buffer=[],debug_port=oasis_serial.TLC_TCP_PORT)
 
 #tlc_serial.sendString("hello world!")
 
