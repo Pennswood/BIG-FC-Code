@@ -26,7 +26,7 @@ threads = []
 def main_loop():
 	"""This will be the main loop that checks for and processes commands"""
 	print("Main loop entered")
-	command = rover_serial.read_command()
+	command = rover_serial.readByte()
 	if command == b'\x01':
 		roverio.ping(rover_serial)
 
@@ -76,12 +76,11 @@ def main_loop():
 		roverio.pi_tune(rover_serial)
 
 # Talk to Tyler to learn what this line does :)
-rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=True,debug_input_buffer=[b'\x01'],debug_port=oasis_serial.ROVER_TCP_PORT)
+rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=True, debug_tx_port=roverio.ROVER_TX_PORT, debug_rx_port=roverio.ROVER_RX_PORT)
+rover_serial.sendString("hello world")
 
 # Talk to Tyler to learn what this line does :)
-tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=True,debug_input_buffer=[],debug_port=oasis_serial.TLC_TCP_PORT)
-
-#tlc_serial.sendString("hello world!")
+tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=True, debug_tx_port=roverio.TLC_TX_PORT, debug_rx_port=roverio.TLC_RX_PORT)
 
 while(True):
 	main_loop()
