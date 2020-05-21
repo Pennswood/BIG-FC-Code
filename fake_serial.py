@@ -14,7 +14,7 @@ class RoverTCPHandler(socketserver.BaseRequestHandler):
 
 	def handle(self):
 		self.data = self.request.recv(BUFFER_SIZE)
-		print("Received data: " + str(self.data))
+		print("ROVER]\t Received data: " + str(self.data))
 
 
 class TLCTCPHandler(socketserver.BaseRequestHandler):
@@ -24,7 +24,7 @@ class TLCTCPHandler(socketserver.BaseRequestHandler):
 
 	def handle(self):
 		self.data = self.request.recv(BUFFER_SIZE)
-		print("Received data: " + str(self.data))
+		print("TLC]\t Received data: " + str(self.data))
 
 def main():
 	global rover_sock, tlc_sock, ROVER_PORT, TLC_PORT
