@@ -20,10 +20,27 @@ class RoverSerial():
 			self.tcp_socket.send(s.encode('ascii'))
 		else:
 			self.rover_serial.write(s.encode('ascii'))
+            
+    def read_command(self):
+        if self.debug:
+            a = read_buffer.pop(0)
+            if a == None:
+                while read_buffer.len() == 0:
+                    #Wair for a command to be received
+                a = read_buffer.pop(0)
+            
+            return a
+        else:
+            return self.rover_serial.read()
 
-	def __init__(self, debug_mode=False):
+    """
+        When debug_mode is set to True, the program will attempt to connect to the TCP port provided by fake_serial.py.
+        Additionally, debug_input_buffer will hold a byte array of received/simulated commands sent from the rover.
+    """
+	def __init__(self, debug_mode=False, debug_input_buffer=None):
 		self.debug = debug_mode
 		if debug_mode:
+            self.read_buffer = debug_input_buffer
 			self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.tcp_socket.connect(("localhost", ROVER_TCP_PORT))
 			print("Connected to dummy serial!")
@@ -33,30 +50,14 @@ class RoverSerial():
 
 rover_serial = RoverSerial(DEBUG_SERIAL)
 
-"""
-Task: checks for existing rover command and read command if it exists
-Inputs: none
-Returns: a 8 bit hex value for the command number sent, 0x00 for no commands sent
-"""
-def read_command():
-	#TODO
-	return
-"""
-Task: writes a response to the rover.
-Input: array of bytes to be sent to the rover,
-with the number in index 0 to be sent first and last index sent last.
-Returns: a boolean value, True for success and False for unsuccessful (line occupied, etc for debugging purposes)
-"""
-def write_response(response):
-	# TODO
-	return
+
 """
 Task: sends a response to the rover.
 Input: none
 Returns: a boolean value, True for success and False for unsuccessful (line occupied, etc for debugging purposes)
 """
 def ping():
-	return write_response(hex(0x01))
+	return rover_serial.sendByte(0x01)
 
 """
 Task: sends all spectrometer data to the rover
