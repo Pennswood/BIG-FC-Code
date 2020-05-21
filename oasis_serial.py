@@ -14,9 +14,10 @@ def DebugUDPHandlerFactory(oserial):
 
 		def handle(self):
 			self.data = self.request[0]
-			print(self.data)
+			#print(type(self.data))
+			#print(self.data)
 			self.oasis_serial.rx_buffer_lock.acquire()
-			self.oasis_serial.rx_buffer.join(bytearray(self.data))
+			self.oasis_serial.rx_buffer += self.data
 			self.oasis_serial.rx_buffer_lock.release()
 	return DebugUDPHandler
 
@@ -53,24 +54,12 @@ class OasisSerial():
 		
 	# Returns a single byte read from the serial connection
 	def readByte(self):
-		if self.debug:
-		
-			done = False
-			while not done:
-				self.rx_buffer_lock.acquire()
-				if len(self.rx_buffer) > 0:
-					a = self.rx_buffer.pop(0)
-					done = True
-				self.rx_buffer_lock.release()
+		return self.readBytes(1)
 			
-			return a
-		else:
-			return self.serial_connection.read()
-			
-	# Returns an array of bytes of length `count` read from the serial connection
+	# Returns a bytearray of length `count` read from the serial connection
 	def readBytes(self, count):
 		if self.debug:
-			a = []
+			a = bytearray()
 			while len(a) < count:
 				self.rx_buffer_lock.acquire() # yeah, i could optimize this, but nah
 				if len(self.rx_buffer) > 0:
