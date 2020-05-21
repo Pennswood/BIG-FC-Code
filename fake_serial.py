@@ -37,8 +37,15 @@ def main():
 	rover_thread = threading.Thread(target=rover_serv.serve_forever)
 	tlc_thread = threading.Thread(target=tlc_serv.serve_forever)
 
+	rover_thread.daemon = True
+	tlc_thread.daemon = True
+
 	print("Starting threads...")
 	rover_thread.start()
 	tlc_thread.start()
+
+	while True:
+		a=''
+		# do nothing
 
 main()
