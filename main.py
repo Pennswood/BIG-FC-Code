@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import time
 import serial
-from roverio import RoverSerial
+import roverio
 import laserio as laser
 import debug
 import threading
@@ -26,56 +26,56 @@ def main_loop():
 	"""This will be the main loop that checks for and processes commands"""
 	print("Main loop entered")
 	command = rover_serial.read_command()
-	if command == '\x01':
-		rover.ping()
+	if command == b'\x01':
+		roverio.ping(rover_serial)
 
-	if command == '\x02':
+	elif command == b'\x02':
 		laser.warm_up_laser()
 
-	if command == '\x03':
+	elif command == b'\x03':
 		laser.laser_arm()
 
-	if command == '\x04':
+	elif command == b'\x04':
 		laser.laser_disarm()
 
-	if command == '\x05':
+	elif command == b'\x05':
 		t1 = threading.Thread(target=spectrometer.sample, args=(10,))
 		threads.append(t1)
 		t1.start()
 		t2 = threading.Timer(.01, laser.laser_fire)
 
-	if command == '\x06':
+	elif command == b'\x06':
 		laser.laser_off()
 
-	if command == '\x07':
+	elif command == b'\x07':
 		spectrometer.sample(10)
 
-	if command == '\x08':
+	elif command == b'\x08':
 		spectrometer.sample(20)
 
-	if command == '\x09':
-		rover.all_spectrometer_data()
+	elif command == b'\x09':
+		roverio.all_spectrometer_data(rover_serial)
 
-	if command == '\x0A':
-		rover.status_request()
+	elif command == b'\x0A':
+		roverio.status_request(rover_serial)
 
-	if command == '\x0B':
-		rover.status_dump()
+	elif command == b'\x0B':
+		roverio.status_dump(rover_serial)
 
-	if command == '\x0C':
-		rover.manifest_request()
+	elif command == b'\x0C':
+		roverio.manifest_request(rover_serial)
 
-	if command == '\x0D':
-		rover.transfer_sample()
+	elif command == b'\x0D':
+		roverio.transfer_sample(rover_serial)
 
-	if command == '\x0E':
-		rover.clock_sync()
+	elif command == b'\x0E':
+		roverio.clock_sync(rover_serial)
 
-	if command == '\xF0':
-		rover.pi_tune()
+	elif command == b'\xF0':
+		roverio.pi_tune(rover_serial)
 
 # Talk to Tyler to learn what this line does :)
-rover_serial = RoverSerial(debug_mode=True,debug_input_buffer=[0x01])
+rover_serial = roverio.RoverSerial(debug_mode=True,debug_input_buffer=[b'\x01'])
 
 while(True):
 	main_loop()
