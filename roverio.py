@@ -28,8 +28,49 @@ Task: sends back a byte list of status data (in accordance to table III in rover
 Input: An OasisSerial object
 Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 """
-def status_request(s):
-	# TODO
+'''
+Sends over the current status of the Oasis (temperature, error codes, laser and spectrometer status)
+'''
+def status_request(self, s, tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
+	if(!tlc_mode):					# storage
+		s.sendBytes(b'\x01')			# TLC mode | 1 byte
+	else:						# operations
+		s.sendBytes(b'\x02')
+	If laser_status == 0:
+		s.sendBytes(b'\x24')			# Laser status | 1 byte
+	elif laser_status == 1:
+		s.sendBytes('\x??????')			# need to add hex for this
+	elif laser_status == 2;
+		s.sendBytes(b'\x22')
+	elif laser_status == 3:
+		s.sendBytes(b'\x?????')			# need to add hex for this
+	elif laser_status == 4:
+		s.sendBytes(b'\x20')
+	elif laser_status == 5:
+		s.sendBytes(b'\x23')
+
+	if spec_status == 0:				# Spectrometer status | 1 byte
+		s.sendBytes(b'\x01')
+	if spec_status == 1:
+		s.sendBytes(b'\x02')
+	if spec_status == 2:
+		s.sendBytes(b'\xFC')
+
+	for i in self.temp_data:			# Assuming that temp_data is an array
+		self.sendFloat(i)			# Temperature data | 56 bytes
+	
+	for i in self.etch_foil_duty_cycle:		# Assuming EFDC is an array of bytes
+		self.sendBytes(i)			# Etch foil duty cycle (EFDC) | 3 bytes
+
+	# An array of errors (21X1)
+	errors = ['ECD', 'LDD', 'SDD', 'TDD', 'THH', 'TLL', 'TIM', 'TO0', 'TO1', 'TO2', 'TO3', 'TO4', 'TO5', 'TO6', 'TO7', 'TO8', 'EDD', 'DSL', 'ALF', 'FLF', 'LSE']
+	for index, error in enumerate(error_codes):	# Error codes | 3 bytes
+		if error:				# if an error exists/is True
+			s.sendString(errors[index])
+			break
+	else:						# need to check with Normen
+		s.sendBytes(b'000')			# null???
+	s.sendBytes(prev_cmd)				# Previous command | 1 byte
 	return
 
 
