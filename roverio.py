@@ -17,27 +17,24 @@ class RoverSerial():
 			self.tcp_socket.send(s.encode('ascii'))
 		else:
 			self.rover_serial.write(s.encode('ascii'))
-            
-    def read_command(self):
-        if self.debug:
-            a = read_buffer.pop(0)
-            if a == None:
-                while read_buffer.len() == 0:
-                    #Wair for a command to be received
-                a = read_buffer.pop(0)
-            
-            return a
-        else:
-            return self.rover_serial.read()
 
-    """
-        When debug_mode is set to True, the program will attempt to connect to the TCP port provided by fake_serial.py.
-        Additionally, debug_input_buffer will hold a byte array of received/simulated commands sent from the rover.
-    """
+	def read_command(self):
+		if self.debug:
+			while len(self.read_buffer) == 0:
+				a = ''	#Wait for a command to be received
+			a = self.read_buffer.pop(0)   
+			return a
+		else:
+			return self.rover_serial.read()
+
+	"""
+	When debug_mode is set to True, the program will attempt to connect to the TCP port provided by fake_serial.py.
+	Additionally, debug_input_buffer will hold a byte array of received/simulated commands sent from the rover.
+	"""
 	def __init__(self, debug_mode=False, debug_input_buffer=None):
 		self.debug = debug_mode
 		if debug_mode:
-            self.read_buffer = debug_input_buffer
+			self.read_buffer = debug_input_buffer
 			self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.tcp_socket.connect(("localhost", ROVER_TCP_PORT))
 			print("Connected to dummy serial!")

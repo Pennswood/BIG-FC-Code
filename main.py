@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import time
 import serial
-from roverio import rover_serial
+from roverio import RoverSerial
 import laserio as laser
 import debug
 import threading
@@ -25,7 +25,7 @@ threads = []
 def main_loop():
 	"""This will be the main loop that checks for and processes commands"""
 	print("Main loop entered")
-	command = rover.read_command()
+	command = rover_serial.read_command()
 	if command == '\x01':
 		rover.ping()
 
@@ -74,8 +74,8 @@ def main_loop():
 	if command == '\xF0':
 		rover.pi_tune()
 
-
-rover_serial = RoverSerial(DEBUG_SERIAL)
+# Talk to Tyler to learn what this line does :)
+rover_serial = RoverSerial(debug_mode=True,debug_input_buffer=[0x01])
 
 while(True):
 	main_loop()
