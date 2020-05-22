@@ -31,16 +31,17 @@ Returns: integer, 0 for success, other numbers for failure to send data (for deb
 '''
 Sends over the current status of the Oasis (temperature, error codes, laser and spectrometer status)
 '''
+# TODO: add comments for what each sendBytes indicates and what inputs are expected
 def status_request(s, tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
 	print("Got status request...")
 	if not tlc_mode:					# storage
 		s.sendBytes(b'\x01')			# TLC mode | 1 byte
-	else:						# operations
+	else:								# operations
 		s.sendBytes(b'\x02')
 	if laser_status == 0:
 		s.sendBytes(b'\x24')			# Laser status | 1 byte
 	elif laser_status == 1:
-		s.sendBytes('\x00')			# TODO: need to add hex for this
+		s.sendBytes('\x00')				# TODO: need to add hex for this
 	elif laser_status == 2:
 		s.sendBytes(b'\x22')
 	elif laser_status == 3:
@@ -57,20 +58,23 @@ def status_request(s, tlc_mode, laser_status, spec_status, temp_data, efdc, erro
 	if spec_status == 2:
 		s.sendBytes(b'\xFC')
 
-	for i in self.temp_data:			# Assuming that temp_data is an array
-		self.sendFloat(i)			# Temperature data | 56 bytes
+	for i in temp_data:					# Assuming that temp_data is an array
+		s.sendFloat(i)					# Temperature data | 56 bytes
 	
-	for i in self.etch_foil_duty_cycle:		# Assuming EFDC is an array of bytes
-		self.sendBytes(i)			# Etch foil duty cycle (EFDC) | 3 bytes
+	for i in etch_foil_duty_cycle:		# Assuming EFDC is an array of bytes
+		s.sendBytes(i)					# Etch foil duty cycle (EFDC) | 3 bytes
 
-	# An array of errors (21X1)
-	errors = ['ECD', 'LDD', 'SDD', 'TDD', 'THH', 'TLL', 'TIM', 'TO0', 'TO1', 'TO2', 'TO3', 'TO4', 'TO5', 'TO6', 'TO7', 'TO8', 'EDD', 'DSL', 'ALF', 'FLF', 'LSE']
-	for index, error in enumerate(error_codes):	# Error codes | 3 bytes
-		if error:				# if an error exists/is True
-			s.sendString(errors[index])
-			break
-	else:						# need to check with Normen
-		s.sendBytes(b'000')			# null???
+	errors = [0, 0, 0]					# Error codes | 3 bytes
+	for index, error in enumerate(error_codes):		# Convert bits into int to bytes
+		if (index//8 == 0):				# First 8 bits in first byte
+			errors[0] += error * 2**(index%8)
+		elif (index//8 == 1):			# Second 8 bits in second byte
+			errors[1] += error * 2**(index%8)
+		else:							# Third 5 bits in third byte with 3 bits of zeroes padding
+			errors[2] += error * 2**(index%8)
+	for i in errors:					# loop through the 3 bytes
+		s.sendInt(i)
+
 	s.sendBytes(prev_cmd)				# Previous command | 1 byte
 	return
 
