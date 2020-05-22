@@ -52,6 +52,7 @@ def main():
 			print("\t:send_sint\tSend a signed integer to the BBB")
 			print("\t:send_uint\tSend an unsigned integer to the BBB")
 			print("\t:send_bytes\tSend a sequence of bytes to the BBB. Do not use \\x or 0x !")
+			print("\t:send_float\tSend an ASCII encoded float to the BBB. Do not use \\x or 0x !")
 			
 		elif command == ":exit" or command == ":quit":
 			done = True
@@ -67,5 +68,7 @@ def main():
 			rover_serial.sendUnsignedInteger(int(input("Input integer: ")))
 		elif command == ":send_bytes":
 			rover_serial.sendBytes(bytes.fromhex(input("Input bytes: ")))
+		elif command == ":send_float":
+			rover_serial.sendFloat(float(input("Input float: ")))
 		
 main()
