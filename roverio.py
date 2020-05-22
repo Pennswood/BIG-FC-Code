@@ -43,17 +43,17 @@ def add_status(tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes
 	else:									# operations
 		status_array += (b'\x02')
 	if laser_status == 0:
-		status_array += (b'\x24')			# Laser status | 1 byte
-	elif laser_status == 1:
-		status_array += (b'\x00')			# TODO: need to add hex for this
-	elif laser_status == 2:
-		status_array += (b'\x22')
-	elif laser_status == 3:
-		status_array += (b'\x00')			# TODO: need to add hex for this
-	elif laser_status == 4:
-		status_array += (b'\x20')
-	elif laser_status == 5:
-		status_array += (b'\x23')
+        status_array += (b'\x20')           # Laser status | 1 byte
+    elif laser_status == 1:
+        status_array += (b'\x21')           
+    elif laser_status == 2:
+        status_array += (b'\x22')
+    elif laser_status == 3:
+        status_array += (b'\x23')           
+    elif laser_status == 4:
+        status_array += (b'\x24')
+    elif laser_status == 5:
+        status_array += (b'\x25')
 
 	if spec_status == 0:					# Spectrometer status | 1 byte
 		status_array += (b'\x01')
@@ -86,7 +86,10 @@ Returns: integer, 0 for success, other numbers for failure to send data (for deb
 def status_request(s, status_array):
 	for i in status_array:
 		s.sendBytes(i)
-	return
+	if len(status_array) == 66:				# fix this when the number of thermistors are finalized
+        return 0
+    else:
+        return 1
 
 '''
 Task: dumps all the status file information to the rover
@@ -95,7 +98,13 @@ Inputs: An OasisSerial object, An sdcardio object
 def status_dump(s, sdcard):
 	file_list = sdcard.read_all_log_file()
 	for i in file_list:
-		s.sendBytes(open(i, 'rb').read())
+		try:
+			f = open(i, 'rb')
+			if f.readable():
+				s.sendBytes(f.read())
+			f.close()
+		except:
+			print("error opening file: " + i)
 	return
 
 
