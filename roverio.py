@@ -22,7 +22,53 @@ Returns: integer, 0 for success, other numbers for failure to send data (for deb
 def all_spectrometer_data(s):
 	# TODO
 	return
+
+'''
+Adds all the statuses into a bytearray
+'''
+# TODO: add comments for what each sendBytes indicates and what inputs are expected
+def add_status(tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
+	status_array = bytearray()
+	if not tlc_mode:						# storage
+		status_array += (b'\x01')			# TLC mode | 1 byte
+	else:									# operations
+		status_array += (b'\x02')
+	if laser_status == 0:
+		status_array += (b'\x24')			# Laser status | 1 byte
+	elif laser_status == 1:
+		status_array += (b'\x00')			# TODO: need to add hex for this
+	elif laser_status == 2:
+		status_array += (b'\x22')
+	elif laser_status == 3:
+		status_array += (b'\x00')			# TODO: need to add hex for this
+	elif laser_status == 4:
+		status_array += (b'\x20')
+	elif laser_status == 5:
+		status_array += (b'\x23')
+
+	if spec_status == 0:					# Spectrometer status | 1 byte
+		status_array += (b'\x01')
+	if spec_status == 1:
+		status_array += (b'\x02')
+	if spec_status == 2:
+		status_array += (b'\xFC')
+
+	for f in temp_data:						# Assuming that temp_data is an array
+		s = "{:0=+4d}{:0=-3d}".format(int(f),int(abs(abs(f)-abs(int(f)))*1000))		# Temperature data | 56 bytes
+		status_array += s.encode("ascii")
 	
+	for i in efdc:							# Assuming EFDC is an array of bytes
+		status_array += i					# Etch foil duty cycle (EFDC) | 3 bytes
+
+	errors = 0								# Error codes | 3 bytes
+	for index, error in enumerate(error_codes):		# Convert bits into int to bytes
+		errors += error * 2**index			
+	b = errors.to_bytes(3, byteorder="big", signed=False)
+	status_array += b
+
+	status_array += prev_cmd				# Previous command | 1 byte
+	return status_array
+
 """
 Task: sends back a byte list of status data (in accordance to table III in rover commands) to the rover)
 Input: An OasisSerial object
@@ -31,52 +77,9 @@ Returns: integer, 0 for success, other numbers for failure to send data (for deb
 '''
 Sends over the current status of the Oasis (temperature, error codes, laser and spectrometer status)
 '''
-# TODO: add comments for what each sendBytes indicates and what inputs are expected
-def status_request(s, tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
-	print("Got status request...")
-	if not tlc_mode:					# storage
-		s.sendBytes(b'\x01')			# TLC mode | 1 byte
-	else:								# operations
-		s.sendBytes(b'\x02')
-	if laser_status == 0:
-		s.sendBytes(b'\x24')			# Laser status | 1 byte
-	elif laser_status == 1:
-		s.sendBytes('\x00')				# TODO: need to add hex for this
-	elif laser_status == 2:
-		s.sendBytes(b'\x22')
-	elif laser_status == 3:
-		s.sendBytes(b'\x00')			# TODO: need to add hex for this
-	elif laser_status == 4:
-		s.sendBytes(b'\x20')
-	elif laser_status == 5:
-		s.sendBytes(b'\x23')
-
-	if spec_status == 0:				# Spectrometer status | 1 byte
-		s.sendBytes(b'\x01')
-	if spec_status == 1:
-		s.sendBytes(b'\x02')
-	if spec_status == 2:
-		s.sendBytes(b'\xFC')
-
-	for i in temp_data:					# Assuming that temp_data is an array
-		s.sendFloat(i)					# Temperature data | 56 bytes
-	
-	for i in etch_foil_duty_cycle:		# Assuming EFDC is an array of bytes
-		s.sendBytes(i)					# Etch foil duty cycle (EFDC) | 3 bytes
-
-	errors = [0, 0, 0]					# Error codes | 3 bytes
-	for index, error in enumerate(error_codes):		# Convert bits into int to bytes
-		if (index//8 == 0):				# First 8 bits in first byte
-			errors[0] += error * 2**(index%8)
-		elif (index//8 == 1):			# Second 8 bits in second byte
-			errors[1] += error * 2**(index%8)
-		else:							# Third 5 bits in third byte with 3 bits of zeroes padding
-			errors[2] += error * 2**(index%8)
-	for i in errors:					# loop through the 3 bytes
-		s.sendInt(i)
-
-	s.sendBytes(prev_cmd)				# Previous command | 1 byte
-	return
+def status_request(s, status_array):
+	for i in status_array:
+		s.sendBytes(i)
 
 
 def status_dump(s):
