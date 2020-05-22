@@ -31,19 +31,20 @@ Returns: integer, 0 for success, other numbers for failure to send data (for deb
 '''
 Sends over the current status of the Oasis (temperature, error codes, laser and spectrometer status)
 '''
-def status_request(self, s, tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
-	if(!tlc_mode):					# storage
+def status_request(s, tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
+	print("Got status request...")
+	if not tlc_mode:					# storage
 		s.sendBytes(b'\x01')			# TLC mode | 1 byte
 	else:						# operations
 		s.sendBytes(b'\x02')
-	If laser_status == 0:
+	if laser_status == 0:
 		s.sendBytes(b'\x24')			# Laser status | 1 byte
 	elif laser_status == 1:
-		s.sendBytes('\x??????')			# need to add hex for this
-	elif laser_status == 2;
+		s.sendBytes('\x00')			# TODO: need to add hex for this
+	elif laser_status == 2:
 		s.sendBytes(b'\x22')
 	elif laser_status == 3:
-		s.sendBytes(b'\x?????')			# need to add hex for this
+		s.sendBytes(b'\x00')			# TODO: need to add hex for this
 	elif laser_status == 4:
 		s.sendBytes(b'\x20')
 	elif laser_status == 5:

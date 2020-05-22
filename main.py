@@ -55,7 +55,7 @@ def main_loop():
 		t1 = threading.Thread(target=spectrometer.sample, args=(10,))
 		threads.append(t1)
 		t1.start()
-		t2 = threading.Timer(.01, laser.laser_fire)
+		t2 = threading.Timer(0.01, laser.laser_fire)
 
 	elif command == b'\x06':
 		laser.laser_off()
