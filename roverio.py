@@ -24,7 +24,16 @@ def all_spectrometer_data(s):
 	return
 
 '''
-Adds all the statuses into a bytearray
+Task: Organizes all the status logs into a byte array
+Inputs:
+		A boolean tlc_mode
+		An integer laser_status
+		An integer spec_status
+		A float array temp_data
+		A byte array efdc (etch foil duty cycle)
+		A boolean array error_codes
+		A byte prev_cmd
+Return: A bytearray of status log
 '''
 # TODO: add comments for what each sendBytes indicates and what inputs are expected
 def add_status(tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
@@ -71,19 +80,22 @@ def add_status(tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes
 
 """
 Task: sends back a byte list of status data (in accordance to table III in rover commands) to the rover)
-Input: An OasisSerial object
+Inputs: An OasisSerial object, A byte array of status logs
 Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 """
-'''
-Sends over the current status of the Oasis (temperature, error codes, laser and spectrometer status)
-'''
 def status_request(s, status_array):
 	for i in status_array:
 		s.sendBytes(i)
+	return
 
-
-def status_dump(s):
-	# TODO
+'''
+Task: dumps all the status file information to the rover
+Inputs: An OasisSerial object, An sdcardio object
+'''
+def status_dump(s, sdcard):
+	file_list = sdcard.read_all_log_file()
+	for i in file_list:
+		s.sendBytes(open(i, 'rb').read())
 	return
 
 
