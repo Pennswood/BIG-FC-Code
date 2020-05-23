@@ -44,7 +44,7 @@ def add_status(tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes
 		status_array += (b'\x02')
 	if laser_status == 0:
         status_array += (b'\x20')           # Laser status | 1 byte
-    elif laser_status == 1:
+    elif laser_status==1:
         status_array += (b'\x21')           
     elif laser_status == 2:
         status_array += (b'\x22')
