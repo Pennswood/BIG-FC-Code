@@ -113,9 +113,15 @@ def manifest_request(s):
 	return
 
 
-def transfer_sample(s):
-	# TODO
-	return
+def transfer_sample(s, sdcard):
+    recent_two = sdcard.last_two_spectrometer_file()    # Saves last 2 spectrometer files to recent_two
+    for i in recent_two:                                # Iterating through both files
+        if i == "":
+            continue                                    # Incase of empty string with no file, skip it
+        f = open(i, 'r')                                # Open each file in read
+        s.sendString(f.read())                          # Sending string over to rover
+        f.close()                                       # Close each file when done
+    return None
 
 
 def clock_sync(s):
