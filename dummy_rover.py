@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import oasis_serial
 import threading
+import time
 
 IP_ADDRESS = "127.0.0.1"
 ROVER_RX_PORT = 420 # Emulate receiving from the BBB on this port (we are the Rover)
@@ -47,6 +48,7 @@ def main():
 			print("\t:exit\t\tExits the program")
 			print("\t:quit\t\tSame as :exit\n")
 			print("\t:ping\t\tPing the BBB")
+			print("\t:clk_sync\t\tSend a CLOCK SYNC command the BBB\n")
 			print("\t:status\t\tSend a STATUS REQUEST command the BBB\n")
 			print("\t:send_ascii\tSend an ASCII string the BBB")
 			print("\t:send_sint\tSend a signed integer to the BBB")
@@ -60,6 +62,9 @@ def main():
 			rover_serial.sendBytes(b'\x01')
 		elif command == ":status":
 			rover_serial.sendBytes(b'\x0A')
+		elif command == ":clk_sync":
+			rover_serial.sendBytes(b'\x0E')
+			rover_serial.sendSignedInteger(int(time.time()))
 		elif command == ":send_ascii":
 			rover_serial.sendString(input("Input string to send and press enter:"))
 		elif command == ":send_sint":

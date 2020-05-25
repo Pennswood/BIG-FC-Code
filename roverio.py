@@ -121,5 +121,7 @@ def transfer_sample(s, sdcard):
 
 
 def clock_sync(s):
-	# TODO
+	print("CLOCK SYNC")
+	t = s.readSignedInteger()
+	print("Got time stamp: " + str(t)) #TODO: Run the command line command to set the system time
 	return
