@@ -26,7 +26,6 @@ def all_spectrometer_data(s):
 '''
 Task: Organizes all the status logs into a byte array
 Inputs:
-		A boolean tlc_mode
 		An integer laser_status
 		An integer spec_status
 		A float array temp_data
@@ -36,12 +35,9 @@ Inputs:
 Return: A bytearray of status log
 '''
 # TODO: add comments for what each sendBytes indicates and what inputs are expected
-def add_status(tlc_mode, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
+def add_status(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
 	status_array = bytearray()
-	if not tlc_mode:						# storage
-		status_array += (b'\x01')			# TLC mode | 1 byte
-	else:									# operations
-		status_array += (b'\x02')
+	
 	if laser_status == 0:
 		status_array += (b'\x20')			# Laser status | 1 byte
 	elif laser_status==1:
