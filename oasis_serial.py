@@ -103,7 +103,7 @@ class OasisSerial():
 	debug_rx_port will be the UDP port that we will listen to for incoming connections
 	debug_tx_port will be the UDP port that we will connect to when sending bytes
 	"""
-	def __init__(self, serial_device, debug_mode=False, debug_rx_port=0, debug_tx_port=0):
+	def __init__(self, serial_device, baud_rate=9600, debug_mode=False, debug_rx_port=0, debug_tx_port=0):
 		self.debug = debug_mode
 		if debug_mode:
 			if debug_rx_port == 0 or debug_tx_port == 0:
@@ -123,8 +123,8 @@ class OasisSerial():
 			self.rx_thread.start()
 			print("Started socketserver for dummy serial UDP port for reception (rx): " + str(debug_rx_port))
 		
-		else:
-			self.serial_connection = serial.Serial(serial_device)
+		else: #TODO: Set parity, stop bits, data bits
+			self.serial_connection = serial.Serial(serial_device, baudrate=baud_rate)
 			print("Created serial connection to " + serial_device)
 
 	def __del__(self):
