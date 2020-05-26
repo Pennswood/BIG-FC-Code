@@ -1,5 +1,7 @@
 import serial
 import socket
+import os
+import binascii
 import threading
 import socketserver
 
@@ -97,6 +99,23 @@ class OasisSerial():
 		if s[0] == '-':
 			f = f * -1.0
 		return f
+		
+	# Transmits a file through serial, using error correction and packetization
+	def sendFile(self, f, filename):
+		print("Sending file: " + filename)
+		
+		filesize = os.stat(f.name).st_size
+		packetsize = 1024 #TODO: Make an algorithm to select something that is not hardcoded
+		retry_count = 0
+		file_hash = 0
+		f.seek(0,0)
+		#TODO: Finish this
+		
+		self.sendByte(b'\x12') # magic command code
+		self.sendString(filename + ";") # filename delimited by semicolon
+		self.sendBytes(filesize.to_bytes(4, byteorder="big", signed=False)) #send filesize
+		self.sendBytes(packetsize.to_bytes(2, byteorder="big", signed=False))
+		
 
 	"""
 	When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
