@@ -9,7 +9,7 @@ import threading
 import spectrometerio as spectrometer
 
 #Set this to False when testing on the Beagle Bone Black
-DEBUG_SERIAL = True
+DEBUG_MODE = True
 
 #States:
 #0 = off, 1 = warming up, 2 = warmed up, 3 = arming, 4 = armed, 5 = firing
@@ -88,10 +88,10 @@ def main_loop():
 		roverio.pi_tune(rover_serial)
 
 # Talk to Tyler to learn what this line does :)
-rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=True, debug_tx_port=roverio.ROVER_TX_PORT, debug_rx_port=roverio.ROVER_RX_PORT)
+rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, debug_tx_port=roverio.ROVER_TX_PORT, debug_rx_port=roverio.ROVER_RX_PORT)
 
 # Talk to Tyler to learn what this line does :)
-tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=True, debug_tx_port=roverio.TLC_TX_PORT, debug_rx_port=roverio.TLC_RX_PORT)
+tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=roverio.TLC_TX_PORT, debug_rx_port=roverio.TLC_RX_PORT)
 
 while(True):
 	main_loop()

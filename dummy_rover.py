@@ -48,7 +48,7 @@ def main():
 			print("\t:exit\t\tExits the program")
 			print("\t:quit\t\tSame as :exit\n")
 			print("\t:ping\t\tPing the BBB")
-			print("\t:clk_sync\t\tSend a CLOCK SYNC command the BBB\n")
+			print("\t:clk_sync\tSend a CLOCK SYNC command the BBB\n")
 			print("\t:status\t\tSend a STATUS REQUEST command the BBB\n")
 			print("\t:send_ascii\tSend an ASCII string the BBB")
 			print("\t:send_sint\tSend a signed integer to the BBB")
