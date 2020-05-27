@@ -25,8 +25,11 @@ class TimeSync():
 	id = 0x0E
 	name = "CLOCK_SYNC"
 	def execute(self):
-
+		# TODO
+		return
 	def __init__(self, stream):
+		#TODO
+		return
 
 def main():
 	print("Enter command stream:")
