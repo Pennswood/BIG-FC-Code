@@ -20,19 +20,10 @@ def DebugUDPHandlerFactory(oserial):
 
 		def handle(self):
 			self.data = self.request[0]
-			#print(type(self.data))
-			#print(self.data)
-			
-			# OK kiddos this is where it gets wild, we're gonna use Condition objects in python. Put your seatbelts on.
-			if self.oasis_serial.sending_file:
-				# You should call something like self.oasis_serial.reply_received_condition.notifyall() in here
-				a = "" # We should be doing something here to handle the ACK/NACK during file transfer, but this is a placeholder for now
-			elif self.oasis_serial.receiving_file:
-				if not self.got_start:
-					
-					b = "" # TODO
-			
+
 			self.oasis_serial.rx_buffer_lock.acquire()
+			if self.oasis_serial.rx_print_prefix:
+				print(self.oasis_serial.rx_print_prefix + str(self.data))
 			self.oasis_serial.rx_buffer += self.data
 			self.oasis_serial.rx_buffer_lock.release()
 	return DebugUDPHandler
@@ -81,14 +72,14 @@ class OasisSerial():
 	def sendString(self, s):
 		self.sendBytes(s.encode('ascii'))
 		
-	# Returns a single byte read from the serial connection
+	# Returns a single byte read from the serial connection. Returns None if timed out reading the byte
 	def readByte(self):
 		b, timeout = self.readBytes(1)
 		if timeout:
 			return None
 		return b
 			
-	# Returns a bytearray of length `count` read from the serial connection
+	# Returns a bytearray of length `count` read from the serial connection and a boolean value saying whether or not the read timed out
 	def readBytes(self, count): # Default to 5 seconds of waiting before timing out
 		if self.debug:
 			timeout_timer = threading.Timer(5.0, timeoutTimer, (self,))
@@ -109,22 +100,22 @@ class OasisSerial():
 				return None, True
 	
 	# Returns a signed (positive or negative) integer read from the serial connection
-	def readSignedInteger(self):
-		b, timeout = self.readBytes(INTEGER_SIZE)
+	def readSignedInteger(self, size=INTEGER_SIZE):
+		b, timeout = self.readBytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 	
 	# Returns a signed (positive only) integer read from the serial connection
-	def readUnsignedInteger(self):
-		b, timeout = self.readBytes(INTEGER_SIZE)
+	def readUnsignedInteger(self, size=INTEGER_SIZE):
+		b, timeout = self.readBytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=False)
 	
 	# Returns a signed (positive or negative) integer read from the serial connection
-	def readInteger(self):
-		b, timeout = self.readBytes(INTEGER_SIZE)
+	def readInteger(self, size=INTEGER_SIZE):
+		b, timeout = self.readBytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
@@ -165,7 +156,6 @@ class OasisSerial():
 		file_hash = h.digest() # gives us a bytes object representing the md5 digest
 		print("MD5 128bit-digest is: " + str(h.hexdigest()))
 		
-		self.reply_ok = False
 		while retry_count < 5: # We will only resend the start packet 5 times before giving up on transmission
 			self.sendBytes(b'\x12') # magic command code
 			self.sendString(filename + ";") # filename terminated by semicolon
@@ -174,15 +164,44 @@ class OasisSerial():
 			self.sendBytes(file_hash) # send the 16 bytes of the md5 digest
 			self.sendBytes(retry_count.to_bytes(1, byteorder="big", signed=False)) # send the number of times that we have tried to send the start packet
 			
-			self.reply_received_condition.acquire()
-			self.reply_received_condition.wait(timeout=2.0) # Wait at most two seconds to receive an acknowledge from the Rover
-			if self.reply_ok:
-				break
+			d = self.readByte()
+			if d == b'\x1a':
+				reply_ok = True
+				check_filename = ''
+				while True:
+					d = self.readByte()
+					if d.decode('ascii') == ";": #possible bug if we never receive a ; character
+						break
+					else:
+						check_filename += d.decode('ascii')
+				if not check_filename == filename:
+					reply_ok = False
+				check_size = self.readUnsignedInteger()
+				if not filesize == check_size:
+					reply_ok = False
+				check_p_size = self.readUnsignedInteger(size=2)
+				if not check_p_size == packetsize:
+					reply_ok = False
+				check_digest, tout = self.readBytes(16)
+				if not check_digest == file_hash:
+					reply_ok = False
+				a = self.readByte()
+				if not a == b'\x2a':
+					reply_ok = False
+					
+				if reply_ok:
+					break
+			
 			retry_count += 1
 			
 		if retry_count >= 5:
 			print("ERROR] File transmission failed! Too many retries for start packet. Check to make sure the Rover is listening and connected.")
+			self.sending_file = False
 			return False
+		else:
+			print("Received SACK, beginning data transfer...")
+			
+		self.sending_file = False
 			
 	def receiveFile(self,fname="None"):
 		if self.sending_file or self.receiving_file:
@@ -190,19 +209,87 @@ class OasisSerial():
 			return False
 		
 		self.receiving_file = True
-		print("Getting ready to receive a file...")
-		b = readByte()
-		if b == b'\x12':
-			print("Got start packet...")
+		print("Waiting for start packet...")
+		
+		self.opened_file = False
+		done = False
+		rx_filename = ''
+		file_size = 0
+		packet_size = 0
+		while not done:
+			while self.in_waiting() == 0:
+				b=b'' # do nothing while we wait for bytes to come in
+		
+			b = self.readByte()
+		
+			if b == b'\x12':
+				print("Start...")
+				rx_filename = ''
+				while True:
+					d = self.readByte()
+					if d.decode('ascii') == ";":
+						break
+					else:
+						rx_filename += d.decode('ascii')
+				print("rx_filename is: " + rx_filename)
+				file_size = self.readUnsignedInteger(size=4)
+				packet_size = self.readUnsignedInteger(size=2)
+				hash, timeout = self.readBytes(16)
+				if timeout:
+					print("Timed out while reading the MD5 digest for the file!")
+					self.receiving_file = False
+					return False
+				retry_number = self.readByte()
+				
+				# Send SACK
+				self.sendBytes(b'\x1A')
+				self.sendString(rx_filename + ";")
+				self.sendUnsignedInteger(file_size)
+				self.sendBytes(packet_size.to_bytes(2, byteorder="big", signed=False))
+				self.sendBytes(hash)
+				self.sendBytes(b'\x2A')
+				print("Sent SACK")
+				
+			elif b == b'\x55': # data packet
+				if not opened_file:
+					if fname == None:
+						fname = rx_filename
+					f = open("rx_" + fname, "wb")	
+					opened_file = True
+				retry_number = self.readByte()
+				packet_number = self.readUnsignedInteger(size=2)
+				fec, timeout = self.readBytes(4)
+				if timeout:
+					print("Timed out while reading the CRC-32 hash for the packet!")
+					fec_ok = False #TODO: This actually doesn't do anything because we already make the comparison below
+				
+				data = self.readBytes(packet_size)
+				calculated_fec = zlib.crc32(data)
+				
+				fec_ok = fec == calculated_fec
+				if fec_ok:
+					self.sendBytes(b'\x60')
+				else:
+					self.sendBytes(b'\x77')
+				self.sendBytes(packet_number.to_bytes(2, byteorder="big", signed=False))
+				self.sendBytes(calculated_fec)
+				
+				if fec_ok:
+					f.seek(packet_size * packet_number)
+					f.write(data)
+					f.flush()
+			
+		self.receiving_file = False
 
 	"""
 	When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
 	debug_rx_port will be the UDP port that we will listen to for incoming connections
 	debug_tx_port will be the UDP port that we will connect to when sending bytes
 	"""
-	def __init__(self, serial_device, baud_rate=9600, debug_mode=False, debug_rx_port=0, debug_tx_port=0):
+	def __init__(self, serial_device, baud_rate=9600, debug_mode=False, debug_rx_port=0, debug_tx_port=0, rx_print_prefix=None):
 		self.debug = debug_mode
 		self.read_timeout = False
+		self.rx_print_prefix = rx_print_prefix
 		
 		# Variables for sending files
 		self.sending_file = False

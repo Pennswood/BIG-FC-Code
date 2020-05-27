@@ -38,7 +38,7 @@ Inputs:
 Return: A bytearray of status log
 '''
 # TODO: add comments for what each sendBytes indicates and what inputs are expected
-def add_status(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
+def get_status_array(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
 	status_array = bytearray()
 	
 	if laser_status == 0:

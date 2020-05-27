@@ -23,32 +23,12 @@ def print_received(oserial, prefix):
 		if d != b'':
 			print(prefix + " RX]\t" + str(bytes(d)))
 
-def handle_rover_received(oserial, prefix):
-	while True:
-		oserial.rx_buffer_lock.acquire()
-		d=bytearray()
-		while len(oserial.rx_buffer) > 0:
-			d += oserial.rx_buffer
-			oserial.rx_buffer.clear()
-		oserial.rx_buffer_lock.release()
-		if d != b'':
-			print("ROVER RX]\t" + str(bytes(d)))
-
 def main():
 	global ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT
 	print("Setting up UDP sockets...")
-	rover_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT)
+	rover_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="ROVER RX] ")
 
-	tlc_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
-	
-	rover_handle_thread = threading.Thread(target=handle_rover_received, args=(rover_serial,"ROVER"))
-	tlc_print_thread = threading.Thread(target=print_received, args=(tlc_serial,"TLC"))
-	
-	rover_handle_thread.daemon = True
-	tlc_print_thread.daemon = True
-	
-	rover_handle_thread.start()
-	tlc_print_thread.start()
+	tlc_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT, rx_print_prefix="TLC RX] ")
 	
 	done = False
 	while not done:
@@ -68,7 +48,6 @@ def main():
 			print("\t:send_float\tSend an ASCII encoded float to the BBB. Do not use \\x or 0x !\n")
 			print("\t:tx_file\tSend the file at the given path to the payload")
 			print("\t:rx_file\tPrepare to receive a file from the payload, save to the given path")
-			
 			
 		elif command == ":exit" or command == ":quit":
 			done = True
@@ -95,7 +74,6 @@ def main():
 			rover_serial.sendFile(f, fname)
 		elif command == ":rx_file":
 			fname = input("Location to save received file:")
-			f = open(fname, "wb")
-			rover_serial.receiveFile(f)
+			rover_serial.receiveFile(fname=fname)
 		time.sleep(0.5)
 main()

@@ -73,7 +73,9 @@ def main_loop():
 		roverio.all_spectrometer_data(rover_serial)
 
 	elif command == b'\x0A':
-		roverio.status_request(rover_serial)
+		print("This still needs to be implemented")
+		#roverio.status_request(rover_serial)
+		#rover_serial.sendBytes(roverio.get_status_array(states_laser, states_spectrometer, 
 
 	elif command == b'\x0B':
 		roverio.status_dump(rover_serial)
@@ -89,9 +91,12 @@ def main_loop():
 
 	elif command == b'\xF0':
 		roverio.pi_tune(rover_serial)
+		
+	elif command == b'\x75':
+		rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
 
 # Talk to Tyler to learn what this line does :)
-rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, debug_tx_port=roverio.ROVER_TX_PORT, debug_rx_port=roverio.ROVER_RX_PORT)
+rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, debug_tx_port=roverio.ROVER_TX_PORT, debug_rx_port=roverio.ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
 
 # Talk to Tyler to learn what this line does :)
 tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=roverio.TLC_TX_PORT, debug_rx_port=roverio.TLC_RX_PORT)
