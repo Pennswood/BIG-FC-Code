@@ -24,18 +24,33 @@ def DebugUDPHandlerFactory(oserial):
 			#print(self.data)
 			
 			# OK kiddos this is where it gets wild, we're gonna use Condition objects in python. Put your seatbelts on.
-			if selfv.sending_file:
+			if self.oasis_serial.sending_file:
 				# You should call something like self.oasis_serial.reply_received_condition.notifyall() in here
 				a = "" # We should be doing something here to handle the ACK/NACK during file transfer, but this is a placeholder for now
-			elif seld.oasis_serial.receiving_file:
-				b = "" # TODO
+			elif self.oasis_serial.receiving_file:
+				if not self.got_start:
+					
+					b = "" # TODO
 			
 			self.oasis_serial.rx_buffer_lock.acquire()
 			self.oasis_serial.rx_buffer += self.data
 			self.oasis_serial.rx_buffer_lock.release()
 	return DebugUDPHandler
+	
+def timeoutTimer(oserial):
+	print("Timeout")
+	oserial.read_timeout = True
 
 class OasisSerial():
+	def in_waiting(self):
+		if self.debug:
+			self.rx_buffer_lock.acquire()
+			c = len(self.rx_buffer)
+			self.rx_buffer_lock.release()
+			return c
+		else:
+			return self.serial_connection.in_waiting
+
 	def sendBytes(self, b):
 		if self.debug:
 			self.udp_tx_socket.sendto(b, ("localhost", self.tx_port))
@@ -68,39 +83,57 @@ class OasisSerial():
 		
 	# Returns a single byte read from the serial connection
 	def readByte(self):
-		return self.readBytes(1)
+		b, timeout = self.readBytes(1)
+		if timeout:
+			return None
+		return b
 			
 	# Returns a bytearray of length `count` read from the serial connection
-	def readBytes(self, count):
+	def readBytes(self, count): # Default to 5 seconds of waiting before timing out
 		if self.debug:
+			timeout_timer = threading.Timer(5.0, timeoutTimer, (self,))
+			self.read_timeout = False
+			timeout_timer.start()
 			a = bytearray()
-			while len(a) < count:
+			while len(a) < count and not self.read_timeout:
 				self.rx_buffer_lock.acquire() # yeah, i could optimize this, but nah
 				if len(self.rx_buffer) > 0:
 					a.append(self.rx_buffer.pop(0))
 				self.rx_buffer_lock.release()
-			return a
+			if not self.read_timeout:
+				timeout_timer.cancel()
+			return a, self.read_timeout
 		else:
-			return self.serial_connection.read(count)
+			b = self.serial_connection.read(count)
+			if len(b) < count: # Reading the bytes from the serial connection timed out
+				return None, True
 	
 	# Returns a signed (positive or negative) integer read from the serial connection
 	def readSignedInteger(self):
-		b = self.readBytes(INTEGER_SIZE)
+		b, timeout = self.readBytes(INTEGER_SIZE)
+		if timeout:
+			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 	
 	# Returns a signed (positive only) integer read from the serial connection
 	def readUnsignedInteger(self):
-		b = self.readBytes(INTEGER_SIZE)
+		b, timeout = self.readBytes(INTEGER_SIZE)
+		if timeout:
+			return None
 		return int.from_bytes(b, byteorder="big", signed=False)
 	
 	# Returns a signed (positive or negative) integer read from the serial connection
 	def readInteger(self):
-		b = self.readBytes(INTEGER_SIZE)
+		b, timeout = self.readBytes(INTEGER_SIZE)
+		if timeout:
+			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 		
 	# Returns a float read from the serial connection that was represented in our special ASCII encoded format
 	def read_float(self):
-		b = bytearray(self.readBytes(7))
+		b, timeout = bytearray(self.readBytes(7))
+		if timeout:
+			return None
 		s = b.decode("ascii")
 		l = int(s[1:4])
 		r = int(s[4:7])
@@ -158,6 +191,9 @@ class OasisSerial():
 		
 		self.receiving_file = True
 		print("Getting ready to receive a file...")
+		b = readByte()
+		if b == b'\x12':
+			print("Got start packet...")
 
 	"""
 	When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
@@ -166,6 +202,7 @@ class OasisSerial():
 	"""
 	def __init__(self, serial_device, baud_rate=9600, debug_mode=False, debug_rx_port=0, debug_tx_port=0):
 		self.debug = debug_mode
+		self.read_timeout = False
 		
 		# Variables for sending files
 		self.sending_file = False
@@ -174,6 +211,7 @@ class OasisSerial():
 		
 		# Variables for receiving files
 		self.receiving_file = False
+		self.got_start = False
 		self.data_received_condition = threading.Condition()
 		
 		if debug_mode:
@@ -195,7 +233,7 @@ class OasisSerial():
 			print("Started socketserver for dummy serial UDP port for reception (rx): " + str(debug_rx_port))
 		
 		else: #TODO: Set parity, stop bits, data bits
-			self.serial_connection = serial.Serial(serial_device, baudrate=baud_rate)
+			self.serial_connection = serial.Serial(serial_device, baudrate=baud_rate, timeout=5)
 			print("Created serial connection to " + serial_device)
 
 	def __del__(self):

@@ -32,6 +32,9 @@ threads = []
 def main_loop():
 	"""This will be the main loop that checks for and processes commands"""
 	#print("Main loop entered")
+	while rover_serial.in_waiting() == 0:
+		a=''
+		#just do nothing for now, we use this because the readByte call will repeatedly timeout
 	command = rover_serial.readByte()
 	
 	#Adds the command into the status list

@@ -23,6 +23,17 @@ def print_received(oserial, prefix):
 		if d != b'':
 			print(prefix + " RX]\t" + str(bytes(d)))
 
+def handle_rover_received(oserial, prefix):
+	while True:
+		oserial.rx_buffer_lock.acquire()
+		d=bytearray()
+		while len(oserial.rx_buffer) > 0:
+			d += oserial.rx_buffer
+			oserial.rx_buffer.clear()
+		oserial.rx_buffer_lock.release()
+		if d != b'':
+			print("ROVER RX]\t" + str(bytes(d)))
+
 def main():
 	global ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT
 	print("Setting up UDP sockets...")
@@ -30,13 +41,13 @@ def main():
 
 	tlc_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
 	
-	rover_print_thread = threading.Thread(target=print_received, args=(rover_serial,"ROVER"))
+	rover_handle_thread = threading.Thread(target=handle_rover_received, args=(rover_serial,"ROVER"))
 	tlc_print_thread = threading.Thread(target=print_received, args=(tlc_serial,"TLC"))
 	
-	rover_print_thread.daemon = True
+	rover_handle_thread.daemon = True
 	tlc_print_thread.daemon = True
 	
-	rover_print_thread.start()
+	rover_handle_thread.start()
 	tlc_print_thread.start()
 	
 	done = False
@@ -86,4 +97,5 @@ def main():
 			fname = input("Location to save received file:")
 			f = open(fname, "wb")
 			rover_serial.receiveFile(f)
+		time.sleep(0.5)
 main()

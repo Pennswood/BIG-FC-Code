@@ -126,6 +126,10 @@ def transfer_sample(s, sdcard):
 def clock_sync(s):
 	print("CLOCK SYNC")
 	t = s.readSignedInteger()
+	if t == None:
+		print("WARNING] Reading timestamp from Rover timed out!")
+		return False
+		
 	print("Got time stamp: " + str(t))
 	if not platform.system() == "Linux":
 		print("Not running actual command because not on Linux system...")
