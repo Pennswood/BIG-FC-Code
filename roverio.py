@@ -1,3 +1,5 @@
+import subprocess
+
 # The two value below are for debugging purposes only, they mean nothing to the TLC or BBB
 ROVER_TX_PORT = 420 # Emulate sending to the Rover on this port
 ROVER_RX_PORT = 421 # Emulate receiving from the Rover
@@ -121,7 +123,18 @@ def transfer_sample(s, sdcard):
 
 
 def clock_sync(s):
+	global DEBUG_MODE
 	print("CLOCK SYNC")
 	t = s.readSignedInteger()
 	print("Got time stamp: " + str(t)) #TODO: Run the command line command to set the system time
-	return
+	if DEBUG_MODE:
+		print("Not running actual command becase DEBUG_MODE is set to True...")
+		return True
+	else:
+		try:
+			subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True)
+			print("Set system time to: " + str(t))
+			return True
+		except:
+			print("ERROR] The set time command failed!")
+			return False
