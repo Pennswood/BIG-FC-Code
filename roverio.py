@@ -126,7 +126,7 @@ def transfer_sample(s, sdcard):
 def clock_sync(s):
 	print("CLOCK SYNC")
 	t = s.readSignedInteger()
-	print("Got time stamp: " + str(t)) #TODO: Run the command line command to set the system time
+	print("Got time stamp: " + str(t))
 	if not platform.system() == "Linux":
 		print("Not running actual command because not on Linux system...")
 		return True

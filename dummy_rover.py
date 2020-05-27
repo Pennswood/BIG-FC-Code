@@ -54,7 +54,10 @@ def main():
 			print("\t:send_sint\tSend a signed integer to the BBB")
 			print("\t:send_uint\tSend an unsigned integer to the BBB")
 			print("\t:send_bytes\tSend a sequence of bytes to the BBB. Do not use \\x or 0x !")
-			print("\t:send_float\tSend an ASCII encoded float to the BBB. Do not use \\x or 0x !")
+			print("\t:send_float\tSend an ASCII encoded float to the BBB. Do not use \\x or 0x !\n")
+			print("\t:tx_file\tSend the file at the given path to the payload")
+			print("\t:rx_file\tPrepare to receive a file from the payload, save to the given path")
+			
 			
 		elif command == ":exit" or command == ":quit":
 			done = True
@@ -75,5 +78,12 @@ def main():
 			rover_serial.sendBytes(bytes.fromhex(input("Input bytes: ")))
 		elif command == ":send_float":
 			rover_serial.sendFloat(float(input("Input float: ")))
-		
+		elif command == ":tx_file":
+			fname = input("File to send:")
+			f = open(fname, "rb")
+			rover_serial.sendFile(f, fname)
+		elif command == ":rx_file":
+			fname = input("Location to save received file:")
+			f = open(fname, "wb")
+			rover_serial.receiveFile(f)
 main()

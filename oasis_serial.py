@@ -1,7 +1,8 @@
 import serial
 import socket
 import os
-import binascii
+import zlib
+import hashlib
 import threading
 import socketserver
 
@@ -21,6 +22,14 @@ def DebugUDPHandlerFactory(oserial):
 			self.data = self.request[0]
 			#print(type(self.data))
 			#print(self.data)
+			
+			# OK kiddos this is where it gets wild, we're gonna use Condition objects in python. Put your seatbelts on.
+			if selfv.sending_file:
+				# You should call something like self.oasis_serial.reply_received_condition.notifyall() in here
+				a = "" # We should be doing something here to handle the ACK/NACK during file transfer, but this is a placeholder for now
+			elif seld.oasis_serial.receiving_file:
+				b = "" # TODO
+			
 			self.oasis_serial.rx_buffer_lock.acquire()
 			self.oasis_serial.rx_buffer += self.data
 			self.oasis_serial.rx_buffer_lock.release()
@@ -102,20 +111,53 @@ class OasisSerial():
 		
 	# Transmits a file through serial, using error correction and packetization
 	def sendFile(self, f, filename):
+		if self.sending_file:
+			print("ERROR] Cannot send mutliple files at once!")
+			return False
+
+		self.sending_file = True
 		print("Sending file: " + filename)
 		
 		filesize = os.stat(f.name).st_size
 		packetsize = 1024 #TODO: Make an algorithm to select something that is not hardcoded
 		retry_count = 0
-		file_hash = 0
 		f.seek(0,0)
 		#TODO: Finish this
+		h = hashlib.new("md5")
 		
-		self.sendByte(b'\x12') # magic command code
-		self.sendString(filename + ";") # filename delimited by semicolon
-		self.sendBytes(filesize.to_bytes(4, byteorder="big", signed=False)) #send filesize
-		self.sendBytes(packetsize.to_bytes(2, byteorder="big", signed=False))
+		d = f.read(512) # 512 is the block size of md5, see: https://stackoverflow.com/questions/42819622/getting-hash-digest-of-a-file-in-python-reading-whole-file-at-once-vs-readin	
+		while d:
+			h.update(d)
+			d = f.read(512)
+		file_hash = h.digest() # gives us a bytes object representing the md5 digest
+		print("MD5 128bit-digest is: " + str(h.hexdigest()))
 		
+		self.reply_ok = False
+		while retry_count < 5: # We will only resend the start packet 5 times before giving up on transmission
+			self.sendBytes(b'\x12') # magic command code
+			self.sendString(filename + ";") # filename terminated by semicolon
+			self.sendBytes(filesize.to_bytes(4, byteorder="big", signed=False)) # send file size
+			self.sendBytes(packetsize.to_bytes(2, byteorder="big", signed=False)) # send the number of bytes that will be contained in each packet
+			self.sendBytes(file_hash) # send the 16 bytes of the md5 digest
+			self.sendBytes(retry_count.to_bytes(1, byteorder="big", signed=False)) # send the number of times that we have tried to send the start packet
+			
+			self.reply_received_condition.acquire()
+			self.reply_received_condition.wait(timeout=2.0) # Wait at most two seconds to receive an acknowledge from the Rover
+			if self.reply_ok:
+				break
+			retry_count += 1
+			
+		if retry_count >= 5:
+			print("ERROR] File transmission failed! Too many retries for start packet. Check to make sure the Rover is listening and connected.")
+			return False
+			
+	def receiveFile(self,fname="None"):
+		if self.sending_file or self.receiving_file:
+			print("ERROR] Unable to receive multiple files or receive while sending!")
+			return False
+		
+		self.receiving_file = True
+		print("Getting ready to receive a file...")
 
 	"""
 	When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
@@ -124,6 +166,16 @@ class OasisSerial():
 	"""
 	def __init__(self, serial_device, baud_rate=9600, debug_mode=False, debug_rx_port=0, debug_tx_port=0):
 		self.debug = debug_mode
+		
+		# Variables for sending files
+		self.sending_file = False
+		self.reply_received_condition = threading.Condition()
+		self.reply_ok = False # set to True when we receive ACK, set to false for NACK
+		
+		# Variables for receiving files
+		self.receiving_file = False
+		self.data_received_condition = threading.Condition()
+		
 		if debug_mode:
 			if debug_rx_port == 0 or debug_tx_port == 0:
 				raise Exception("ERROR: You must specify a debug_rx_port and debug_tx_port when in debug serial mode!")
