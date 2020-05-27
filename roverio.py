@@ -132,7 +132,7 @@ def clock_sync(s):
 		return True
 	else:
 		try:
-			subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True)
+			subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True, timeout=5)
 			print("Set system time to: " + str(t))
 			return True
 		except:
