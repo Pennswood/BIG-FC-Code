@@ -3,11 +3,11 @@ import time
 import serial
 import roverio
 import oasis_serial
-import laserio as laser
+import laserio
 from tlc import TLC
 import debug
 import threading
-import spectrometerio as spectrometer
+import spectrometerio
 
 #Set this to False when testing on the Beagle Bone Black
 DEBUG_MODE = True
@@ -111,6 +111,9 @@ rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, deb
 # Talk to Tyler to learn what this line does :)
 tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=roverio.TLC_TX_PORT, debug_rx_port=roverio.TLC_RX_PORT, rx_print_prefix="BBB TLC RX] ")
 tlc = TLC(tlc_serial)
+
+laser = laserio.laser()
+spectrometer = spectrometerio.spectrometer()
 
 while(True):
 	main_loop()
