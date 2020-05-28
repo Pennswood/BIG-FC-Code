@@ -13,12 +13,12 @@ class log_file():
         return output
 
     def append_log_file(self, byte_array):
-        statinfo = os.stat(self.path+'logfile'+str(self.fileCount)+'.bin')
+        statinfo = os.stat(self.path_to_log+'logfile'+str(self.fileCount)+'.bin')
         if statinfo.st_size>= self.length*100:
             sdcardio.append_manifest_file('logfile'+str(self.fileCount)+'.bin', time.time(), statinfo.st_size*8,1)
             #TODO: time could could change!
             self.fileCount = self.fileCount+1
-        f = open(self.path+'logfile'+str(self.fileCount)+'.bin', 'a+b')
+        f = open(self.path_to_log+'logfile'+str(self.fileCount)+'.bin', 'a+b')
         binary_format = bytearray(byte_array)
         f.write(binary_format)
         f.close()
@@ -29,8 +29,9 @@ class log_file():
             output.append('logfile'+str(self.fileCount)+'.bin')
         return output
 
-    def __init__(self, path, log_byte_length):
+    def __init__(self, path,path_to_log, log_byte_length):
         self.path = path
+        self.path_to_sd_card = path_to_log
         self.fileCount = len(self.read_old_log_file())
         self.length = log_byte_length
 

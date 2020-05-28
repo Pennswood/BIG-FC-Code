@@ -21,9 +21,10 @@ class spectrometer():
         self.states_spectrometer = 1
         #TODO: Send nominal response to rover as specified in rover commands
         wavelengths, intensities = spec.spectrum()          # This will return wavelengths and intensities as a 2D array
-        #TODO: Send file to rover as specified in rover commands
+        #TODO: Save file to rover as specified in rover commands
         self.states_spectrometer = 0
         return wavelengths, intensities                     # Returns array for wavelengths and intensities
 
-    def __init__(self): 
+    def __init__(self):
+        # 0 = standby, 1 = integrating, 2 = disconnected
         self.states_spectrometer = 0

@@ -2,6 +2,7 @@
 import time
 import serial
 import roverio
+import sdcardio
 import oasis_serial
 import laserio
 from tlc import TLC
@@ -10,14 +11,25 @@ import threading
 import spectrometerio
 
 #Set this to False when testing on the Beagle Bone Black
+
+#SD Card constants
+PATH = "/home/"
+PATH_DEBUG = "files/"
+PATH_TO_SD_CARD = "/mnt/"
+PATH_TO_SD_CARD_DEBUG = "files/sd_card/"
+LOG_BYTE_LENGTH = 44
+
+#Rover IO constants
+# The two value below are for debugging purposes only, they mean nothing to the TLC or BBB
+ROVER_TX_PORT = 420  # Emulate sending to the Rover on this port
+ROVER_RX_PORT = 421  # Emulate receiving from the Rover
+
+TLC_TX_PORT = 320  # Emulate sending to the TLC on this port
+TLC_RX_PORT = 321  # Emulate receiving from the TLC on this port
+
 DEBUG_MODE = True
 
 #States:
-#0 = off, 1 = warming up, 2 = warmed up, 3 = arming, 4 = armed, 5 = firing
-states_laser = 0
-#0 = standby, 1 = integrating, 2 = disconnected
-states_spectrometer = 0
-
 files_transferring = False
 
 #21X1 boolean array. False for non-active error, True for active errors. Goes from LSB to MSB where LSB is active_errors[0]
@@ -47,7 +59,7 @@ def main_loop():
 		status.pop(2)
 	
 	if command == b'\x01':
-		roverio.ping(rover_serial)
+		rover.ping(rover_serial)
 
 	elif command == b'\x02':
 		laser.warm_up_laser()
@@ -75,46 +87,52 @@ def main_loop():
 		spectrometer.sample(20)
 
 	elif command == b'\x09':
-		roverio.all_spectrometer_data(rover_serial)
+		rover.all_spectrometer_data(rover_serial)
 
 	elif command == b'\x0A':
 		# print("This still needs to be implemented")
 		# print(tlc.get_temperatures())
 		temp_data = tlc.get_temperatures()		# set the temp_data array to the most recent temp_data
 		efdc = tlc.get_duty_cycles()			# set the efdc array to the most recent efdc
-		status_array = roverio.get_status_array(states_laser, states_spectrometer, temp_data, efdc, active_errors, status[1])
-		roverio.status_request(rover_serial, status_array)
+		status_array = rover.get_status_array(states_laser, states_spectrometer, temp_data, efdc, active_errors, status[1])
+		rover.status_request(rover_serial, status_array)
 
 		#roverio.status_request(rover_serial)
 		#rover_serial.sendBytes(roverio.get_status_array(states_laser, states_spectrometer, 
 
 	elif command == b'\x0B':
-		roverio.status_dump(rover_serial)
+		rover.status_dump(rover_serial)
 
 	elif command == b'\x0C':
-		roverio.manifest_request(rover_serial)
+		rover.manifest_request(rover_serial)
 
 	elif command == b'\x0D':
-		roverio.transfer_sample(rover_serial)
+		rover.transfer_sample(rover_serial)
 
 	elif command == b'\x0E':
-		roverio.clock_sync(rover_serial)
+		rover.clock_sync(rover_serial)
 
 	elif command == b'\xF0':
-		roverio.pi_tune(rover_serial)
+		rover.pi_tune(rover_serial)
 		
 	elif command == b'\x75':
 		rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
 
 # Talk to Tyler to learn what this line does :)
-rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, debug_tx_port=roverio.ROVER_TX_PORT, debug_rx_port=roverio.ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
+rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
 
 # Talk to Tyler to learn what this line does :)
-tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=roverio.TLC_TX_PORT, debug_rx_port=roverio.TLC_RX_PORT, rx_print_prefix="BBB TLC RX] ")
+tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT, rx_print_prefix="BBB TLC RX] ")
 tlc = TLC(tlc_serial)
 
 laser = laserio.laser()
 spectrometer = spectrometerio.spectrometer()
+if DEBUG_MODE:
+	sdcard = sdcardio.sdcard(path=PATH_DEBUG, path_to_sd_card=PATH_TO_SD_CARD_DEBUG, log_byte_length=LOG_BYTE_LENGTH)
+else:
+	sdcard = sdcardio.sdcard(path=PATH, path_to_sd_card=PATH_TO_SD_CARD, log_byte_length=LOG_BYTE_LENGTH)
+
+rover = roverio.rover(sdcard=sdcard,ROVER_TX_PORT=ROVER_TX_PORT, ROVER_RX_PORT = ROVER_RX_PORT, TLC_TX_PORT = TLC_TX_PORT, TLC_RX_PORT = TLC_RX_PORT)
 
 while(True):
 	main_loop()
