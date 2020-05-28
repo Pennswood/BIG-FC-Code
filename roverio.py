@@ -1,5 +1,6 @@
 import subprocess
 import platform
+import sdcardio as sdcard
 
 # The two value below are for debugging purposes only, they mean nothing to the TLC or BBB
 ROVER_TX_PORT = 420 # Emulate sending to the Rover on this port
@@ -32,7 +33,7 @@ Inputs:
 		An integer laser_status
 		An integer spec_status
 		A float array temp_data
-		A byte array efdc (etch foil duty cycle)
+		An int (0-255) array efdc (etch foil duty cycle)
 		A boolean array error_codes
 		A byte prev_cmd
 Return: A bytearray of status log
@@ -65,8 +66,9 @@ def get_status_array(laser_status, spec_status, temp_data, efdc, error_codes, pr
 		s = "{:0=+4d}{:0=-3d}".format(int(f),int(abs(abs(f)-abs(int(f)))*1000))		# Temperature data | 56 bytes
 		status_array += s.encode("ascii")
 	
-	for i in efdc:							# Assuming EFDC is an array of bytes
-		status_array += i					# Etch foil duty cycle (EFDC) | 3 bytes
+	for i in efdc:							# Assuming EFDC is an array of integers (0-255)
+		b = i.to_bytes(1, byteorder="big", signed=False)
+		status_array += b					# Etch foil duty cycle (EFDC) | 3 bytes
 
 	errors = 0								# Error codes | 3 bytes
 	for index, error in enumerate(error_codes):		# Convert bits into int to bytes
@@ -85,16 +87,16 @@ Returns: integer, 0 for success, other numbers for failure to send data (for deb
 def status_request(s, status_array):
 	for i in status_array:
 		s.sendBytes(i)
-	if len(status_array) == 66:				# fix this when the number of thermistors are finalized
+	if len(status_array) == 66:				# fix this when the number of thermistors are finalized, currently set to 8
 		return 0
 	else:
 		return 1
 
 '''
 Task: dumps all the status file information to the rover
-Inputs: An OasisSerial object, An sdcardio object
+Inputs: An OasisSerial object
 '''
-def status_dump(s, sdcard):
+def status_dump(s):
 	file_list = sdcard.read_all_log_file()
 	for i in file_list:
 		try:
@@ -112,7 +114,7 @@ def manifest_request(s):
 	return
 
 
-def transfer_sample(s, sdcard):
+def transfer_sample(s):
     recent_two = sdcard.last_two_spectrometer_file()    # Saves last 2 spectrometer files to recent_two
     for i in recent_two:                                # Iterating through both files
         if i == "":
