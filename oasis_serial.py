@@ -225,10 +225,10 @@ class OasisSerial():
 
 				d = self.readByte()
 				if d == b'\x60': # ACK
-					ack_packet_number = self.readUnsignedInteger(size=2) #TODO: We never double check the ACK number
+					ack_packet_number = self.readUnsignedInteger(size=2)
 					ack_hash = self.readUnsignedInteger(size=4)
 					print("Got ACK " + str(ack_packet_number))
-					if ack_hash == packet_crc: # if the ack's crc32 hash matches, move on to the next packet
+					if ack_hash == packet_crc and ack_packet_number == packet_number: # if the ack's crc32 hash matches and the packet number matches, move on to the next packet
 						break
 					else:
 						print("INFO: ACK packet's crc32 does not match ours. Resending packet.")
@@ -254,11 +254,11 @@ class OasisSerial():
 		print("Waiting for start packet...")
 		
 		rx_filename = ''
-		file_size = 0
-		packet_size = 0
-		packet_number = 0
-		last_packet_number = -1
-		sent_sack = False
+		file_size = 0 			# size of the file we are sending, in bytes
+		packet_size = 0 		# size of the data contained in each packet we receive
+		packet_number = 0 		# the current packet number
+		last_packet_number = -1 # the number of the laster received packet, ensures that we are receiving in sequence
+		sent_sack = False		# keeps track of whether or not we acknowledged the start packet
 		
 		b=b'' # Control Byte read
 		
