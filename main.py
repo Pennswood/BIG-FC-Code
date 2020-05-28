@@ -23,11 +23,17 @@ states_TLC = False
 
 files_transferring = False
 
-#21X1 boolean array. False for non-active error, True for active errors
+#21X1 boolean array. False for non-active error, True for active errors. Goes from LSB to MSB where LSB is active_errors[0]
 active_errors = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 
 #Last 2 rover commands. First being most recent, second next recent.
 status = []
+
+#float array for temperature data
+temp_data = []
+
+#int array for etch foil duty cycle
+efdc = []
 
 threads = []
 def main_loop():
@@ -74,8 +80,12 @@ def main_loop():
 		roverio.all_spectrometer_data(rover_serial)
 
 	elif command == b'\x0A':
-		print("This still needs to be implemented")
-		print(tlc.get_temperatures())
+		# print("This still needs to be implemented")
+		# print(tlc.get_temperatures())
+		temp_data = tlc.get_temperatures()		# set the temp_data array to the most recent temp_data
+		efdc = tlc.get_duty_cycles()			# set the efdc array to the most recent efdc
+		roverio.get_status_array(states_laser, states_spectrometer, temp_data, efdc, active_errors, status[1])
+
 		#roverio.status_request(rover_serial)
 		#rover_serial.sendBytes(roverio.get_status_array(states_laser, states_spectrometer, 
 
