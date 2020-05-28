@@ -132,7 +132,7 @@ if DEBUG_MODE:
 else:
 	sdcard = sdcardio.sdcard(path=PATH, path_to_sd_card=PATH_TO_SD_CARD, log_byte_length=LOG_BYTE_LENGTH)
 
-rover = roverio.rover(sdcard=sdcard,ROVER_TX_PORT=ROVER_TX_PORT, ROVER_RX_PORT = ROVER_RX_PORT, TLC_TX_PORT = TLC_TX_PORT, TLC_RX_PORT = TLC_RX_PORT)
+rover = roverio.Rover(sdcard=sdcard,ROVER_TX_PORT=ROVER_TX_PORT, ROVER_RX_PORT = ROVER_RX_PORT, TLC_TX_PORT = TLC_TX_PORT, TLC_RX_PORT = TLC_RX_PORT)
 
 while(True):
 	main_loop()

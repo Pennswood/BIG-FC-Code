@@ -46,13 +46,13 @@ class TLC():
 	# Returns an array of unsigned integers (0-255) representing the PWM duty cycle set on each heater
 	def get_duty_cycles(self):
 		self.read_lock.acquire()
-		d = self.duty_cycles
+		d = self.duty_cycle
 		self.read_lock.release()
 		return d
 		
 	def get_data(self):
 		self.read_lock.acquire()
-		d = self.duty_cycles
+		d = self.duty_cycle
 		t = self.temperatures
 		s = self.read_timestamp
 		self.read_lock.release()

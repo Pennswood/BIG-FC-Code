@@ -1,8 +1,7 @@
 import subprocess
 import platform
 
-class rover():
-
+class Rover():
 
 	"""
 	Task: sends a response to the rover.
@@ -139,6 +138,7 @@ class rover():
 			except:
 				print("ERROR] The set time command failed!")
 				return False
+
 	def __init__(self,sdcard, ROVER_TX_PORT, ROVER_RX_PORT, TLC_TX_PORT, TLC_RX_PORT):
 		self.ROVER_TX_PORT = ROVER_TX_PORT
 		self.ROVER_RX_PORT = ROVER_RX_PORT
