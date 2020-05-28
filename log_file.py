@@ -30,7 +30,7 @@ class log_file():
         return output
 
     def __init__(self, path, log_byte_length):
-        self.fileCount = len(self.read_old_log_file(path))
+        self.fileCount = len(self.read_old_log_file())
         self.directory = path
         self.length = log_byte_length
 
