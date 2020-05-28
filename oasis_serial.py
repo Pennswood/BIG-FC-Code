@@ -143,7 +143,7 @@ class OasisSerial():
 		print("Sending file: " + filename)
 		
 		file_size = os.stat(f.name).st_size
-		packet_size = 64 #TODO: Make an algorithm to select something that is not hardcoded
+		packet_size = 512 #TODO: Make an algorithm to select something that is not hardcoded
 		retry_count = 0
 		f.seek(0,0)
 		#TODO: Finish this
