@@ -2,6 +2,7 @@
 import oasis_serial
 import threading
 import time
+import random
 
 IP_ADDRESS = "127.0.0.1"
 ROVER_RX_PORT = 420 # Emulate receiving from the BBB on this port (we are the Rover)
@@ -11,6 +12,8 @@ TLC_RX_PORT = 320 # Emulate receiving from the BBB on this port (we are the TLC)
 TLC_TX_PORT = 321 # Emulate sending to the BBB on this port
 
 BUFFER_SIZE = 1024
+
+THERMISTER_COUNT = 9 # Used to emulate the TLC stream
 
 def print_received(oserial, prefix):
 	while True:
@@ -22,13 +25,26 @@ def print_received(oserial, prefix):
 		oserial.rx_buffer_lock.release()
 		if d != b'':
 			print(prefix + " RX]\t" + str(bytes(d)))
-
+			
+def emulate_tlc_stream(tlc_serial):
+	global THERMISTER_COUNT
+	while True:
+		tlc_serial.sendString("|")
+		for i in range(THERMISTER_COUNT):
+			tlc_serial.sendString(str(random.random() * 400)[0:6] + ",") # send randomized thermister values
+		tlc_serial.sendString(str(random.random())[0:6]) # send randomized duty cycle value
+		time.sleep(1)
+		
 def main():
 	global ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT
 	print("Setting up UDP sockets...")
 	rover_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="ROVER RX] ")
 
 	tlc_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT, rx_print_prefix="TLC RX] ")
+	
+	tlc_stream = threading.Thread(target=emulate_tlc_stream, args=(tlc_serial,))
+	tlc_stream.daemon = True
+	tlc_stream.start()
 	
 	done = False
 	while not done:
