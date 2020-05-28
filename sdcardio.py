@@ -75,7 +75,7 @@ def all_spectrometer_files():
                 output.append(row[0])
     return output
 
-logFile = log_file.log_file(path = PATH_TO_SD_CARD + "/log_file/")
+logFile = log_file.log_file(path = PATH_TO_SD_CARD + "/log_file/", log_byte_length=44)
 
 """
 Task: Append data into the log file. May automatically create a new file.
