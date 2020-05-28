@@ -59,10 +59,11 @@ def main_loop():
 		laser.laser_disarm()
 
 	elif command == b'\x05':
-		t1 = threading.Thread(target=spectrometer.sample, args=(10,))
+		"""t1 = threading.Thread(target=spectrometer.sample, args=(10,))
 		threads.append(t1)
 		t1.start()
-		t2 = threading.Timer(0.01, laser.laser_fire)
+		t2 = threading.Timer(0.01, laser.laser_fire)"""
+		laser.laser_fire()
 
 	elif command == b'\x06':
 		laser.laser_off()
