@@ -49,18 +49,18 @@ class OasisSerial():
 			self.serial_connection.write(b)
 
 	#Sends a signed (positive or negative), big endian integer
-	def sendInteger(self, i):
-		b = i.to_bytes(INTEGER_SIZE, byteorder="big", signed=True)
+	def sendInteger(self, i, size=INTEGER_SIZE):
+		b = i.to_bytes(size, byteorder="big", signed=True)
 		self.sendBytes(b)
 		
 	#Sends a signed (positive or negative), big endian integer
-	def sendSignedInteger(self, i):
-		b = i.to_bytes(INTEGER_SIZE, byteorder="big", signed=True)
+	def sendSignedInteger(self, i, size=INTEGER_SIZE):
+		b = i.to_bytes(size, byteorder="big", signed=True)
 		self.sendBytes(b)
 		
 	#Sends an unsigned (positive only), big endian integer
-	def sendUnsignedInteger(self, i):
-		b = i.to_bytes(INTEGER_SIZE, byteorder="big", signed=False)
+	def sendUnsignedInteger(self, i, size=INTEGER_SIZE):
+		b = i.to_bytes(size, byteorder="big", signed=False)
 		self.sendBytes(b)
 		
 	#This is our "ASCII encoded float" way of sending floats. This may be changed in the future.
@@ -142,8 +142,8 @@ class OasisSerial():
 		self.sending_file = True
 		print("Sending file: " + filename)
 		
-		filesize = os.stat(f.name).st_size
-		packetsize = 1024 #TODO: Make an algorithm to select something that is not hardcoded
+		file_size = os.stat(f.name).st_size
+		packet_size = 64 #TODO: Make an algorithm to select something that is not hardcoded
 		retry_count = 0
 		f.seek(0,0)
 		#TODO: Finish this
@@ -155,14 +155,15 @@ class OasisSerial():
 			d = f.read(512)
 		file_hash = h.digest() # gives us a bytes object representing the md5 digest
 		print("MD5 128bit-digest is: " + str(h.hexdigest()))
+		f.seek(0)
 		
 		while retry_count < 5: # We will only resend the start packet 5 times before giving up on transmission
 			self.sendBytes(b'\x12') # magic command code
 			self.sendString(filename + ";") # filename terminated by semicolon
-			self.sendBytes(filesize.to_bytes(4, byteorder="big", signed=False)) # send file size
-			self.sendBytes(packetsize.to_bytes(2, byteorder="big", signed=False)) # send the number of bytes that will be contained in each packet
+			self.sendUnsignedInteger(file_size, size=4) # send file size
+			self.sendUnsignedInteger(packet_size, size=2) # send the number of bytes that will be contained in each packet
 			self.sendBytes(file_hash) # send the 16 bytes of the md5 digest
-			self.sendBytes(retry_count.to_bytes(1, byteorder="big", signed=False)) # send the number of times that we have tried to send the start packet
+			self.sendUnsignedInteger(retry_count, size=1) # send the number of times that we have tried to send the start packet
 			
 			d = self.readByte()
 			if d == b'\x1a':
@@ -176,11 +177,11 @@ class OasisSerial():
 						check_filename += d.decode('ascii')
 				if not check_filename == filename:
 					reply_ok = False
-				check_size = self.readUnsignedInteger()
-				if not filesize == check_size:
+				check_size = self.readUnsignedInteger(size=4)
+				if not file_size == check_size:
 					reply_ok = False
 				check_p_size = self.readUnsignedInteger(size=2)
-				if not check_p_size == packetsize:
+				if not check_p_size == packet_size:
 					reply_ok = False
 				check_digest, tout = self.readBytes(16)
 				if not check_digest == file_hash:
@@ -198,11 +199,52 @@ class OasisSerial():
 			print("ERROR] File transmission failed! Too many retries for start packet. Check to make sure the Rover is listening and connected.")
 			self.sending_file = False
 			return False
-		else:
-			print("Received SACK, beginning data transfer...")
+		
+		print("Received SACK, beginning data transfer...")
+		tx_count = 0 # Number of bytes transmitted
+		packet_number = 0
+		while tx_count < file_size:
+
+			f.seek(packet_size * packet_number)
+			data = f.read(packet_size)
 			
+			#Zero pad our data before running it through the CRC32 hash
+			diff = packet_size - len(data)
+			pad = bytes(diff)
+			data += pad
+			
+			packet_crc = zlib.crc32(data)
+
+			retry_count = 0
+			while retry_count < 10:
+				self.sendBytes(b'\x55')
+				self.sendUnsignedInteger(retry_count, size=1)
+				self.sendUnsignedInteger(packet_number, size=2)
+				self.sendUnsignedInteger(packet_crc, size=4)
+				self.sendBytes(data)
+
+				d = self.readByte()
+				if d == b'\x60': # ACK
+					ack_packet_number = self.readUnsignedInteger(size=2) #TODO: We never double check the ACK number
+					ack_hash = self.readUnsignedInteger(size=4)
+					print("Got ACK " + str(ack_packet_number))
+					if ack_hash == packet_crc: # if the ack's crc32 hash matches, move on to the next packet
+						break
+					else:
+						print("INFO: ACK packet's crc32 does not match ours. Resending packet.")
+				elif d == b'\x77': # NACK
+					nack_packet_number = self.readUnsignedInteger(size=2)
+					print("Got NACK " + str(nack_packet_number))
+					if not nack_packet_number == packet_number:
+						print("NACK says packet numbers don't match! Nothing we can really do other than resend data packet...")
+
+				retry_count += 1
+
+			packet_number += 1
+			tx_count += packet_size
+		print("Done sending file.")
 		self.sending_file = False
-			
+
 	def receiveFile(self,fname="None"):
 		if self.sending_file or self.receiving_file:
 			print("ERROR] Unable to receive multiple files or receive while sending!")
@@ -211,19 +253,25 @@ class OasisSerial():
 		self.receiving_file = True
 		print("Waiting for start packet...")
 		
-		self.opened_file = False
-		done = False
 		rx_filename = ''
 		file_size = 0
 		packet_size = 0
-		while not done:
+		packet_number = 0
+		last_packet_number = -1
+		sent_sack = False
+		
+		b=b'' # Control Byte read
+		
+		# First we will loop until we get a start packet
+		done = False 
+		while not done: # TODO: Replace this with a timeout
 			while self.in_waiting() == 0:
 				b=b'' # do nothing while we wait for bytes to come in
 		
 			b = self.readByte()
 		
 			if b == b'\x12':
-				print("Start...")
+				print("Got start file control byte...")
 				rx_filename = ''
 				while True:
 					d = self.readByte()
@@ -234,7 +282,7 @@ class OasisSerial():
 				print("rx_filename is: " + rx_filename)
 				file_size = self.readUnsignedInteger(size=4)
 				packet_size = self.readUnsignedInteger(size=2)
-				hash, timeout = self.readBytes(16)
+				digest, timeout = self.readBytes(16)
 				if timeout:
 					print("Timed out while reading the MD5 digest for the file!")
 					self.receiving_file = False
@@ -245,39 +293,72 @@ class OasisSerial():
 				self.sendBytes(b'\x1A')
 				self.sendString(rx_filename + ";")
 				self.sendUnsignedInteger(file_size)
-				self.sendBytes(packet_size.to_bytes(2, byteorder="big", signed=False))
-				self.sendBytes(hash)
+				self.sendUnsignedInteger(packet_size, size=2)
+				self.sendBytes(digest)
 				self.sendBytes(b'\x2A')
+				sent_sack = True
 				print("Sent SACK")
-				
-			elif b == b'\x55': # data packet
-				if not opened_file:
-					if fname == None:
-						fname = rx_filename
-					f = open("rx_" + fname, "wb")	
-					opened_file = True
+			elif sent_sack and b == b'\x55':
+				done = True # Alright, we sent a SACK and they've now started sending DATA packets, so switch over to handle packets
+			else:
+				print("ERROR: Out of order byte sent while in file receiving mode!? Check your implementation, ignoring...")
+		
+		to_read = file_size		#Number of bytes left to read
+		
+		if fname == None:
+			fname = rx_filename
+		f = open("rx_" + fname, "wb")
+		
+		while to_read > 0:
+			if b == b'\x55': # data packet
 				retry_number = self.readByte()
 				packet_number = self.readUnsignedInteger(size=2)
-				fec, timeout = self.readBytes(4)
-				if timeout:
-					print("Timed out while reading the CRC-32 hash for the packet!")
-					fec_ok = False #TODO: This actually doesn't do anything because we already make the comparison below
 				
-				data = self.readBytes(packet_size)
-				calculated_fec = zlib.crc32(data)
+				fec = self.readUnsignedInteger(size=4) # read the crc32 hash they sent for the packet data
+				data, tout = self.readBytes(packet_size)
 				
-				fec_ok = fec == calculated_fec
-				if fec_ok:
-					self.sendBytes(b'\x60')
+				number_ok = last_packet_number == packet_number or packet_number == last_packet_number + 1 # Make sure the packet number they sent makes sense, we should be sending sequentially (or resending the current packet number)
+				if not number_ok:
+					print("WARNING] Got incorrect or out of order packet number! Dropping packet and sending NACK")
 				else:
-					self.sendBytes(b'\x77')
-				self.sendBytes(packet_number.to_bytes(2, byteorder="big", signed=False))
-				self.sendBytes(calculated_fec)
+					last_packet_number = packet_number
 				
-				if fec_ok:
-					f.seek(packet_size * packet_number)
+				if tout:
+					print("Failed to read all of packet data without timing out! Sending NACK")
+				
+				fec_ok = False
+				if not tout: # Only check the crc32 if we received all the data bytes
+					calculated_fec = zlib.crc32(data) # calculate the crc32 hash of the received data
+					fec_ok = fec == calculated_fec # double check that the received crc32 hash and our calculated one match
+				
+				if fec_ok and number_ok and not tout: # crc32 hashes match, packet number makes sense, so send an ACK
+					self.sendBytes(b'\x60') # send an ACK
+					self.sendUnsignedInteger(packet_number, size=2) # send the packet number we are acknowledging
+					self.sendUnsignedInteger(calculated_fec, size=4) # send them the crc32 hash we calculated to double check that we heard their crc32 hash correctly
+					print("Sent ACK " + str(packet_number))
+				else:
+					self.sendBytes(b'\x77') # send a NACK
+					self.sendUnsignedInteger(packet_number, size=2) # send the packet number that we want them to resend
+					print("Sent NACK " + str(packet_number))
+				
+				if fec_ok: # we sent our ACK, so write down the data we received
+					f.seek(packet_size * packet_number) # always set to the packet number in case they send up the same packet number again (if we send an ACK with an incorrect crc32 value)
+					if to_read < packet_size: # This should be the last packet, and it should be zero padded, so remove the zero padding
+						data = data[:to_read]
+					to_read -= len(data)
 					f.write(data)
 					f.flush()
+					print("To read: " + str(to_read))
+					if to_read <= 0:
+						print("File received.")
+						f.close()
+						break
+			else:
+				print("WARNING: Got command byte other than 0x55 during file transfer mode! Ignoring...")
+					
+			while self.in_waiting() == 0:
+				b=b'' # do nothing while we wait for bytes to come in
+			b = self.readByte()
 			
 		self.receiving_file = False
 
