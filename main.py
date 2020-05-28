@@ -122,7 +122,7 @@ def main_loop():
 rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
 
 # Talk to Tyler to learn what this line does :)
-tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT, rx_print_prefix="BBB TLC RX] ")
+tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
 tlc = TLC(tlc_serial)
 
 laser = laserio.laser()
