@@ -18,9 +18,6 @@ states_laser = 0
 #0 = standby, 1 = integrating, 2 = disconnected
 states_spectrometer = 0
 
-#False = storage mode, True = operations mode
-states_TLC = False
-
 files_transferring = False
 
 #21X1 boolean array. False for non-active error, True for active errors. Goes from LSB to MSB where LSB is active_errors[0]
@@ -84,7 +81,8 @@ def main_loop():
 		# print(tlc.get_temperatures())
 		temp_data = tlc.get_temperatures()		# set the temp_data array to the most recent temp_data
 		efdc = tlc.get_duty_cycles()			# set the efdc array to the most recent efdc
-		roverio.get_status_array(states_laser, states_spectrometer, temp_data, efdc, active_errors, status[1])
+		status_array = roverio.get_status_array(states_laser, states_spectrometer, temp_data, efdc, active_errors, status[1])
+		roverio.status_request(rover_serial, status_array)
 
 		#roverio.status_request(rover_serial)
 		#rover_serial.sendBytes(roverio.get_status_array(states_laser, states_spectrometer, 
