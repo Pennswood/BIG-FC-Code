@@ -1,6 +1,7 @@
 import csv
 import pickle
 import os
+import log_file
 
 
 """
@@ -73,13 +74,16 @@ def all_spectrometer_files():
             if row[3] == "0":
                 output.append(row[0])
     return output
+
+logFile = log_file.log_file(path = PATH_TO_SD_CARD + "/log_file/")
+
 """
 Task: Append data into the log file. May automatically create a new file.
 Inputs: Bit string data to input.
 Returns: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
 """
 def append_log_file(data):
-
+    logFile.append_log_file(data)
     return
 """
 Task: Returns all strings of all log files.
@@ -88,12 +92,7 @@ Returns: a nx1 String array of all n log files, with the first being the most re
 The string will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], ...}
 """
 def read_all_log_file():
-    output = []
-    with open(PATH + "manifest.csv", newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            if row[3] == "1":
-                output.append(row[0])
+    output = logFile.read_all_log_file()
     return output
 """
 Task: Returns manifest data.
