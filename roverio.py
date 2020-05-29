@@ -58,7 +58,7 @@ class Rover():
 
 		for f in temp_data:						# Assuming that temp_data is an array
 			s = "{:0=+4d}{:0=-3d}".format(int(f),int(abs(abs(f)-abs(int(f)))*1000))		# Temperature data | 56 bytes
-			status_array += self.oasis_serial.encode("ascii")
+			status_array += s.encode("ascii")
 
 		for i in efdc:							# Assuming EFDC is an array of integers (0-255)
 			b = i.to_bytes(1, byteorder="big", signed=False)
