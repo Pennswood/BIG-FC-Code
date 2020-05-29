@@ -139,10 +139,6 @@ class Rover():
 				print("ERROR] The set time command failed!")
 				return False
 
-	def __init__(self,oasis_serial, sdcard, ROVER_TX_PORT, ROVER_RX_PORT, TLC_TX_PORT, TLC_RX_PORT):
-		self.ROVER_TX_PORT = ROVER_TX_PORT
-		self.ROVER_RX_PORT = ROVER_RX_PORT
-		self.TLC_TX_PORT = TLC_TX_PORT
-		self.TLC_RX_PORT = TLC_RX_PORT
+	def __init__(self,oasis_serial, sdcard):
 		self.sdcard=sdcard
 		self.oasis_serial = oasis_serial

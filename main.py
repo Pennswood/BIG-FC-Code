@@ -59,7 +59,7 @@ def main_loop():
 		status.pop(2)
 	
 	if command == b'\x01':
-		rover.ping(rover_serial)
+		rover.ping()
 
 	elif command == b'\x02':
 		laser.warm_up_laser()
@@ -94,10 +94,10 @@ def main_loop():
 		# print(tlc.get_temperatures())
 		temp_data = tlc.get_temperatures()		# set the temp_data array to the most recent temp_data
 		efdc = tlc.get_duty_cycles()			# set the efdc array to the most recent efdc
-		status_array = rover.get_status_array(states_laser, states_spectrometer, temp_data, efdc, active_errors, status[1])
-		rover.status_request(rover_serial, status_array)
+		status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer, temp_data, efdc, active_errors, status[1])
+		rover.status_request(status_array)
 
-		#roverio.status_request(rover_serial)
+		#roverio.status_request()
 		#rover_serial.sendBytes(roverio.get_status_array(states_laser, states_spectrometer, 
 
 	elif command == b'\x0B':
@@ -113,7 +113,7 @@ def main_loop():
 		rover.clock_sync()
 
 	elif command == b'\xF0':
-		rover.pi_tune()
+		debug.pi_tune()
 		
 	elif command == b'\x75':
 		rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
@@ -132,7 +132,7 @@ if DEBUG_MODE:
 else:
 	sdcard = sdcardio.sdcard(path=PATH, path_to_sd_card=PATH_TO_SD_CARD, log_byte_length=LOG_BYTE_LENGTH)
 
-rover = roverio.Rover(oasis_serial=tlc_serial, sdcard=sdcard,ROVER_TX_PORT=ROVER_TX_PORT, ROVER_RX_PORT = ROVER_RX_PORT, TLC_TX_PORT = TLC_TX_PORT, TLC_RX_PORT = TLC_RX_PORT)
+rover = roverio.Rover(oasis_serial=rover_serial, sdcard=sdcard)
 
 while(True):
 	main_loop()
