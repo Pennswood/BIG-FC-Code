@@ -38,11 +38,8 @@ active_errors = [False, False, False, False, False, False, False, False, False, 
 #Last 2 rover commands. First being most recent, second next recent.
 status = [b'\x00']*2
 
-#float array for temperature data
-temp_data = []
 
-#int array for etch foil duty cycle
-efdc = []
+
 
 threads = []
 def main_loop():
@@ -114,7 +111,8 @@ def main_loop():
 
 	elif command == b'\xF0':
 		debug.pi_tune()
-		
+
+	#TODO: remove!
 	elif command == b'\x75':
 		rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
 

@@ -8,7 +8,6 @@ Output: Integer. 0 = laser warmed up, 1 = laser warming up, 2 = TLC warming modu
 
 
 class Laser():
-    laser_commands = laser_control.Laser()
     def warm_up_laser(self):
         # TODO
         return
