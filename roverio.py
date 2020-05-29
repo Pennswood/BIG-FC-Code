@@ -8,17 +8,17 @@ class Rover():
 	Input: An OasisSerial object
 	Returns: a boolean value, True for success and False for unsuccessful (line occupied, etc for debugging purposes)
 	"""
-	def ping(self,s):
+	def ping(self):
 		print("PONG")
-		s.sendBytes(b'\x01')
+		self.oasis_serial.sendBytes(b'\x01')
 
 	"""
 	Task: sends all spectrometer data to the rover
 	Input: An OasisSerial object
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
-	def all_spectrometer_data(s):
-		# TODO
+	def all_spectrometer_data(self):
+		self.sdcard.all_spectrometer_files()
 		return
 
 	'''
@@ -58,7 +58,7 @@ class Rover():
 
 		for f in temp_data:						# Assuming that temp_data is an array
 			s = "{:0=+4d}{:0=-3d}".format(int(f),int(abs(abs(f)-abs(int(f)))*1000))		# Temperature data | 56 bytes
-			status_array += s.encode("ascii")
+			status_array += self.oasis_serial.encode("ascii")
 
 		for i in efdc:							# Assuming EFDC is an array of integers (0-255)
 			b = i.to_bytes(1, byteorder="big", signed=False)
@@ -78,9 +78,9 @@ class Rover():
 	Inputs: An OasisSerial object, A byte array of status logs
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
-	def status_request(self,s, status_array):
+	def status_request(self, status_array):
 		for i in status_array:
-			s.sendBytes(i)
+			self.oasis_serial.sendBytes(i)
 		if len(status_array) == 66:				# fix this when the number of thermistors are finalized, currently set to 8
 			return 0
 		else:
@@ -90,38 +90,38 @@ class Rover():
 	Task: dumps all the status file information to the rover
 	Inputs: An OasisSerial object
 	'''
-	def status_dump(self,s):
+	def status_dump(self):
 		file_list = self.sdcard.read_all_log_file()
 		for i in file_list:
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					s.sendBytes(f.read())
+					self.oasis_serial.sendBytes(f.read())
 				f.close()
 			except:
 				print("error opening file: " + i)
 		return
 
 
-	def manifest_request(self,s):
+	def manifest_request(self):
 		# TODO
 		return
 
 
-	def transfer_sample(self,s):
+	def transfer_sample(self):
 		recent_two = self.sdcard.last_two_spectrometer_file()    # Saves last 2 spectrometer files to recent_two
 		for i in recent_two:                                # Iterating through both files
 			if i == "":
 				continue                                    # Incase of empty string with no file, skip it
 			f = open(i, 'r')                                # Open each file in read
-			s.sendString(f.read())                          # Sending string over to rover
+			self.oasis_serial.sendString(f.read())                          # Sending string over to rover
 			f.close()                                       # Close each file when done
 		return None
 
 
-	def clock_sync(self,s):
+	def clock_sync(self):
 		print("CLOCK SYNC")
-		t = s.readSignedInteger()
+		t = self.oasis_serial.readSignedInteger()
 		if t == None:
 			print("WARNING] Reading timestamp from Rover timed out!")
 			return False
@@ -139,9 +139,10 @@ class Rover():
 				print("ERROR] The set time command failed!")
 				return False
 
-	def __init__(self,sdcard, ROVER_TX_PORT, ROVER_RX_PORT, TLC_TX_PORT, TLC_RX_PORT):
+	def __init__(self,oasis_serial, sdcard, ROVER_TX_PORT, ROVER_RX_PORT, TLC_TX_PORT, TLC_RX_PORT):
 		self.ROVER_TX_PORT = ROVER_TX_PORT
 		self.ROVER_RX_PORT = ROVER_RX_PORT
 		self.TLC_TX_PORT = TLC_TX_PORT
 		self.TLC_RX_PORT = TLC_RX_PORT
 		self.sdcard=sdcard
+		self.oasis_serial = oasis_serial

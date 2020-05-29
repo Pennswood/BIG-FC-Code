@@ -87,7 +87,7 @@ def main_loop():
 		spectrometer.sample(20)
 
 	elif command == b'\x09':
-		rover.all_spectrometer_data(rover_serial)
+		rover.all_spectrometer_data()
 
 	elif command == b'\x0A':
 		# print("This still needs to be implemented")
@@ -101,19 +101,19 @@ def main_loop():
 		#rover_serial.sendBytes(roverio.get_status_array(states_laser, states_spectrometer, 
 
 	elif command == b'\x0B':
-		rover.status_dump(rover_serial)
+		rover.status_dump()
 
 	elif command == b'\x0C':
-		rover.manifest_request(rover_serial)
+		rover.manifest_request()
 
 	elif command == b'\x0D':
-		rover.transfer_sample(rover_serial)
+		rover.transfer_sample()
 
 	elif command == b'\x0E':
-		rover.clock_sync(rover_serial)
+		rover.clock_sync()
 
 	elif command == b'\xF0':
-		rover.pi_tune(rover_serial)
+		rover.pi_tune()
 		
 	elif command == b'\x75':
 		rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
@@ -125,14 +125,14 @@ rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, deb
 tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
 tlc = TLC(tlc_serial)
 
-laser = laserio.laser()
-spectrometer = spectrometerio.spectrometer()
+laser = laserio.Laser()
+spectrometer = spectrometerio.Spectrometer()
 if DEBUG_MODE:
 	sdcard = sdcardio.sdcard(path=PATH_DEBUG, path_to_sd_card=PATH_TO_SD_CARD_DEBUG, log_byte_length=LOG_BYTE_LENGTH)
 else:
 	sdcard = sdcardio.sdcard(path=PATH, path_to_sd_card=PATH_TO_SD_CARD, log_byte_length=LOG_BYTE_LENGTH)
 
-rover = roverio.Rover(sdcard=sdcard,ROVER_TX_PORT=ROVER_TX_PORT, ROVER_RX_PORT = ROVER_RX_PORT, TLC_TX_PORT = TLC_TX_PORT, TLC_RX_PORT = TLC_RX_PORT)
+rover = roverio.Rover(oasis_serial=tlc_serial, sdcard=sdcard,ROVER_TX_PORT=ROVER_TX_PORT, ROVER_RX_PORT = ROVER_RX_PORT, TLC_TX_PORT = TLC_TX_PORT, TLC_RX_PORT = TLC_RX_PORT)
 
 while(True):
 	main_loop()

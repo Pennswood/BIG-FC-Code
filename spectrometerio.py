@@ -4,7 +4,7 @@ import seabreeze
 Set up the spectrometer
 Return: a spectrometer object
 '''
-class spectrometer():
+class Spectrometer():
     def setup_spec(self):
         if seabreeze.spectrometers.list_devices():
             spec = seabreeze.spectrometers.Spectrometer.from_first_available()
