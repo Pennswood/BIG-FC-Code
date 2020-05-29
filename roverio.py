@@ -18,6 +18,8 @@ class Rover():
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
 	def all_spectrometer_data(self):
+		self.oasis_serial.sendBytes('\x14')		# send nominal response directory_start
+
 		self.sdcard.all_spectrometer_files()
 		return
 
@@ -33,7 +35,7 @@ class Rover():
 	Return: A bytearray of status log
 	'''
 	# TODO: add comments for what each sendBytes indicates and what inputs are expected
-	def get_status_array(self,laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
+	def get_status_array(self, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
 		status_array = bytearray()
 
 		if laser_status == 0:
@@ -79,9 +81,11 @@ class Rover():
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
 	def status_request(self, status_array):
+		self.oasis_serial.sendBytes('\x10')		# send nominal response status_message
+
 		self.oasis_serial.sendBytes(status_array)
 		
-		if len(status_array) == 66:				# fix this when the number of thermistors are finalized, currently set to 8
+		if len(status_array) == 72:				# fix this when the number of thermistors are finalized, currently set to 9
 			return 0
 		else:
 			return 1
@@ -91,6 +95,8 @@ class Rover():
 	Inputs: An OasisSerial object
 	'''
 	def status_dump(self):
+		self.oasis_serial.sendBytes('\x14')		# send nominal response directory_start
+
 		file_list = self.sdcard.read_all_log_file()
 		for i in file_list:
 			try:
@@ -104,17 +110,21 @@ class Rover():
 
 
 	def manifest_request(self):
+		self.oasis_serial.sendBytes('\x12')		# send nominal response file_start
+		
 		# TODO
 		return
 
 
 	def transfer_sample(self):
+		self.oasis_serial.sendBytes('\x12')		# send nominal response file_start
+		
 		recent_two = self.sdcard.last_two_spectrometer_file()    # Saves last 2 spectrometer files to recent_two
 		for i in recent_two:                                # Iterating through both files
 			if i == "":
 				continue                                    # Incase of empty string with no file, skip it
 			f = open(i, 'r')                                # Open each file in read
-			self.oasis_serial.sendString(f.read())                          # Sending string over to rover
+			self.oasis_serial.sendString(f.read())          # Sending string over to rover
 			f.close()                                       # Close each file when done
 		return None
 
@@ -134,11 +144,13 @@ class Rover():
 			try:
 				subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True, timeout=5)
 				print("Set system time to: " + str(t))
+
+				self.oasis_serial.sendBytes('\x01')
 				return True
 			except:
-				print("ERROR] The set time command failed!")
+				print("[ERROR] The set time command failed!")
 				return False
 
-	def __init__(self,oasis_serial, sdcard):
-		self.sdcard=sdcard
+	def __init__(self, oasis_serial, sdcard):
+		self.sdcard = sdcard
 		self.oasis_serial = oasis_serial
