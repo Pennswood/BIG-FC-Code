@@ -36,7 +36,7 @@ files_transferring = False
 active_errors = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 
 #Last 2 rover commands. First being most recent, second next recent.
-status = [0]*2
+status = [b'\x00']*2
 
 #float array for temperature data
 temp_data = []

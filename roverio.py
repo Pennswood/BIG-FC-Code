@@ -66,7 +66,7 @@ class Rover():
 
 		errors = 0								# Error codes | 3 bytes
 		for index, error in enumerate(error_codes):		# Convert bits into int to bytes
-			errors += error * 2**index
+			errors += error * (2**index)
 		b = errors.to_bytes(3, byteorder="big", signed=False)
 		status_array += b
 
@@ -79,8 +79,8 @@ class Rover():
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
 	def status_request(self, status_array):
-		for i in status_array:
-			self.oasis_serial.sendBytes(i)
+		self.oasis_serial.sendBytes(status_array)
+		
 		if len(status_array) == 66:				# fix this when the number of thermistors are finalized, currently set to 8
 			return 0
 		else:

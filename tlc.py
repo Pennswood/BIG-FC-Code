@@ -4,6 +4,7 @@ import threading
 import time
 
 THERMISTER_COUNT = 9
+DUTY_CYCLE_COUNT = 1
 
 def readTLCStream(tlc):
 	while tlc.running:
@@ -30,7 +31,10 @@ def readTLCStream(tlc):
 					for i in range(THERMISTER_COUNT):
 						tlc.temperatures[i] = float(parts[i])
 						
-					tlc.duty_cycle = float(parts[THERMISTER_COUNT])
+					
+					for i in range(THERMISTER_COUNT, DUTY_CYCLE_COUNT):
+						tlc.duty_cycles[i] = float(parts[i])
+
 					tlc.read_timestamp = time.time()
 					tlc.read_lock.release()
 
@@ -46,7 +50,7 @@ class TLC():
 	# Returns an array of unsigned integers (0-255) representing the PWM duty cycle set on each heater
 	def get_duty_cycles(self):
 		self.read_lock.acquire()
-		d = self.duty_cycle
+		d = self.duty_cycles
 		self.read_lock.release()
 		return d
 		
@@ -68,7 +72,7 @@ class TLC():
 		self.tlc_serial = serial_connection
 		self.read_lock = threading.Lock()
 		
-		self.duty_cycle = 0
+		self.duty_cycles = [0] * DUTY_CYCLE_COUNT
 		self.temperatures = [0.0] * THERMISTER_COUNT 
 		self.read_timestamp = time.time()
 		
