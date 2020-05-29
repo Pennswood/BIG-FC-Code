@@ -109,4 +109,4 @@ class sdcard():
     def __init__(self, path, path_to_sd_card,log_byte_length):
         self.path = path
         self.path_to_sd_card = path_to_sd_card
-        self.logFile = log_file.log_file(path=path, path_to_log=path_to_sd_card + "/log_file/", log_byte_length=log_byte_length)
+        self.logFile = log_file.log_file(sdcard=self, path=path, path_to_log=path_to_sd_card + "/log_file/", log_byte_length=log_byte_length)
