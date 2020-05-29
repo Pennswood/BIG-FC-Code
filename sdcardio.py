@@ -78,9 +78,33 @@ class sdcard():
     """
     Task: Append data into the log file. May automatically create a new file.
     Inputs: Bit string data to input.
+    log_reason: 0 = regular time log, 1 = command sent, 2 = new error, 3 = error resolved
     Returns: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
     """
-    def append_log_file(self,data):
+    def append_log_file(self,rover,time, INTEGER_SIZE, states_laser,spectrometer,temperature, duty_cycles,active_errors, status, log_reason):
+        data = int(time).to_bytes(INTEGER_SIZE, byteorder="big", signed=True) + \
+        rover.get_status_array(states_laser, spectrometer.states_spectrometer, temperature,
+                               duty_cycles(), active_errors, status)
+        if log_reason == 0:
+            data = data + b'\x00'
+        elif log_reason == 1:
+            data = data + b'\x01'
+        elif log_reason == 2:
+            data = data + b'\x02'
+        elif log_reason == 3:
+            data = data + b'\x03'
+        elif log_reason == 4:
+            data = data + b'\x04'
+        elif log_reason == 5:
+            data = data + b'\x05'
+        elif log_reason == 6:
+            data = data + b'\x06'
+        elif log_reason == 7:
+            data = data + b'\x07'
+        elif log_reason == 8:
+            data = data + b'\x08'
+        elif log_reason == 9:
+            data = data + b'\x09'
         self.logFile.append_log_file(data)
         return
     """
