@@ -1,6 +1,7 @@
 import csv
 import os
 import time
+from threading import Timer,Thread,Event
 class log_file():
     def read_old_log_file(self):
         output = []
@@ -14,7 +15,7 @@ class log_file():
     def append_log_file(self, byte_array):
         statinfo = os.stat(self.path_to_log+'logfile'+str(self.fileCount)+'.bin')
         if statinfo.st_size>= self.length*100:
-            self.sdcard.append_manifest_file('logfile'+str(self.fileCount)+'.bin', time.time(), statinfo.st_size*8,1)
+            self.sdcard.append_manifest_file('logfile'+str(self.fileCount)+'.bin', int(time.time()), statinfo.st_size*8,1)
             #TODO: time could could change!
             self.fileCount = self.fileCount+1
         f = open(self.path_to_log+'logfile'+str(self.fileCount)+'.bin', 'a+b')
@@ -34,4 +35,3 @@ class log_file():
         self.path_to_log = path_to_log
         self.fileCount = len(self.read_old_log_file())
         self.length = log_byte_length
-

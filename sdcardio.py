@@ -20,7 +20,7 @@ class sdcard():
     def append_manifest_file(self,fileName, time, bits, type):
         with open(self.path+"manifest.csv", 'a', newline='') as csvFile:
             writer = csv.writer(csvFile, delimiter=",")
-            writer.writerow(str(fileName)+","+str(time)+","+str(bits))
+            writer.writerow([str(fileName),str(time),str(bits),type])
         return
 
     """
@@ -29,9 +29,9 @@ class sdcard():
     Outputs: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
     """
     def create_spectrometer_file(self,filename, data, time):
-        f = open(self.path_to_sd_card+"/spectrometer/"+filename, 'wb')
+        f = open(self.path_to_sd_card+"spectrometer/"+filename, 'wb')
         pickle.dump(data, f)
-        statinfo = os.stat(self.path_to_sd_card+"/spectrometer/"+filename)
+        statinfo = os.stat(self.path_to_sd_card+"spectrometer/"+filename)
         self.append_manifest_file(filename,time,statinfo.st_size*8,0) #TODO: get time? get bits?
         return
     """
@@ -40,7 +40,7 @@ class sdcard():
     Outputs: a 2 by 3648 data array from the spectrometer (wavelength, intensity)
     """
     def read_spectrometer_file(self,filename):
-        f = open(self.path_to_sd_card + "/spectrometer/" + filename, 'rb')
+        f = open(self.path_to_sd_card + "spectrometer/" + filename, 'rb')
         return pickle.load(f)
     """
     Task: Returns the two string of the last 2 spectrometer sample files.
@@ -81,10 +81,11 @@ class sdcard():
     log_reason: 0 = regular time log, 1 = command sent, 2 = new error, 3 = error resolved
     Returns: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
     """
-    def append_log_file(self,rover,time, INTEGER_SIZE, states_laser,spectrometer,temperature, duty_cycles,active_errors, status, log_reason):
+    def append_log_file(self,rover,time, INTEGER_SIZE, states_laser,status_spectrometer,temperature, duty_cycles,active_errors, status, log_reason):
+        print("yea")
         data = int(time).to_bytes(INTEGER_SIZE, byteorder="big", signed=True) + \
-        rover.get_status_array(states_laser, spectrometer.states_spectrometer, temperature,
-                               duty_cycles(), active_errors, status)
+        rover.get_status_array(states_laser, status_spectrometer, temperature,
+                               duty_cycles, active_errors, status)
         if log_reason == 0:
             data = data + b'\x00'
         elif log_reason == 1:
@@ -133,4 +134,4 @@ class sdcard():
     def __init__(self, path, path_to_sd_card,log_byte_length):
         self.path = path
         self.path_to_sd_card = path_to_sd_card
-        self.logFile = log_file.log_file(sdcard=self, path=path, path_to_log=path_to_sd_card + "/log_file/", log_byte_length=log_byte_length)
+        self.logFile = log_file.log_file(sdcard=self, path=path, path_to_log=path_to_sd_card + "log_file/", log_byte_length=log_byte_length)

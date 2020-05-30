@@ -9,6 +9,7 @@ from tlc import TLC
 import debug
 import threading
 import spectrometerio
+import threading
 
 # Set this to False when testing on the Beagle Bone Black
 
@@ -40,14 +41,12 @@ active_errors = [False, False, False, False, False, False, False, False, False, 
 # Last 2 rover commands. First being most recent, second next recent.
 status = [b'\x00'] * 2
 
-last_log_time = time.time()
 
 threads = []
 
 
 def main_loop():
-	global last_log_time, rover, rover_serial, laser, spectrometer, tlc,sdcard
-
+	global rover, rover_serial, laser, spectrometer, tlc,sdcard
 	"""This will be the main loop that checks for and processes commands"""
 	while rover_serial.in_waiting() == 0:
 		a = ''
@@ -58,13 +57,7 @@ def main_loop():
 	status.insert(0, command)
 
 	# Log to file when appropriate
-
-
-	if (last_log_time + 10 < time.time()):
-		print("logging")
-		last_log_time = time.time()
-		sdcard.append_log_file(rover, time, laser.states_laser, spectrometer.states_spectrometer, tlc.get_duty_cycles(),
-							   tlc.get_temperatures(), active_errors, status[1], 0)
+	print("hi")
 
 	if len(status) > 2:
 		status.pop(2)
@@ -149,5 +142,14 @@ else:
 
 rover = roverio.Rover(oasis_serial=rover_serial, sdcard=sdcard)
 
+#For logging file
+def recurrsive_Timer():
+	global log_data_timer
+	sdcard.append_log_file(rover, time.time(),oasis_serial.INTEGER_SIZE, laser.states_laser, spectrometer.states_spectrometer, tlc.get_temperatures(), tlc.get_duty_cycles(), active_errors, status[1], 0)
+	log_data_timer = threading.Timer(1, function=recurrsive_Timer)
+	log_data_timer.start()
+
+log_data_timer = threading.Timer(1, function=recurrsive_Timer)
+log_data_timer.start()
 while (True):
 	main_loop()
