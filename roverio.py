@@ -18,7 +18,7 @@ class Rover():
 	Returns: a byte array for the command rejected response
 	'''
 	def get_cmd_rejected_response_array(self, laser_status, spec_status, active_errors):
-		cmd_rejected_array = bytearray
+		cmd_rejected_array = bytearray()
 
 		if laser_status == 0:
 			cmd_rejected_array += (b'\x20')			# Laser status | 1 byte
@@ -60,7 +60,7 @@ class Rover():
 
 			self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
 			for i in cmd_rejected_array:
-				self.oasis_serial.sendBytes(i)			# sends cmd rejected response
+				self.oasis_serial.sendBytes(i)				# sends cmd rejected response
 			return 1
 		# command is successfully executed
 		else:
@@ -194,19 +194,19 @@ class Rover():
 
 			self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
 			for i in cmd_rejected_array:
-				self.oasis_serial.sendBytes(i)			# sends cmd rejected response
+				self.oasis_serial.sendBytes(i)				# sends cmd rejected response
 			return 1
 		# command is successfully executed
 		else:
 			self.oasis_serial.sendBytes(b'\x12')			# send nominal response file_start
 			
-			recent_two = self.fm.get_last_two_samples()    # Saves last 2 spectrometer files to recent_two
-			for i in recent_two:                                # Iterating through both files
+			recent_two = self.fm.get_last_two_samples()   	# Saves last 2 spectrometer files to recent_two
+			for i in recent_two:                            # Iterating through both files
 				if i == "":
-					continue                                    # Incase of empty string with no file, skip it
-				f = open(i, 'r')                                # Open each file in read
-				self.oasis_serial.sendString(f.read())          # Sending string over to rover
-				f.close()                                       # Close each file when done
+					continue                                # Incase of empty string with no file, skip it
+				f = open(i, 'r')                            # Open each file in read
+				self.oasis_serial.sendString(f.read())      # Sending string over to rover
+				f.close()                                   # Close each file when done
 			return 0
 
 
