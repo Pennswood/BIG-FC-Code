@@ -2,22 +2,22 @@
 import time
 import serial
 import threading
+from pathlib import Path
 
 import roverio
-import sdcardio
+import file_manager
 import oasis_serial
 import laserio
 import debug
 import spectrometerio
-import path
 from tlc import TLC
 
-# SD Card constants
-PATH = Path("/home/debian/")
-PATH_DEBUG = Path("./files/")
-PATH_TO_SD_CARD = Path("/mnt/")
-PATH_TO_SD_CARD_DEBUG = Path("./files/sd_card/")
-LOG_BYTE_LENGTH = 44
+# File hierarchy constants
+SD_PATH = Path("/mnt/SD/") # Path to where the SD card is mounted
+DEBUG_SD_PATH = Path("./debug_fs/SD/")
+
+FLASH_PATH = Path("/home/debian/") # Path to where to store files on the flash
+DEBUG_FLASH_PATH = Path("./debug_fs/flash/")
 
 # Amount of time (seconds) between writing to status log file periodically
 LOGGING_INTERVAL = 1
@@ -42,8 +42,6 @@ active_errors = [False, False, False, False, False, False, False, False, False, 
 
 # Last 2 rover commands. First being most recent, second next recent.
 status = [b'\x00'] * 2
-
-threads = []
 
 def main_loop():
 	global rover, rover_serial, laser, spectrometer, tlc,sdcard
@@ -73,10 +71,6 @@ def main_loop():
 		laser.laser_disarm()
 
 	elif command == b'\x05':
-		"""t1 = threading.Thread(target=spectrometer.sample, args=(10,))
-		threads.append(t1)
-		t1.start()
-		t2 = threading.Timer(0.01, laser.laser_fire)"""
 		laser.laser_fire()
 
 	elif command == b'\x06':
@@ -116,6 +110,10 @@ def main_loop():
 	elif command == b'\x75':
 		rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
 
+if DEBUG_MODE:
+	fm = file_manager.FileManager(DEBUG_SD_PATH, DEBUG_FLASH_PATH)
+else:
+	fm = file_manager.FileManager(SD_PATH, FLASH_PATH)
 
 # Talk to Tyler to learn what this line does :)
 rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, debug_tx_port=ROVER_TX_PORT,
@@ -126,19 +124,17 @@ tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug
 tlc = TLC(tlc_serial)
 
 laser = laserio.Laser()
-spectrometer = spectrometerio.Spectrometer()
 
-if DEBUG_MODE:
-	sdcard = sdcardio.SDCard(path=PATH_DEBUG, path_to_sd_card=PATH_TO_SD_CARD_DEBUG, log_byte_length=LOG_BYTE_LENGTH)
-else:
-	sdcard = sdcardio.SDCard(path=PATH, path_to_sd_card=PATH_TO_SD_CARD, log_byte_length=LOG_BYTE_LENGTH)
+spectrometer = spectrometerio.Spectrometer(fm)
 
-rover = roverio.Rover(oasis_serial=rover_serial, sdcard=sdcard)
+rover = roverio.Rover(rover_serial, fm)
 
 #For logging file
 def log_Timer_Callback():
-	global log_data_timer, LOGGING_INTERVAL
-	sdcard.append_log_file(rover, time.time(), oasis_serial.INTEGER_SIZE, laser.states_laser, spectrometer.states_spectrometer, tlc.get_temperatures(), tlc.get_duty_cycles(), active_errors, status[1], 0)
+	status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer,
+											  tlc.get_temperatures(), tlc.get_duty_cycles(),
+											  active_errors, status[1])
+	fm.log_status(status_array, 0)
 	log_data_timer = threading.Timer(LOGGING_INTERVAL, function=log_Timer_Callback)
 	log_data_timer.start()
 
