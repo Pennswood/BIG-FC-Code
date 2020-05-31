@@ -45,7 +45,6 @@ class Rover():
 			errors += error * (2**index)
 		b = errors.to_bytes(3, byteorder="big", signed=False)
 		cmd_rejected_array += b
-
 		return cmd_rejected_array
 
 	"""

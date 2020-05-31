@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 # How many status logs we can fit into a single log file
-LOGS_PER_FILE = 1000
+LOGS_PER_FILE = 200
 
 # Length (in bytes) of a single status log
 STATUS_SIZE = 75
@@ -82,10 +82,10 @@ class FileManager():
 		return sorted(self.samples_directory_path.glob("*.bin"))
 		
 	def list_all_logs(self):
-		return sorted(self.log_directory_path.glob("*.bin"))
+		return sorted(self.log_directory_path.glob("*.statlog"))
 		
 	def get_latest_log_file(self):
-		l = sorted(self.log_directory_path.glob("*.bin"), reverse=True)
+		l = sorted(self.log_directory_path.glob("*.statlog"), reverse=True)
 		if len(l) == 0:
 			return None
 		return l[0]
