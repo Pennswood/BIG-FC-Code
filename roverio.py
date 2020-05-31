@@ -9,7 +9,7 @@ class Rover():
 	Returns: a boolean value, True for success and False for unsuccessful (line occupied, etc for debugging purposes)
 	"""
 	def ping(self):
-		print("PONG")
+		print("INFO: Got PING, sending PONG back")
 		self.oasis_serial.sendBytes(b'\x01')
 
 	'''
@@ -58,15 +58,25 @@ class Rover():
 		if laser_status != 0 or spec_status == 1:
 			cmd_rejected_array = self.get_cmd_rejected_response_array(laser_status, spec_status, active_errors)
 
-			self.oasis_serial.sendBytes('\xFF')			# tells rover that the cmd is rejected
+			self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
 			for i in cmd_rejected_array:
 				self.oasis_serial.sendBytes(i)			# sends cmd rejected response
 			return 1
 		# command is successfully executed
 		else:
-			self.oasis_serial.sendBytes('\x14')			# send nominal response directory_start
+			self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
 
-			self.sdcard.all_spectrometer_files()
+			file_list = self.fm.list_all_samples()
+			for i in file_list:
+				try:
+					f = open(i, 'rb')
+					if f.readable():
+						self.oasis_serial.sendBytes(f.read())
+					else:
+						print("cannot read file")
+					f.close()
+				except:
+					print("error opening file: " + i)
 			return 0
 
 	'''
@@ -127,7 +137,7 @@ class Rover():
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
 	def status_request(self, status_array):
-		self.oasis_serial.sendBytes('\x10')		# send nominal response status_message
+		self.oasis_serial.sendBytes(b'\x10')		# send nominal response status_message
 
 		self.oasis_serial.sendBytes(status_array)
 		
@@ -146,13 +156,13 @@ class Rover():
 		if laser_status != 0 or spec_status == 1:
 			cmd_rejected_array = self.get_cmd_rejected_response_array(laser_status, spec_status, active_errors)
 
-			self.oasis_serial.sendBytes('\xFF')			# tells rover that the cmd is rejected
+			self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
 			for i in cmd_rejected_array:
 				self.oasis_serial.sendBytes(i)			# sends cmd rejected response
 			return 1
 		# command is successfully executed
 		else:
-			file_list = self.sdcard.read_all_log_file()
+			file_list = self.fm.list_all_logs()
 			for i in file_list:
 				try:
 					f = open(i, 'rb')
@@ -167,7 +177,7 @@ class Rover():
 
 
 	def manifest_request(self):
-		self.oasis_serial.sendBytes('\x12')		# send nominal response file_start
+		self.oasis_serial.sendBytes(b'\x12')		# send nominal response file_start
 		
 		# TODO
 		return
@@ -182,15 +192,15 @@ class Rover():
 		if laser_status != 0 or spec_status == 1:
 			cmd_rejected_array = self.get_cmd_rejected_response_array(laser_status, spec_status, active_errors)
 
-			self.oasis_serial.sendBytes('\xFF')			# tells rover that the cmd is rejected
+			self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
 			for i in cmd_rejected_array:
 				self.oasis_serial.sendBytes(i)			# sends cmd rejected response
 			return 1
 		# command is successfully executed
 		else:
-			self.oasis_serial.sendBytes('\x12')			# send nominal response file_start
+			self.oasis_serial.sendBytes(b'\x12')			# send nominal response file_start
 			
-			recent_two = self.sdcard.last_two_spectrometer_file()    # Saves last 2 spectrometer files to recent_two
+			recent_two = self.fm.get_last_two_samples()    # Saves last 2 spectrometer files to recent_two
 			for i in recent_two:                                # Iterating through both files
 				if i == "":
 					continue                                    # Incase of empty string with no file, skip it
@@ -201,27 +211,27 @@ class Rover():
 
 
 	def clock_sync(self):
-		print("CLOCK SYNC")
 		t = self.oasis_serial.readSignedInteger()
 		if t == None:
-			print("WARNING] Reading timestamp from Rover timed out!")
+			print("WARNING: Reading timestamp from Rover timed out!")
 			return False
 
-		print("Got time stamp: " + str(t))
+		print("INFO: Got time stamp from CLOCK_SYNC: " + str(t))
 		if not platform.system() == "Linux":
-			print("Not running actual command because not on Linux system...")
+			print("WARNING: Not running actual command because not on Linux system...")
 			return True
 		else:
 			try:
 				subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True, timeout=5)
-				print("Set system time to: " + str(t))
+				print("INFO: Set system time to: " + str(t))
 
-				self.oasis_serial.sendBytes('\x01')
+				self.oasis_serial.sendBytes(b'\x01')
 				return True
 			except:
-				print("[ERROR] The set time command failed!")
+				print("ERROR: The set time command failed!")
 				return False
 
-	def __init__(self, oasis_serial, sdcard):
-		self.sdcard = sdcard
+
+	def __init__(self, oasis_serial, filemanager):
 		self.oasis_serial = oasis_serial
+		self.fm = filemanager
