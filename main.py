@@ -91,7 +91,7 @@ def main_loop():
 		spectrometer.sample(20)
 
 	elif command == b'\x09':
-		rover.all_spectrometer_data()
+		rover.all_spectrometer_data(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 
 	elif command == b'\x0A':
 		# print("This still needs to be implemented")
@@ -105,13 +105,13 @@ def main_loop():
 	# rover_serial.sendBytes(roverio.get_status_array(states_laser, states_spectrometer,
 
 	elif command == b'\x0B':
-		rover.status_dump()
+		rover.status_dump(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 
 	elif command == b'\x0C':
 		rover.manifest_request()
 
 	elif command == b'\x0D':
-		rover.transfer_sample()
+		rover.transfer_sample(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 
 	elif command == b'\x0E':
 		rover.clock_sync()
