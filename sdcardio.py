@@ -82,7 +82,6 @@ class sdcard():
     Returns: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
     """
     def append_log_file(self,rover,time, INTEGER_SIZE, states_laser,status_spectrometer,temperature, duty_cycles,active_errors, status, log_reason):
-        print("yea")
         data = int(time).to_bytes(INTEGER_SIZE, byteorder="big", signed=True) + \
         rover.get_status_array(states_laser, status_spectrometer, temperature,
                                duty_cycles, active_errors, status)

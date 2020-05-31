@@ -13,9 +13,13 @@ class log_file():
         return output
 
     def append_log_file(self, byte_array):
-        statinfo = os.stat(self.path_to_log+'logfile'+str(self.fileCount)+'.bin')
-        if statinfo.st_size>= self.length*100:
-            self.sdcard.append_manifest_file('logfile'+str(self.fileCount)+'.bin', int(time.time()), statinfo.st_size*8,1)
+        try:
+            statsize = os.stat(self.path_to_log+'logfile'+str(self.fileCount)+'.bin').st_size
+        except: #No file created
+            statsize = 0
+        print(statsize)
+        if statsize>= self.length*100:
+            self.sdcard.append_manifest_file('logfile'+str(self.fileCount)+'.bin', int(time.time()), statsize,1)
             #TODO: time could could change!
             self.fileCount = self.fileCount+1
         f = open(self.path_to_log+'logfile'+str(self.fileCount)+'.bin', 'a+b')

@@ -19,7 +19,7 @@ PATH = "/home/"
 PATH_DEBUG = "files/"
 PATH_TO_SD_CARD = "/mnt/"
 PATH_TO_SD_CARD_DEBUG = "files/sd_card/"
-LOG_BYTE_LENGTH = 44
+LOG_BYTE_LENGTH = 75
 
 # Rover IO constants
 # The two value below are for debugging purposes only, they mean nothing to the TLC or BBB
