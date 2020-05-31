@@ -1,12 +1,13 @@
 import pickle
 import os
+import time
 from pathlib import Path
 
 # How many status logs we can fit into a single log file
 LOGS_PER_FILE = 1000
 
 # Length (in bytes) of a single status log
-STATUS_SIZE = 44
+STATUS_SIZE = 75
 
 """
 If you need to save a file please use/call functions here
@@ -84,7 +85,10 @@ class FileManager():
 		return sorted(self.log_directory_path.glob("*.bin"))
 		
 	def get_latest_log_file(self):
-		return sorted(self.log_directory_path.glob("*.bin"), reverse=True)[0]
+		l = sorted(self.log_directory_path.glob("*.bin"), reverse=True)
+		if len(l) == 0:
+			return None
+		return l[0]
 
 	"""
 	Task: Append data into the log file. May automatically create a new file.
@@ -94,21 +98,23 @@ class FileManager():
 	"""
 	def log_status(self, status_array, log_reason=0):
 		global STATUS_SIZE, LOGS_PER_FILE
-		status_array += log_reason.to_bytes(1, byteorder="big", signed=False)
-		self.log_file.write(status_array)
+		data = int(time.time()).to_bytes(4, byteorder="big", signed=True)
+		data += status_array
+		data += log_reason.to_bytes(1, byteorder="big", signed=False)
+		self.log_file.write(data)
 		
 		if self.current_log_file_path.stat().st_size > LOGS_PER_FILE * STATUS_SIZE:
 			self.log_index += 1
 			self.current_log_file_path = self.log_directory_path / (str(self.log_index) + ".statlog")
 			self.log_file.close()
-			self.log_file = self.current_log_file_path.open("ab")
+			self.log_file = self.current_log_file_path.open("ab", buffering=STATUS_SIZE)
 
 	def __init__(self, sd_path, flash_path):
 		self.sd_path = sd_path
 		if not sd_path.exists():
 			print("WARNING: SD_PATH " + str(sd_path) + " does not exist! Attempting to create...")
 			try:
-				sd_path.mkdir()
+				sd_path.mkdir(parents=True)
 			except:
 				print("ERROR: Failed to create SD_PATH directory " + str(sd_path))
 		
@@ -120,7 +126,7 @@ class FileManager():
 		if not flash_path.exists():
 			print("WARNING: FLASH_PATH " + str(flash_path) + " does not exist! Attempting to create...")
 			try:
-				flash_path.mkdir()
+				flash_path.mkdir(parents=True)
 			except:
 				print("ERROR: Failed to create FLASH_PATH directory " + str(flash_path))
 		
@@ -158,12 +164,16 @@ class FileManager():
 
 		# Set up our logging file handles
 		self.current_log_file_path = self.get_latest_log_file()
-		self.log_index = self.current_log_file_path.name[:-len(".statlog")]
+		if self.current_log_file_path == None: # this is the first log file to be opened, bootstrap the process
+			self.log_index = 0
+			self.current_log_file_path = self.log_directory_path / "0.statlog"
+		else: # first log file already exists, check to see if the most recent log file is still usable
+			self.log_index = self.current_log_file_path.name[:-len(".statlog")]
 
-		if self.current_log_file_path.stat().st_size > LOGS_PER_FILE * STATUS_SIZE:
-			self.log_index += 1
-			self.current_log_file_path = self.log_directory_path / (str(self.log_index) + ".statlog")
+			if self.current_log_file_path.stat().st_size > LOGS_PER_FILE * STATUS_SIZE:
+				self.log_index += 1
+				self.current_log_file_path = self.log_directory_path / (str(self.log_index) + ".statlog")
 
-		self.log_file = self.current_log_file_path.open("ab")
+		self.log_file = self.current_log_file_path.open("ab", buffering=STATUS_SIZE)
 		
 		print("INFO: FileManager initialized.")

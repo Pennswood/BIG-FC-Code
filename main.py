@@ -14,10 +14,10 @@ from tlc import TLC
 
 # File hierarchy constants
 SD_PATH = Path("/mnt/SD/") # Path to where the SD card is mounted
-DEBUG_SD_PATH = Path("./debug_fs/SD/")
+DEBUG_SD_PATH = Path.cwd() / "debug_fs" / "SD/"
 
 FLASH_PATH = Path("/home/debian/") # Path to where to store files on the flash
-DEBUG_FLASH_PATH = Path("./debug_fs/flash/")
+DEBUG_FLASH_PATH = Path.cwd() / "debug_fs" / "flash/"
 
 # Amount of time (seconds) between writing to status log file periodically
 LOGGING_INTERVAL = 1
