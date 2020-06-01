@@ -8,7 +8,6 @@ import roverio
 import file_manager
 import oasis_serial
 import laserio
-import debug
 import spectrometerio
 from tlc import TLC
 
