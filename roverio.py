@@ -12,37 +12,7 @@ class Rover():
 		print("INFO: Got PING, sending PONG back")
 		self.oasis_serial.sendBytes(b'\x01')
 
-	'''
-	Task: checks if the command sent is a valid command
-	Inputs: int for laser status, int for spectrometer status, 21X1 boolean array for active errors, bytes for command
-	Returns: Boolean of whether it's a valid command
-	'''
-	def is_valid_command(self, laser_status, spec_status, active_errors, cmd):
-		if cmd == b'\x02':
-			if active_errors[16] or active_errors[19] or active_errors[20]:
-				return False
-		elif cmd == b'\x03':
-			# NOTE: rover docs say not warmed up or firing which is redundant so firing is left out
-			if spec_status == 1 or laser_status != 2:	
-				return False
-		elif cmd == b'\x04':
-			if laser_status != 2:
-				return False
-		elif cmd == b'\x05':
-			if laser_status != 4:
-				return False
-		elif cmd == b'\x06':
-			# TODO: Ask about other states like off and "not warmed up" to verify this is correct
-			if laser_status == 1:
-				return False
-		elif cmd == b'\x07' or cmd == b'\x08':
-			if active_errors[16] or active_errors[18]:
-				return False
-		elif cmd == b'\x09' or cmd == b'\x0B' or cmd == b'\x0C' or cmd == b'\x0D':
-			# TODO: Ask if active laser means laser is not 0/OFF or if it just means firing
-			if laser_status != 0 or spec_status == 1:
-				return False
-		return True
+
 
 	'''
 	Task: sends the command rejected response for roverio

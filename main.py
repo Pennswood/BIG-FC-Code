@@ -38,7 +38,7 @@ DEBUG_MODE = True
 files_transferring = False
 
 # 21X1 boolean array. False for non-active error, True for active errors. Goes from LSB to MSB where LSB is active_errors[0]
-active_errors = [False, False, False, False, False, False, False, False, False, False, False, False, False, False,
+active_errors = [True, True, False, False, False, True, False, False, False, False, False, False, False, False,
 				 False, False, False, False, False, False, False]
 
 # Last 2 rover commands. First being most recent, second next recent.
@@ -59,27 +59,22 @@ def main_loop():
 	if len(status) > 2:
 		status.pop(2)
 
-	if not rover.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0]):
+	if not error_checking.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0]):
 		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0])
 	else:
-		error_check = error_checking.ErrorCheck(laser_state = laser.states_laser, spec_state= spectrometer.states_spectrometer,
-												error_state = active_errors, transfer_state = files_transferring, rover_comm = rover)
 		if command == b'\x01':
 			rover.ping()
 
 		elif command == b'\x02':
-			error_check.warm_up_check()
 			laser.warm_up_laser()
 
 		elif command == b'\x03':
-			error_check.arm_check()
 			laser.laser_arm()
 
 		elif command == b'\x04':
 			laser.laser_disarm()
 
 		elif command == b'\x05':
-			error_check.fire_check()
 			laser.laser_fire()
 
 		elif command == b'\x06':
