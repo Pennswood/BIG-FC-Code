@@ -21,7 +21,9 @@ class Spectrometer():
 			return None
 
 	"""
-	Taking integration time int
+	Task: Starting integrating for x milliseconds
+	Input: int integration time in milliseconds
+	Returns: none
 	"""
 	def sample(self, milliseconds):
 		self.spec.trigger_mode = 0																# Setting the trigger mode to normal
@@ -46,43 +48,6 @@ class Spectrometer():
 		self.sdcard.create_spectrometer_file(filename + '.bin', data, seconds)					# Function call to create spectrometer file
 		self.states_spectrometer = 0															# Spectrometer state is now on standby
 		return None
-
-	# TODO: avoid duplicating this function in this file
-	'''
-	Task: gets the command rejected response for spectrometer
-	Input: int for laser status, int for spectrometer status, 21X1 boolean array for active errors
-	Returns: a byte array for the command rejected response
-	'''
-	def get_cmd_rejected_response_array(self, laser_status, spec_status, active_errors):
-		cmd_rejected_array = bytearray()
-
-		if laser_status == 0:
-			cmd_rejected_array += (b'\x20')			# Laser status | 1 byte
-		elif laser_status==1:
-			cmd_rejected_array += (b'\x21')
-		elif laser_status == 2:
-			cmd_rejected_array += (b'\x22')
-		elif laser_status == 3:
-			cmd_rejected_array += (b'\x23')
-		elif laser_status == 4:
-			cmd_rejected_array += (b'\x24')
-		elif laser_status == 5:
-			cmd_rejected_array += (b'\x25')
-
-		if spec_status == 0:						# Spectrometer status | 1 byte
-			cmd_rejected_array += (b'\x01')
-		elif spec_status == 1:
-			cmd_rejected_array += (b'\x02')
-		elif spec_status == 2:
-			cmd_rejected_array += (b'\xFC')
-
-		errors = 0									# Error codes | 3 bytes
-		for index, error in enumerate(active_errors):		# Convert bits into int to bytes
-			errors += error * (2**index)
-		b = errors.to_bytes(3, byteorder="big", signed=False)
-		cmd_rejected_array += b
-
-		return cmd_rejected_array
 
 	def __init__(self, file_manager):
 		# 0 = standby, 1 = integrating, 2 = disconnected

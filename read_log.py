@@ -30,7 +30,7 @@ for log_file in get_log_files():
             elif data == b"\x25": #Firing
                 output = output + "\nLaser status: firing"
             data = f.read(1)
-            if data == b"\01": #stand-by
+            if data == b"\x01": #stand-by
                 output = output + "\tSpectrometer status: standing by"
             elif data == b"\x02": #integrating
                 output = output + "\tSpectrometer status: integrating"
@@ -97,13 +97,13 @@ for log_file in get_log_files():
                 decimal_error = math.floor(decimal_error / 2)
             output = output +"\n"
             data = f.read(1)
-            if data == b'\00':
+            if data == b'\x00':
                 output = output + "\nLog reason: regular interval log"
-            elif data == b'\01':
+            elif data == b'\x01':
                 output = output + "\nLog reason: rover command"
-            elif data == b'\02':
+            elif data == b'\x02':
                 output = output + "\nLog reason: error detected"
-            elif data == b'\03':
+            elif data == b'\x03':
                 output = output + "\nLog reason: error resolved"
             output = output + "\n_______________________"
             print(output)
