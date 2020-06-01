@@ -12,16 +12,71 @@ class Rover():
 		print("INFO: Got PING, sending PONG back")
 		self.oasis_serial.sendBytes(b'\x01')
 
+	'''
+	Task: gets the command rejected response for roverio
+	Input: int for laser status, int for spectrometer status, 21X1 boolean array for active errors
+	Returns: a byte array for the command rejected response
+	'''
+	def get_cmd_rejected_response_array(self, laser_status, spec_status, active_errors):
+		cmd_rejected_array = bytearray()
+
+		if laser_status == 0:
+			cmd_rejected_array += (b'\x20')			# Laser status | 1 byte
+		elif laser_status==1:
+			cmd_rejected_array += (b'\x21')
+		elif laser_status == 2:
+			cmd_rejected_array += (b'\x22')
+		elif laser_status == 3:
+			cmd_rejected_array += (b'\x23')
+		elif laser_status == 4:
+			cmd_rejected_array += (b'\x24')
+		elif laser_status == 5:
+			cmd_rejected_array += (b'\x25')
+
+		if spec_status == 0:						# Spectrometer status | 1 byte
+			cmd_rejected_array += (b'\x01')
+		elif spec_status == 1:
+			cmd_rejected_array += (b'\x02')
+		elif spec_status == 2:
+			cmd_rejected_array += (b'\xFC')
+
+		errors = 0									# Error codes | 3 bytes
+		for index, error in enumerate(active_errors):		# Convert bits into int to bytes
+			errors += error * (2**index)
+		b = errors.to_bytes(3, byteorder="big", signed=False)
+		cmd_rejected_array += b
+		return cmd_rejected_array
+
 	"""
 	Task: sends all spectrometer data to the rover
-	Input: An OasisSerial object
+	Input: int for laser status, int for spectrometer status, 21X1 boolean array for active errors
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
-	def all_spectrometer_data(self):
-		self.oasis_serial.sendBytes(b'\x14')		# send nominal response directory_start
-		# TODO: Implement this
-		#self.sdcard.all_spectrometer_files()
-		return
+	def all_spectrometer_data(self, laser_status, spec_status, active_errors):
+		# command rejected if laser is not off or spectrometer is integrating
+		if laser_status != 0 or spec_status == 1:
+			cmd_rejected_array = self.get_cmd_rejected_response_array(laser_status, spec_status, active_errors)
+
+			self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
+			for i in cmd_rejected_array:
+				self.oasis_serial.sendBytes(i)				# sends cmd rejected response
+			return 1
+		# command is successfully executed
+		else:
+			self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
+
+			file_list = self.fm.list_all_samples()
+			for i in file_list:
+				try:
+					f = open(i, 'rb')
+					if f.readable():
+						self.oasis_serial.sendBytes(f.read())
+					else:
+						print("cannot read file")
+					f.close()
+				except:
+					print("error opening file: " + i)
+			return 0
 
 	'''
 	Task: Organizes all the status logs into a byte array
@@ -77,7 +132,7 @@ class Rover():
 
 	"""
 	Task: sends back a byte list of status data (in accordance to table III in rover commands) to the rover)
-	Inputs: An OasisSerial object, A byte array of status logs
+	Inputs: A byte array of status logs
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
 	def status_request(self, status_array):
@@ -92,21 +147,32 @@ class Rover():
 
 	'''
 	Task: dumps all the status file information to the rover
-	Inputs: An OasisSerial object
+	Inputs: int for laser status, int for spectrometer status, 21X1 boolean array for active errors
+	Returns: 0 for successful completion, 1 for error
 	'''
-	def status_dump(self):
-		self.oasis_serial.sendBytes(b'\x14')		# send nominal response directory_start
-		# TODO: Re-implement this
-		#file_list = self.sdcard.read_all_log_file()
-		#for i in file_list:
-		#	try:
-		#		f = open(i, 'rb')
-		#		if f.readable():
-		#			self.oasis_serial.sendBytes(f.read())
-		#		f.close()
-		#	except:
-		#		print("error opening file: " + i)
-		return
+	def status_dump(self, laser_status, spec_status, active_errors):
+		# command rejected if laser is not off or spectrometer is integrating
+		if laser_status != 0 or spec_status == 1:
+			cmd_rejected_array = self.get_cmd_rejected_response_array(laser_status, spec_status, active_errors)
+
+			self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
+			for i in cmd_rejected_array:
+				self.oasis_serial.sendBytes(i)			# sends cmd rejected response
+			return 1
+		# command is successfully executed
+		else:
+			file_list = self.fm.list_all_logs()
+			for i in file_list:
+				try:
+					f = open(i, 'rb')
+					if f.readable():
+						self.oasis_serial.sendBytes(f.read())
+					else:
+						print("cannot read file")
+					f.close()
+				except:
+					print("error opening file: " + i)
+			return 0
 
 
 	def manifest_request(self):
@@ -115,18 +181,32 @@ class Rover():
 		# TODO
 		return
 
+	'''
+	Task: Sends over the two most recent spectrometer data files
+	Input: int for laser status, int for spectrometer status, 21X1 boolean array for active errors
+	Returns: 0 for successful completion, 1 for error
+	'''
+	def transfer_sample(self, laser_status, spec_status, active_errors):
+		# command rejected if laser is not off or spectrometer is integrating
+		if laser_status != 0 or spec_status == 1:
+			cmd_rejected_array = self.get_cmd_rejected_response_array(laser_status, spec_status, active_errors)
 
-	def transfer_sample(self):
-		self.oasis_serial.sendBytes(b'\x12')		# send nominal response file_start
-		# TODO: Re-implement this
-		#recent_two = self.sdcard.last_two_spectrometer_file()    # Saves last 2 spectrometer files to recent_two
-		#for i in recent_two:                                # Iterating through both files
-		#	if i == "":
-		#		continue                                    # Incase of empty string with no file, skip it
-		#	f = open(i, 'r')                                # Open each file in read
-		#	self.oasis_serial.sendString(f.read())          # Sending string over to rover
-		#	f.close()                                       # Close each file when done
-		#return None
+			self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
+			for i in cmd_rejected_array:
+				self.oasis_serial.sendBytes(i)				# sends cmd rejected response
+			return 1
+		# command is successfully executed
+		else:
+			self.oasis_serial.sendBytes(b'\x12')			# send nominal response file_start
+			
+			recent_two = self.fm.get_last_two_samples()   	# Saves last 2 spectrometer files to recent_two
+			for i in recent_two:                            # Iterating through both files
+				if i == "":
+					continue                                # Incase of empty string with no file, skip it
+				f = open(i, 'r')                            # Open each file in read
+				self.oasis_serial.sendString(f.read())      # Sending string over to rover
+				f.close()                                   # Close each file when done
+			return 0
 
 
 	def clock_sync(self):
@@ -149,6 +229,7 @@ class Rover():
 			except:
 				print("ERROR: The set time command failed!")
 				return False
+
 
 	def __init__(self, oasis_serial, filemanager):
 		self.oasis_serial = oasis_serial
