@@ -60,7 +60,7 @@ def main_loop():
 		status.pop(2)
 
 	if not rover.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0]):
-		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors)
+		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0])
 	else:
 		error_check = error_checking.ErrorCheck(laser_state = laser.states_laser, spec_state= spectrometer.states_spectrometer,
 												error_state = active_errors, transfer_state = files_transferring, rover_comm = rover)
@@ -92,20 +92,20 @@ def main_loop():
 			spectrometer.sample(20)
 
 		elif command == b'\x09':
-			rover.all_spectrometer_data(laser.states_laser, spectrometer.states_spectrometer, active_errors)
+			rover.all_spectrometer_data()
 
 		elif command == b'\x0A':
 			rover.status_request(laser.states_laser, spectrometer.states_spectrometer,
 												  tlc.get_temperatures(), tlc.get_duty_cycles(),
 												  active_errors, status[1])
 		elif command == b'\x0B':
-			rover.status_dump(laser.states_laser, spectrometer.states_spectrometer, active_errors)
+			rover.status_dump()
 
 		elif command == b'\x0C':
 			rover.manifest_request()
 
 		elif command == b'\x0D':
-			rover.transfer_sample(laser.states_laser, spectrometer.states_spectrometer, active_errors)
+			rover.transfer_sample()
 
 		elif command == b'\x0E':
 			rover.clock_sync()

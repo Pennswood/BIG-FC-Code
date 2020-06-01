@@ -28,7 +28,7 @@ class Spectrometer():
 		self.spec.trigger_mode = 0																# Setting the trigger mode to normal
 		self.spec.integration_time_micros(milliseconds*1000)									# Set integration time for spectrometer
 		self.states_spectrometer = 1															# Spectrometer state is set to sampling
-		self.oasis_serial.sendBytes(b'\x01')															# Sending nominal responce
+		self.oasis_serial.sendBytes(b'\x30')															# Sending nominal responce
 		try:
 			wavelengths, intensities = self.spec.spectrum()										# This will return wavelengths and intensities as a 2D array, this call also begins the sampling
 		except:
@@ -46,6 +46,8 @@ class Spectrometer():
 		# self.fm.save_sample([insert timestamp], data)					# No longer using sdcard
 		self.fm.create_spectrometer_file(filename + '.bin', data, seconds)					# Function call to create spectrometer file
 		self.states_spectrometer = 0															# Spectrometer state is now on standby
+		
+		self.oasis_serial.sendBytes(b'\x01')													# Send nominal response for successful completion
 		return None
 
 	def __init__(self, serial,file_manager):
