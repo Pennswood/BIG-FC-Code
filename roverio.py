@@ -12,11 +12,9 @@ class Rover():
 		print("INFO: Got PING, sending PONG back")
 		self.oasis_serial.sendBytes(b'\x01')
 
-
-
 	'''
 	Task: sends the command rejected response for roverio
-	Input: int for laser status, int for spectrometer status, 21X1 boolean array for active errors
+	Input: int for laser status, int for spectrometer status, 21X1 boolean array for active errors, bytes for prev_cmd
 	Returns: None
 	'''
 	def send_cmd_rejected_response(self, laser_status, spec_status, active_errors, prev_cmd):
@@ -58,22 +56,12 @@ class Rover():
 
 	"""
 	Task: sends all spectrometer data to the rover
-	Input: 
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
 	def all_spectrometer_data(self):
-		# # command rejected if laser is not off or spectrometer is integrating
-		# if laser_status != 0 or spec_status == 1:
-		# 	cmd_rejected_array = self.get_cmd_rejected_response_array(laser_status, spec_status, active_errors)
-
-		# 	self.oasis_serial.sendBytes(b'\xFF')			# tells rover that the cmd is rejected
-		# 	for i in cmd_rejected_array:
-		# 		self.oasis_serial.sendBytes(i)				# sends cmd rejected response
-		# 	return 1
-		# # command is successfully executed
-		# else:
 		self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
 
+		debug_int = 0									# return 1 if error for debugging purposes
 		file_list = self.fm.list_all_samples()
 		for i in file_list:
 			try:
@@ -85,7 +73,8 @@ class Rover():
 				f.close()
 			except:
 				print("error opening file: " + i)
-		return 0
+				debug_int = 1
+		return debug_int
 
 	'''
 	Task: Organizes all the status logs into a byte array
@@ -154,46 +143,6 @@ class Rover():
 		else:
 			return 1
 
-	# TODO: add documentation
-	def get_error_array(self, laser_status, spec_status, error_codes, prev_cmd):
-		status_array = bytearray()
-
-		if laser_status == 0:
-			status_array += (b'\x20')  # Laser status | 1 byte
-		elif laser_status == 1:
-			status_array += (b'\x21')
-		elif laser_status == 2:
-			status_array += (b'\x22')
-		elif laser_status == 3:
-			status_array += (b'\x23')
-		elif laser_status == 4:
-			status_array += (b'\x24')
-		elif laser_status == 5:
-			status_array += (b'\x25')
-
-		if spec_status == 0:  # Spectrometer status | 1 byte
-			status_array += (b'\x01')
-		elif spec_status == 1:
-			status_array += (b'\x02')
-		elif spec_status == 2:
-			status_array += (b'\xFC')
-
-		errors = 0  # Error codes | 3 bytes
-		for index, error in enumerate(error_codes):  # Convert bits into int to bytes
-			errors += error * (2 ** index)
-		b = errors.to_bytes(3, byteorder="big", signed=False)
-		status_array += b
-
-		status_array += prev_cmd  # Previous command | 1 byte
-		return status_array
-
-	# TODO: Add documentation
-	def error_response(self, laser_status, spec_status, error_codes, cmd):
-		self.oasis_serial.sendBytes(b'\xFF') # send error response
-		error_array = self.get_status_array(laser_status, spec_status,  error_codes, cmd)
-		self.oasis_serial.sendBytes(error_array)
-		return error_array
-
 	'''
 	Task: dumps all the status file information to the rover
 	Inputs: 
@@ -215,7 +164,7 @@ class Rover():
 
 
 	def manifest_request(self):
-		self.oasis_serial.sendBytes(b'\x12')		# send nominal response file_start
+		self.oasis_serial.sendBytes(b'\x12')			# send nominal response file_start
 		
 		# TODO
 		return
