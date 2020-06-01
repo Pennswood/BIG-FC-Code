@@ -10,7 +10,7 @@ Output: Integer. 0 = laser warmed up, 1 = laser warming up, 2 = TLC warming modu
 
 
 class Laser():
-    # Laser is powered-up and DISARMED. While warming up, status is 1. When warmed up, status is 2.
+    # Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
     def warm_up_laser(self):
         status = self.get_status()
         self.oasis_serial(b'\x01')
@@ -26,7 +26,7 @@ class Laser():
         return
     """
     """
-    # Laser is powered-up and ARMED. While arming, status is 3. When ARMED, status is 4.
+    # Laser is powered-up and ARMED. While arming, state is 3. When ARMED, state is 4.
     def laser_arm(self):
         self.laser_commands.arm()
         status = self.get_status()
@@ -46,13 +46,13 @@ class Laser():
         return
     """
     """
-    # Laser must already be powered-up and ARMED to fire. When firing, status is 5.
+    # Laser must already be powered-up and ARMED to fire. When firing, state is 5.
     def laser_fire(self):
         self.laser_commands.fire_laser()
         return
     """
     """
-    # Laser is powered-off. When off, status is 0.
+    # Laser is powered-off. When off, state is 0.
     def laser_off(self):
         # TODO
 
