@@ -5,26 +5,24 @@ Returns: Boolean of whether it's a valid command
 '''
 def is_valid_command(laser_status, spec_status, active_errors, cmd):
     if cmd == b'\x02': # warm up laser
-        if active_errors[16] or active_errors[19] or active_errors[20]: #Excessive current draw, laser disconnected, temp high
+        if active_errors[16] or active_errors[19] or active_errors[20]: # Excessive current draw, laser disconnected, temp high
             return False
-    elif cmd == b'\x03': # Arm laser
-        # NOTE: rover docs say not warmed up or firing which is redundant so firing is left out
-        # TODO: this command should be allowed even if you are already armed or arming.
-
-        #TODO: Considering allowing this state to be called even when firing, in which case it will stop the firing but stay armed.
-        if laser_status != 2: # Laser is not in warmed up state
+    elif cmd == b'\x03' or cmd == b'\x04': # Arm/disarm laser
+        # NOTE: If the laser is off, disconnected, or warming up, this command will be rejected
+        if laser_status == 0 or laser_status == 1 or laser_status == 6: # Laser is not in warmed up state
             return False
-    elif cmd == b'\x04': # Laser disarm
-        #TODO: this command should be allowed for all states except for "warming up" or "off.
-        # (warmed up state, arming, armed, firing, are all allowed states to disarm)
-        if laser_status != 2: # Laser is not in warmed up state
-            return False
-    elif cmd == b'\x05': #Fire laser
+    # elif cmd == b'\x04': # Laser disarm
+    #     #TODO: this command should be allowed for all states except for "warming up" or "off.
+    #     # (warmed up state, arming, armed, firing, are all allowed states to disarm)
+    #     if laser_status != 2: # Laser is not in warmed up state
+    #         return False
+    elif cmd == b'\x05': # Fire laser
         if laser_status != 4: # Laser is not in armed state
             return False
     elif cmd == b'\x06': # Laser off
-        # TODO: This command should be allowed in any state (as long as laser is not disconnected)
-        if laser_status == 1: # Laser is not in on state
+        # NOTE: Original is "If the laser is not warmed up, or if it is in the process of warming up, this command will be rejected"
+        # Now it's only "if the laser is disconnected, this command will be rejected", it will be allowed in any state
+        if laser_status == 6: # Laser is disconnected
             return False
     elif cmd == b'\x07' or cmd == b'\x08': # Sample
         if spec_status == 1 or active_errors[16] or active_errors[18]: #Sampling, excessive current draw, or temp high.
