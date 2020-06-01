@@ -57,57 +57,60 @@ def main_loop():
 	if len(status) > 2:
 		status.pop(2)
 
-	if command == b'\x01':
-		rover.ping()
+	if not rover.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0]):
+		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors)
+	else:
+		if command == b'\x01':
+			rover.ping()
 
-	elif command == b'\x02':
-		laser.warm_up_laser()
+		elif command == b'\x02':
+			laser.warm_up_laser()
 
-	elif command == b'\x03':
-		laser.laser_arm()
+		elif command == b'\x03':
+			laser.laser_arm()
 
-	elif command == b'\x04':
-		laser.laser_disarm()
+		elif command == b'\x04':
+			laser.laser_disarm()
 
-	elif command == b'\x05':
-		laser.laser_fire()
+		elif command == b'\x05':
+			laser.laser_fire()
 
-	elif command == b'\x06':
-		laser.laser_off()
+		elif command == b'\x06':
+			laser.laser_off()
 
-	elif command == b'\x07':
-		spectrometer.sample(10)
+		elif command == b'\x07':
+			spectrometer.sample(10)
 
-	elif command == b'\x08':
-		spectrometer.sample(20)
+		elif command == b'\x08':
+			spectrometer.sample(20)
 
-	elif command == b'\x09':
-		rover.all_spectrometer_data(laser.states_laser, spectrometer.states_spectrometer, active_errors)
+		elif command == b'\x09':
+			rover.all_spectrometer_data(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 
-	elif command == b'\x0A':
-		status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer,
-											  tlc.get_temperatures(), tlc.get_duty_cycles(),
-											  active_errors, status[1])
-		rover.status_request(status_array)
+		elif command == b'\x0A':
+			status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer,
+												  tlc.get_temperatures(), tlc.get_duty_cycles(),
+												  active_errors, status[1])
+			rover.status_request(status_array)
 
-	elif command == b'\x0B':
-		rover.status_dump(laser.states_laser, spectrometer.states_spectrometer, active_errors)
+		elif command == b'\x0B':
+			rover.status_dump(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 
-	elif command == b'\x0C':
-		rover.manifest_request()
+		elif command == b'\x0C':
+			rover.manifest_request()
 
-	elif command == b'\x0D':
-		rover.transfer_sample(laser.states_laser, spectrometer.states_spectrometer, active_errors)
+		elif command == b'\x0D':
+			rover.transfer_sample(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 
-	elif command == b'\x0E':
-		rover.clock_sync()
+		elif command == b'\x0E':
+			rover.clock_sync()
 
-	elif command == b'\xF0':
-		debug.pi_tune()
+		elif command == b'\xF0':
+			debug.pi_tune()
 
-	# TODO: remove!
-	elif command == b'\x75':
-		rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
+		# TODO: remove!
+		elif command == b'\x75':
+			rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
 
 if DEBUG_MODE:
 	fm = file_manager.FileManager(DEBUG_SD_PATH, DEBUG_FLASH_PATH)
