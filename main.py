@@ -38,7 +38,7 @@ DEBUG_MODE = True
 files_transferring = False
 
 # 21X1 boolean array. False for non-active error, True for active errors. Goes from LSB to MSB where LSB is active_errors[0]
-active_errors = [True, True, False, False, False, True, False, False, False, False, False, False, False, False,
+active_errors = [False, False, False, False, False, False, False, False, False, False, False, False, False, False,
 				 False, False, False, False, False, False, False]
 
 # Last 2 rover commands. First being most recent, second next recent.
