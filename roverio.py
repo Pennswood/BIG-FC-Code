@@ -172,15 +172,55 @@ class Rover():
 	Inputs: A byte array of status logs
 	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
 	"""
-	def status_request(self, status_array):
+	def status_request(self, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
 		self.oasis_serial.sendBytes(b'\x10')		# send nominal response status_message
-
+		status_array = self.get_status_array(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd)
 		self.oasis_serial.sendBytes(status_array)
 		
 		if len(status_array) == 72:				# fix this when the number of thermistors are finalized, currently set to 9
 			return 0
 		else:
 			return 1
+
+	# TODO: add documentation
+	def get_error_array(self, laser_status, spec_status, error_codes, prev_cmd):
+		status_array = bytearray()
+
+		if laser_status == 0:
+			status_array += (b'\x20')  # Laser status | 1 byte
+		elif laser_status == 1:
+			status_array += (b'\x21')
+		elif laser_status == 2:
+			status_array += (b'\x22')
+		elif laser_status == 3:
+			status_array += (b'\x23')
+		elif laser_status == 4:
+			status_array += (b'\x24')
+		elif laser_status == 5:
+			status_array += (b'\x25')
+
+		if spec_status == 0:  # Spectrometer status | 1 byte
+			status_array += (b'\x01')
+		elif spec_status == 1:
+			status_array += (b'\x02')
+		elif spec_status == 2:
+			status_array += (b'\xFC')
+
+		errors = 0  # Error codes | 3 bytes
+		for index, error in enumerate(error_codes):  # Convert bits into int to bytes
+			errors += error * (2 ** index)
+		b = errors.to_bytes(3, byteorder="big", signed=False)
+		status_array += b
+
+		status_array += prev_cmd  # Previous command | 1 byte
+		return status_array
+
+	# TODO: Add documentation
+	def error_response(self, laser_status, spec_status, error_codes, cmd):
+		self.oasis_serial.sendBytes(b'\xFF') # send error response
+		error_array = self.get_status_array(laser_status, spec_status,  error_codes, cmd)
+		self.oasis_serial.sendBytes(error_array)
+		return error_array
 
 	'''
 	Task: dumps all the status file information to the rover

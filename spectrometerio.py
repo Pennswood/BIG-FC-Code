@@ -1,9 +1,8 @@
 import seabreeze
-from seabreeze.spectrometers import Spectrometer
+from seabreeze.spectrometers import Spectrometer as Spec
 from file_manager import FileManager
 import subprocess
 import time
-import oasis_serial
 
 class Spectrometer():
 	'''
@@ -29,7 +28,7 @@ class Spectrometer():
 		self.spec.trigger_mode = 0																# Setting the trigger mode to normal
 		self.spec.integration_time_micros(milliseconds*1000)									# Set integration time for spectrometer
 		self.states_spectrometer = 1															# Spectrometer state is set to sampling
-		oasis_serial.sendBytes(b'\x01')															# Sending nominal responce
+		self.oasis_serial.sendBytes(b'\x01')															# Sending nominal responce
 		try:
 			wavelengths, intensities = self.spec.spectrum()										# This will return wavelengths and intensities as a 2D array, this call also begins the sampling
 		except:
@@ -38,19 +37,20 @@ class Spectrometer():
 		data = wavelengths, intensities															# Saving 2D array to variable data
 		if data == []:
 			return 'No data entered'															# Error handling for no data collected
-		oasis_serial.sendBytes(b'\x31')		# Code sent to spectrometer signaling sampling has successfully finished
+		self.oasis_serial.sendBytes(b'\x31')		# Code sent to spectrometer signaling sampling has successfully finished
 		
 		# TODO: Fix the below line of code... it works, but we should really be using Python's built-in functions and not opening up another shell just to get a formatted date string
 		date = subprocess.run(['date', "'+%m_%d_%Y_%H_%M_%S'"], timeout = 5, stdout=subprocess.PIPE)	# Running date command on terminal
 		filename = '{}'.format(date.stdout.decode('utf-8'))										# Creates the time stamped spectrometer file name
 		seconds = time.time()																	# Returns # of seconds since Jan 1, 1970 (since epoch)
 		# self.fm.save_sample([insert timestamp], data)					# No longer using sdcard
-		self.sdcard.create_spectrometer_file(filename + '.bin', data, seconds)					# Function call to create spectrometer file
+		self.fm.create_spectrometer_file(filename + '.bin', data, seconds)					# Function call to create spectrometer file
 		self.states_spectrometer = 0															# Spectrometer state is now on standby
 		return None
 
-	def __init__(self, file_manager):
+	def __init__(self, serial,file_manager):
 		# 0 = standby, 1 = integrating, 2 = disconnected
+		self.oasis_serial = serial
 		self.states_spectrometer = 0
 		self.fm = file_manager
 		self.spec = self.setup_spec()

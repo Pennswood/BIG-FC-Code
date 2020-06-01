@@ -4,11 +4,13 @@ import serial
 import threading
 from pathlib import Path
 
+import debug
 import roverio
 import file_manager
 import oasis_serial
 import laserio
 import spectrometerio
+import error_checking
 from tlc import TLC
 
 # File hierarchy constants
@@ -43,7 +45,7 @@ active_errors = [False, False, False, False, False, False, False, False, False, 
 status = [b'\x00'] * 2
 
 def main_loop():
-	global rover, rover_serial, laser, spectrometer, tlc,sdcard
+	global rover, rover_serial, laser, spectrometer, tlc,sdcard, active_errors
 	"""This will be the main loop that checks for and processes commands"""
 	
 	while rover_serial.in_waiting() == 0:
@@ -60,19 +62,24 @@ def main_loop():
 	if not rover.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0]):
 		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 	else:
+		error_check = error_checking.ErrorCheck(laser_state = laser.states_laser, spec_state= spectrometer.states_spectrometer,
+												error_state = active_errors, transfer_state = files_transferring, rover_comm = rover)
 		if command == b'\x01':
 			rover.ping()
 
 		elif command == b'\x02':
+			error_check.warm_up_check()
 			laser.warm_up_laser()
 
 		elif command == b'\x03':
+			error_check.arm_check()
 			laser.laser_arm()
 
 		elif command == b'\x04':
 			laser.laser_disarm()
 
 		elif command == b'\x05':
+			error_check.fire_check()
 			laser.laser_fire()
 
 		elif command == b'\x06':
@@ -88,11 +95,9 @@ def main_loop():
 			rover.all_spectrometer_data(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 
 		elif command == b'\x0A':
-			status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer,
+			rover.status_request(laser.states_laser, spectrometer.states_spectrometer,
 												  tlc.get_temperatures(), tlc.get_duty_cycles(),
 												  active_errors, status[1])
-			rover.status_request(status_array)
-
 		elif command == b'\x0B':
 			rover.status_dump(laser.states_laser, spectrometer.states_spectrometer, active_errors)
 
@@ -124,12 +129,12 @@ rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, deb
 tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=TLC_TX_PORT,
 									  debug_rx_port=TLC_RX_PORT)
 tlc = TLC(tlc_serial)
-
-laser = laserio.Laser()
-
-spectrometer = spectrometerio.Spectrometer(fm)
-
 rover = roverio.Rover(rover_serial, fm)
+laser = laserio.Laser(oasis_serial = rover_serial)
+
+spectrometer = spectrometerio.Spectrometer(serial = rover_serial, file_manager=fm)
+
+
 
 #For logging file
 def log_Timer_Callback():
