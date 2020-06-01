@@ -52,7 +52,6 @@ for log_file in get_log_files():
                 output += "\tSpectrometer status: disconnected"
 
             output += "\n"
-            print(output)
             for i in range(THERMISTER_COUNT):
                 data = f.read(7)  # ASCII-encoded 7 byte float
                 s = data.decode("ascii")
