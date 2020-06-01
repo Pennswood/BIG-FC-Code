@@ -43,20 +43,22 @@ class Laser():
     # Laser is powered-up and DISARMED
     def laser_disarm(self):
         self.laser_commands.disarm()
+        self.states_laser = 2               # WARMED UP
         return
     """
     """
     # Laser must already be powered-up and ARMED to fire. When firing, state is 5.
     def laser_fire(self):
         self.laser_commands.fire_laser()
+        self.states_laser = 5               # FIRING
         return
     """
     """
     # Laser is powered-off. When off, state is 0.
     def laser_off(self):
         # TODO
-
         GPIO.output("P9_42", GPIO.LOW)  # set pin LOW to disable 48V converter, and thus the laser
+        self.states_laser = 0               # OFF
         return
 
 
@@ -81,3 +83,4 @@ class Laser():
         self.states_laser = 0
         self.timer = time.time()        # Only to initalize variable, not used.
         GPIO.setup("P9_42", GPIO.OUT)   # 48V enable is on P9_42. ON = GPIO HIGH. OFF = GPIO LOW.
+        GPIO.output("P9_42", GPIO.LOW)  # make sure the laser is OFF
