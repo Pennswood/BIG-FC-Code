@@ -40,7 +40,7 @@ class Spectrometer():
 		self.oasis_serial.sendBytes(b'\x31')													# Code sent to spectrometer signaling sampling has successfully finished
 		
 		date = time.asctime().replace(" ", "_").replace(":", "_")								# [Fixed] Obtaining date/time through time library
-		filename = '{}'.format(date.stdout.decode('utf-8'))										# Creates the time stamped spectrometer file name
+		filename = '{}'.format(date)															# Creates the time stamped spectrometer file name
 		seconds = time.time()																	# Returns # of seconds since Jan 1, 1970 (since epoch)
 		# self.fm.save_sample([insert timestamp], data)					# No longer using sdcard
 		self.fm.create_spectrometer_file(filename + '.bin', data, seconds)						# Function call to create spectrometer file
