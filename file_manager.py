@@ -168,7 +168,7 @@ class FileManager():
 			self.log_index = 0
 			self.current_log_file_path = self.log_directory_path / "0.statlog"
 		else: # first log file already exists, check to see if the most recent log file is still usable
-			self.log_index = self.current_log_file_path.name[:-len(".statlog")]
+			self.log_index = int(self.current_log_file_path.name[:-len(".statlog")])
 
 			if self.current_log_file_path.stat().st_size > LOGS_PER_FILE * STATUS_SIZE:
 				self.log_index += 1
