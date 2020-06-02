@@ -40,7 +40,7 @@ class FileManager():
 	Outputs: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
 	"""
 	def save_sample(self, timestamp, data):
-		file_name = str(timestamp).replace(",","_") + ".bin" # Get the filename from the timestamp and extension
+		file_name = str(timestamp).replace(".","_") + ".bin" # Get the filename from the timestamp and extension
 		f = (self.samples_directory_path / file_name).open("wb")
 		pickle.dump(data, f) # This writes the data
 		f.close()
