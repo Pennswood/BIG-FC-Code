@@ -38,12 +38,9 @@ class Spectrometer():
 		if data == []:
 			return 'No data entered'															# Error handling for no data collected
 		self.oasis_serial.sendBytes(b'\x31')													# Code sent to spectrometer signaling sampling has successfully finished
-		
-		date = time.asctime().replace(" ", "_").replace(":", "_")								# [Fixed] Obtaining date/time through time library
-		filename = '{}'.format(date)															# Creates the time stamped spectrometer file name
-		seconds = time.time()																	# Returns # of seconds since Jan 1, 1970 (since epoch)
-		# self.fm.save_sample([insert timestamp], data)					# No longer using sdcard
-		self.fm.create_spectrometer_file(filename + '.bin', data, seconds)						# Function call to create spectrometer file
+
+		timestamp = time.time()																	# Returns # of seconds since Jan 1, 1970 (since epoch)
+		self.fm.create_spectrometer_file(timestamp, data)										# Function call to create spectrometer file
 		self.states_spectrometer = 0															# Spectrometer state is now on standby
 		
 		self.oasis_serial.sendBytes(b'\x01')													# Send nominal response for successful completion
