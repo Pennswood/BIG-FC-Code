@@ -36,6 +36,7 @@ DEBUG_MODE = True
 
 # States:
 files_transferring = False
+files_transfer_thread = None
 
 # 21X1 boolean array. False for non-active error, True for active errors. Goes from LSB to MSB where LSB is active_errors[0]
 active_errors = [False, False, False, False, False, False, False, False, False, False, False, False, False, False,
@@ -45,12 +46,17 @@ active_errors = [False, False, False, False, False, False, False, False, False, 
 status = [b'\x00'] * 2
 
 def main_loop():
-	global rover, rover_serial, laser, spectrometer, tlc,sdcard, active_errors
+	global rover, rover_serial, laser, spectrometer, tlc,sdcard, active_errors, files_transferring, files_transfer_thread
 	"""This will be the main loop that checks for and processes commands"""
 	
 	while rover_serial.in_waiting() == 0:
+		if files_transferring: # RS422: Check if still in use
+			if not files_transfer_thread.is_alive(): #finished
+				files_transferring = False
 		a = '' # just do nothing for now, we use this because the readByte call will repeatedly timeout
-	
+	if files_transferring: # RS422: Check if still in use
+		if not files_transfer_thread.is_alive():  # finished
+			files_transferring = False
 	command = rover_serial.readByte()
 
 	# Adds the command into the status list
@@ -61,47 +67,55 @@ def main_loop():
 
 	if not error_checking.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0]):
 		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0])
+	elif files_transferring: # RS422: Line is in use, unfortunately there is nothing you can do but ignore the command.
+		pass
 	else:
 		if command == b'\x01':
 			rover.ping()
 
 		elif command == b'\x02':
-			laser.warm_up_laser()
-
+			threading.Thread(target=laser.warm_up_laser).start()
 		elif command == b'\x03':
-			laser.laser_arm()
-
+			threading.Thread(target=laser.laser_arm).start()
 		elif command == b'\x04':
 			laser.laser_disarm()
-
+			threading.Thread(target=laser.laser_disarm).start()
 		elif command == b'\x05':
-			laser.laser_fire()
-
+			t1 = threading.Thread(target=spectrometer.sample, args=(10,))
+			t2 = threading.Timer(0.001, laser.laser_fire)
+			t1.start()
+			t2.start()
 		elif command == b'\x06':
-			laser.laser_off()
+			threading.Thread(target=laser.laser_off).start()
 
 		elif command == b'\x07':
-			spectrometer.sample(10)
+			threading.Thread(target=spectrometer.sample, args=(10,)).start()
 
 		elif command == b'\x08':
-			spectrometer.sample(20)
+			threading.Thread(target=spectrometer.sample, args=(20,)).start()
 
 		elif command == b'\x09':
-			rover.all_spectrometer_data()
+			files_transferring = True
+			files_transfer_thread = threading.Thread(target=rover.all_spectrometer_data)
+			files_transfer_thread.start()
 
 		elif command == b'\x0A':
 			rover.status_request(laser.states_laser, spectrometer.states_spectrometer,
 												  tlc.get_temperatures(), tlc.get_duty_cycles(),
 												  active_errors, status[1])
-		elif command == b'\x0B':
-			rover.status_dump()
+		elif command == b'\x0B':  # RS422: Begin to use the rover line for extended period of time
+			files_transferring = True
+			files_transfer_thread = threading.Thread(target=rover.status_dump)
+			files_transfer_thread.start()
 
-		elif command == b'\x0C':
-			rover.manifest_request()
-
-		elif command == b'\x0D':
-			rover.transfer_sample()
-
+		elif command == b'\x0C': # RS422: Begin to use the rover line for extended period of time
+			files_transferring = True
+			files_transfer_thread = threading.Thread(target=rover.manifest_request)
+			files_transfer_thread.start()
+		elif command == b'\x0D': # RS422: Begin to use the rover line for extended period of time
+			files_transferring = True
+			files_transfer_thread = threading.Thread(target=rover.transfer_sample)
+			files_transfer_thread.start()
 		elif command == b'\x0E':
 			rover.clock_sync()
 
@@ -128,7 +142,6 @@ rover = roverio.Rover(rover_serial, fm)
 laser = laserio.Laser(oasis_serial = rover_serial)
 
 spectrometer = spectrometerio.Spectrometer(serial = rover_serial, file_manager=fm)
-
 
 
 #For logging file
