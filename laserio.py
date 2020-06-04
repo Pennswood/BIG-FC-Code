@@ -1,12 +1,26 @@
 from science import laser_control
 import time
 import Adafruit_BBIO.GPIO as GPIO       # Adafruit library for safe GPIO control
+from enum import Enum
 """
 Task: turn TLC to operations temperature, followed by turning on laser.
         This function can be expected to be continuously called until laser is warmed up.
 Input: none
 Output: Integer. 0 = laser warmed up, 1 = laser warming up, 2 = TLC warming module up, >2 = some sort of error.
 """
+
+# Possible Laser States. This is ***NOT*** the status value returned by pinging the laser.
+class LASER_STATE(Enum):
+    OFF = 0
+    WARMING_UP = 1
+    WARMED_UP = 2
+    ARMING = 3
+    ARMED = 4
+    FIRING = 5
+    LASER_DISCONNECTED = 6
+    OVERTEMP_ELECTRICAL = 7
+    OVERTEMP_RESONATOR = 8
+    POWER_FAILURE = 9
 
 
 class Laser():
