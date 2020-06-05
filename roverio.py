@@ -60,6 +60,7 @@ class Rover():
 	"""
 	def all_spectrometer_data(self):
 		self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
+		self.oasis_serial.sendString("samples/;")		# send directory name
 
 		debug_int = 0									# return 1 if error for debugging purposes
 		file_list = self.fm.list_all_samples()
@@ -149,7 +150,8 @@ class Rover():
 	'''
 	def status_dump(self):
 		self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
-		
+		self.oasis_serial.sendString("logs/;")			# send directory name
+
 		file_list = self.fm.list_all_logs()
 		for i in file_list:
 			try:
