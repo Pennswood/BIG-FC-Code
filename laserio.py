@@ -72,7 +72,7 @@ class Laser():
 
     # gets specific bits from the laser status response. 
     # Pass it the response from the laser for status_response, and LASER_STATUS_BITS.whatever for the offset
-    def get_bit(status_response, offset):
+    def get_bit(self, status_response, offset):
         return ((status_response >> offset & 1))
 
     # Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
