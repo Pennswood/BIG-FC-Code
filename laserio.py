@@ -7,6 +7,32 @@ Task: turn TLC to operations temperature, followed by turning on laser.
         This function can be expected to be continuously called until laser is warmed up.
 Input: none
 Output: Integer. 0 = laser warmed up, 1 = laser warming up, 2 = TLC warming module up, >2 = some sort of error.
+
+Random Notes:
+1) Laser Enable – "This enables the laser and readies it for firing. Note: there will be an 8
+second delay between when the laser is first enabled and the laser is able to fire." uJewel manual
+
+2) Laser Status Bits:   Bit 15: Spare
+                        Bit 14: Spare
+                        Bit 13: High-Power Mode         
+                        Bit 12: Low-Power Mode
+                        Bit 11: Ready To Fire               // Laser is enabled AND ready to fire. See note 1. 
+                        Bit 10: Ready To Enable             // Proxy for laser is warmed up? Laser is warmed up and therefore CAN be enabled (armed/disarmed). 
+                        Bit  9: Power Failure (uhh boss, how do you tell me you've had a power failure when you don't have the power to respond? USB Power?)
+                        Bit  8: Electrical Over Temp
+                        Bit  7: Resonator Over Temp
+                        Bit  6: External Interlock          // Not used?
+                        Bit  5: Reserved 
+                        Bit  4: Reserved
+                        Bit  3: Diode External Trigger
+                        Bit  2: Reserved 
+                        Bit  1: Laser Active                // Laser is firing
+                        Bit  0: Laser Enabled               // "laser is ready to fire". Armed/Disarmed state.
+
+^^^This will be converted to a Sphinx table after I learn how to do that^^^
+
+3) Confirm power mode with Science team
+
 """
 
 # Possible Laser States. This is ***NOT*** the status value returned by pinging the laser.
@@ -93,7 +119,6 @@ class Laser():
     def __init__(self, oasis_serial):
         self.oasis_serial = oasis_serial
         self.laser_commands = laser_control.Laser()
-        # 0 = off, 1 = warming up, 2 = warmed up, 3 = arming, 4 = armed, 5 = firing, 6 = laser disconnected
         self.states_laser = 0
         self.timer = time.time()        # Only to initalize variable, not used.
         GPIO.setup("P9_42", GPIO.OUT)   # 48V enable is on P9_42. ON = GPIO HIGH. OFF = GPIO LOW.
