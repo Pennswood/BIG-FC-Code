@@ -108,10 +108,6 @@ def main_loop():
 			files_transfer_thread = threading.Thread(target=rover.status_dump)
 			files_transfer_thread.start()
 
-		elif command == b'\x0C': # RS422: Begin to use the rover line for extended period of time
-			files_transferring = True
-			files_transfer_thread = threading.Thread(target=rover.manifest_request)
-			files_transfer_thread.start()
 		elif command == b'\x0D': # RS422: Begin to use the rover line for extended period of time
 			files_transferring = True
 			files_transfer_thread = threading.Thread(target=rover.transfer_sample)
