@@ -97,7 +97,7 @@ class Laser:
     def get_status(self):
         with self.__lock:
             self.__send_command(';LA:SS?<CR>')
-            return self.__ser.read()
+            return self.__ser.read(2)            # laser is sending status as 2 bytes, so this needs to be read(2), not read() which takes in 1 byte by default
 
     def check_armed(self):
         with self.__lock:
