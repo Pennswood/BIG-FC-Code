@@ -48,8 +48,33 @@ class LASER_STATE(Enum):
     OVERTEMP_RESONATOR = 8
     POWER_FAILURE = 9
 
+# define the locations of the status bit
+class LASER_STATUS_BITS(Enum):
+    SPARE = 15
+    SPARE = 14
+    HIGH_POWER_MODE = 13
+    LOW_POWER_MODE = 12
+    READY_TO_FIRE = 11
+    READ_TO_ENABLE = 10
+    POWER_FAILURE = 9
+    ELECTRICAL_OVERTEMP = 8
+    RESONATOR_OVERTEMP = 7
+    EXTERNAL_INTERLOCK = 6
+    RESERVED_5 = 5
+    RESERVED_4 = 4
+    DIODE_EXTERNAL_TRIGGER = 3
+    RESERVED_2 = 2
+    LASER_ACTIVE = 1
+    LASER_ENABLED = 0
+
 
 class Laser():
+
+    # gets specific bits from the laser status response. 
+    # Pass it the response from the laser for status_response, and LASER_STATUS_BITS.whatever for the offset
+    def get_bit(status_response, offset):
+        return ((status_response >> offset & 1))
+
     # Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
     def warm_up_laser(self):
         status = self.get_status()
