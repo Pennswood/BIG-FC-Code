@@ -70,11 +70,6 @@ class LASER_STATUS_BITS(Enum):
 
 class Laser():
 
-    # gets specific bits from the laser status response. 
-    # Pass it the response from the laser for status_response, and LASER_STATUS_BITS.whatever for the offset
-    def get_bit(self, status_response, offset):
-        return ((status_response >> offset & 1))
-
     # Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
     def warm_up_laser(self):
         status = self.get_status()
@@ -126,7 +121,6 @@ class Laser():
         self.states_laser = 0               # OFF
         return
 
-
     """
     Task: Gets the status response from the laser. Check Laser Status bits listed above.
     Input: None
@@ -134,11 +128,11 @@ class Laser():
         2 = laser warmed up (ready to enable?), 3 = not used (arming = warmed up from the laser's perspective),
         4 = laser armed (laser enabled AND laser ready to fire), 5 = laser firing (laser active)
     """
-    def get_status(self):
-        raw_status = self.laser_commands.get_status()
-        # TODO: Some stuff
-        output = 1
-        return output
+    # gets specific bits from the laser status response.
+    # Pass it the response from the laser for status_response, and LASER_STATUS_BITS.whatever for the offset
+    def get_status_bit(self, offset):
+        raw_status = self.laser_commands.get_status(),
+        return ((raw_status >> offset & 1))
     """
     """
     def __init__(self, oasis_serial):
