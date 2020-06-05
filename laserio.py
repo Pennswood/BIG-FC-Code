@@ -48,7 +48,7 @@ class LASER_STATE(Enum):
     OVERTEMP_RESONATOR = 8
     POWER_FAILURE = 9
 
-# define the locations of the status bit
+# Define the locations of the status bit
 class LASER_STATUS_BITS(Enum):
     SPARE = 15
     SPARE = 14
@@ -67,6 +67,7 @@ class LASER_STATUS_BITS(Enum):
     LASER_ACTIVE = 1
     LASER_ENABLED = 0
 
+# Configure the laser mode 
 class LASER_CONFIG(Enum):
     ENERGY_MODE = 2  # High power. We barely have enough poewr to ablate with this level.
     DIODE_TRIGGER_MODE = 0  # Internal trigger, meaning we use commands to fire the laser rather than a GPIO pin.
@@ -135,11 +136,16 @@ class Laser():
         2 = laser warmed up (ready to enable?), 3 = not used (arming = warmed up from the laser's perspective),
         4 = laser armed (laser enabled AND laser ready to fire), 5 = laser firing (laser active)
     """
+    # gets the status response of the laser
+    def get_status(self):
+        raw_status = self.laser_commands.get_status()
+        return raw_status
+
     # gets specific bits from the laser status response.
     # Pass it the response from the laser for status_response, and LASER_STATUS_BITS.whatever for the offset
-    def get_status_bit(self, offset):
-        raw_status = self.laser_commands.get_status(),
-        return ((raw_status >> offset & 1))
+    def get_status_bit(self, raw_status, offset):
+        status_bit_value = (raw_status >> offset & 1)
+        return status_bit_value
     """
     """
     def __init__(self, oasis_serial):
