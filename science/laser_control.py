@@ -96,7 +96,7 @@ class Laser:
 
     def get_status(self):
         with self.__lock:
-            self.__send_command(';LA:SS?<CR>')
+            self.__send_command(';LA:SS?<CR>')   # Check for timeout exceptions when using read function
             return self.__ser.read(2)            # laser is sending status as 2 bytes, so this needs to be read(2), not read() which takes in 1 byte by default
 
     def check_armed(self):
