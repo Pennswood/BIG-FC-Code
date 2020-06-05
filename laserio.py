@@ -14,18 +14,18 @@ second delay between when the laser is first enabled and the laser is able to fi
 
 2) Laser Status Bits:   Bit 15: Spare
                         Bit 14: Spare
-                        Bit 13: High-Power Mode         
+                        Bit 13: High-Power Mode
                         Bit 12: Low-Power Mode
-                        Bit 11: Ready To Fire               // Laser is enabled AND ready to fire. See note 1. 
-                        Bit 10: Ready To Enable             // Proxy for laser is warmed up? Laser is warmed up and therefore CAN be enabled (armed/disarmed). 
+                        Bit 11: Ready To Fire               // Laser is enabled AND ready to fire. See note 1.
+                        Bit 10: Ready To Enable             // Proxy for laser is warmed up? Laser is warmed up and therefore CAN be enabled (armed/disarmed).
                         Bit  9: Power Failure (uhh boss, how do you tell me you've had a power failure when you don't have the power to respond? USB Power?)
                         Bit  8: Electrical Over Temp
                         Bit  7: Resonator Over Temp
                         Bit  6: External Interlock          // Not used?
-                        Bit  5: Reserved 
+                        Bit  5: Reserved
                         Bit  4: Reserved
                         Bit  3: Diode External Trigger
-                        Bit  2: Reserved 
+                        Bit  2: Reserved
                         Bit  1: Laser Active                // Laser is firing
                         Bit  0: Laser Enabled               // "laser is ready to fire". Armed/Disarmed state.
 
@@ -128,9 +128,9 @@ class Laser():
 
 
     """
-    Task: Gets the command from the laser.
+    Task: Gets the status response from the laser. Check Laser Status bits listed above.
     Input: None
-    Output: Returns an integer: -1 = laser off (laser not responding), 0 = laser warming up (laser on/laser responding), 
+    Output: Returns an integer: -1 = laser off (laser not responding), 0 = laser warming up (laser on/laser responding),
         2 = laser warmed up (ready to enable?), 3 = not used (arming = warmed up from the laser's perspective),
         4 = laser armed (laser enabled AND laser ready to fire), 5 = laser firing (laser active)
     """
