@@ -56,10 +56,11 @@ class Rover():
 
 	"""
 	Task: sends all spectrometer data to the rover
-	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
+	Returns: integer, 0 for success, other numbers for failure to open file (for debugging purposes)
 	"""
 	def all_spectrometer_data(self):
 		self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
+		self.oasis_serial.sendString("samples/;")		# send directory name
 
 		debug_int = 0									# return 1 if error for debugging purposes
 		file_list = self.fm.list_all_samples()
@@ -67,12 +68,12 @@ class Rover():
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					self.oasis_serial.sendBytes(f.read())
+					self.oasis_serial.sendFile(f, i)
 				else:
-					print("cannot read file")
+					print("ERROR: Unable to read file" + i)
 				f.close()
 			except:
-				print("error opening file: " + i)
+				print("ERROR: Unable to open file: " + i)
 				debug_int = 1
 		return debug_int
 
@@ -138,7 +139,7 @@ class Rover():
 		status_array = self.get_status_array(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd)
 		self.oasis_serial.sendBytes(status_array)
 		
-		if len(status_array) == 72:				# fix this when the number of thermistors are finalized, currently set to 9
+		if len(status_array) == 72:					# fix this when the number of thermistors are finalized, currently set to 9
 			return 0
 		else:
 			return 1
@@ -146,28 +147,23 @@ class Rover():
 	'''
 	Task: dumps all the status file information to the rover
 	Inputs: 
-	Returns: 0 for successful completion, 1 for error
 	'''
 	def status_dump(self):
+		self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
+		self.oasis_serial.sendString("logs/;")			# send directory name
+
 		file_list = self.fm.list_all_logs()
 		for i in file_list:
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					self.oasis_serial.sendBytes(f.read())
+					self.oasis_serial.sendFile(f, i)
 				else:
-					print("cannot read file")
+					print("ERROR: Unable to read file" + i)
 				f.close()
 			except:
-				print("error opening file: " + i)
-		return 0
-
-
-	def manifest_request(self):
-		self.oasis_serial.sendBytes(b'\x12')			# send nominal response file_start
-		
-		# TODO
-		return
+				print("ERROR: Unable to open file: " + i)
+		return None
 
 	'''
 	Task: Sends over the two most recent spectrometer data files
@@ -175,15 +171,19 @@ class Rover():
 	Returns: 0 for successful completion, 1 for error
 	'''
 	def transfer_sample(self):
-		self.oasis_serial.sendBytes(b'\x12')			# send nominal response file_start
-		
 		recent_two = self.fm.get_last_two_samples()   	# Saves last 2 spectrometer files to recent_two
 		for i in recent_two:                            # Iterating through both files
-			if i == "":
+			if i == None:
 				continue                                # Incase of empty string with no file, skip it
-			f = open(i, 'r')                            # Open each file in read
-			self.oasis_serial.sendString(f.read())      # Sending string over to rover
-			f.close()                                   # Close each file when done
+			try:
+				f = open(i, 'rb')
+				if f.readable():
+					self.oasis_serial.sendFile(f, i)
+				else:
+					print("ERROR: Unable to read file" + i)
+				f.close()
+			except:
+				print("ERROR: Unable to open file: " + i)
 		return 0
 
 
