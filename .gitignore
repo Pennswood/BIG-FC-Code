@@ -5,3 +5,6 @@ debug_fs/
 *.statlog
 *.bin
 *.dat
+
+#VScode stuff
+.vscode/
