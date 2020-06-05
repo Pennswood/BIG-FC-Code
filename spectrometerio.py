@@ -40,9 +40,9 @@ class Spectrometer():
 		self.oasis_serial.sendBytes(b'\x30')													# Code sent to spectrometer signaling sampling has successfully finished
 
 		timestamp = time.time()																	# Returns # of seconds since Jan 1, 1970 (since epoch)
-		self.fm.create_spectrometer_file(timestamp, data)										# Function call to create spectrometer file
+		self.fm.save_sample(timestamp, data)													# Function call to create spectrometer file
 		self.states_spectrometer = 0															# Spectrometer state is now on standby
-		
+
 		return None
 
 	def __init__(self, serial,file_manager):

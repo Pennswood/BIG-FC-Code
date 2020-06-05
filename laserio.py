@@ -67,6 +67,13 @@ class LASER_STATUS_BITS(Enum):
     LASER_ACTIVE = 1
     LASER_ENABLED = 0
 
+class LASER_CONFIG(Enum):
+    ENERGY_MODE = 2  # High power. We barely have enough poewr to ablate with this level.
+    DIODE_TRIGGER_MODE = 0  # Internal trigger, meaning we use commands to fire the laser rather than a GPIO pin.
+    MODE = 1 # Single shot
+
+
+
 
 class Laser():
 

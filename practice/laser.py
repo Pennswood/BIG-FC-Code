@@ -72,8 +72,12 @@ class Laser():
             return ""
 
     def laser_fire(self, cmd_code):
-        #TODO
-        return
+        if self.diode_trigger_mode == 0:
+            if cmd_code == 1:
+                return
+            return "Error: wrong command"
+        else: # external trigger means this is not used.
+            return
     def laser_enable(self, cmd_code):
         #TODO
         return

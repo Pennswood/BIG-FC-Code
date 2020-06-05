@@ -101,7 +101,7 @@ class Laser:
 
     def check_armed(self):
         with self.__lock:
-            self.__send_command('LA:EN?<CR>')
+            self.__send_command(';LA:EN?<CR>')
 
     def arm(self):
         with self.__lock:

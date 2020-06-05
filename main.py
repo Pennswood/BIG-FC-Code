@@ -43,7 +43,7 @@ active_errors = [False, False, False, False, False, False, False, False, False, 
 				 False, False, False, False, False, False, False]
 
 # Last 2 rover commands. First being most recent, second next recent.
-status = [b'\x00'] * 2
+past_two_commands = [b'\x00'] * 2
 
 def main_loop():
 	global rover, rover_serial, laser, spectrometer, tlc,sdcard, active_errors, files_transferring, files_transfer_thread
@@ -60,13 +60,13 @@ def main_loop():
 	command = rover_serial.readByte()
 
 	# Adds the command into the status list
-	status.insert(0, command)
+	past_two_commands.insert(0, command)
 
-	if len(status) > 2:
-		status.pop(2)
+	if len(past_two_commands) > 2:
+		past_two_commands.pop(2)
 
-	if not error_checking.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0]):
-		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors, status[0])
+	if not error_checking.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, past_two_commands[0]):
+		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors, past_two_commands[0])
 	elif files_transferring: # RS422: Line is in use, unfortunately there is nothing you can do but ignore the command.
 		pass
 	else:
@@ -102,7 +102,7 @@ def main_loop():
 		elif command == b'\x0A':
 			rover.status_request(laser.states_laser, spectrometer.states_spectrometer,
 												  tlc.get_temperatures(), tlc.get_duty_cycles(),
-												  active_errors, status[1])
+												  active_errors, past_two_commands[1])
 		elif command == b'\x0B':  # RS422: Begin to use the rover line for extended period of time
 			files_transferring = True
 			files_transfer_thread = threading.Thread(target=rover.status_dump)
@@ -148,7 +148,7 @@ spectrometer = spectrometerio.Spectrometer(serial = rover_serial, file_manager=f
 def log_Timer_Callback():
 	status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer,
 											  tlc.get_temperatures(), tlc.get_duty_cycles(),
-											  active_errors, status[1])
+											  active_errors, past_two_commands[1])
 	fm.log_status(status_array, 0)
 	log_data_timer = threading.Timer(LOGGING_INTERVAL, function=log_Timer_Callback)
 	log_data_timer.start()

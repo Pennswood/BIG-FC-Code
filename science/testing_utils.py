@@ -40,3 +40,17 @@ def generate_dummy_spectra(central_spectra=(500, 730, 380), width=100, bins=1E4,
     spec_data = np.asarray([wavelengths, intensities]).transpose()
     output_frame = pd.DataFrame(data=spec_data, columns=['Wavelength [nm]', 'Intensity'])
     return output_frame
+
+class dummy_laser():
+    def receive_command(self,cmd):
+        if not cmd[-4:] == "<CR>": #code not complete
+            self.cmd = cmd
+            return
+        if cmd[:3] == ";LA": # new command coming in
+            self.cmd = ""
+        # code is completed
+        cmd = self.cmd + cmd
+        self.cmd = ""
+        cmd = cmd[3:][:-4]
+
+
