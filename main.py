@@ -1,16 +1,20 @@
 #!/usr/bin/python3
-import time
-import serial
+# pylint: disable=C0103
+"""
+main.py
+Contains the main loop and rover command input processing code.
+"""
 import threading
 from pathlib import Path
 
-import debug
+from repeated_timer import RepeatedTimer
 import roverio
 import file_manager
 import oasis_serial
 import laserio
 import spectrometerio
 import error_checking
+import debug
 from tlc import TLC
 
 # File hierarchy constants
@@ -38,22 +42,23 @@ DEBUG_MODE = True
 files_transferring = False
 files_transfer_thread = None
 
-# 21X1 boolean array. False for non-active error, True for active errors. Goes from LSB to MSB where LSB is active_errors[0]
-active_errors = [False, False, False, False, False, False, False, False, False, False, False, False, False, False,
-				 False, False, False, False, False, False, False]
+# 21X1 boolean array. False for non-active error, True for active errors.
+# Goes from LSB to MSB where LSB is active_errors[0]
+active_errors = [False, False, False, False, False, False, False, False, False, False, False,\
+		False, False, False, False, False, False, False, False, False, False]
 
 # Last 2 rover commands. First being most recent, second next recent.
 past_two_commands = [b'\x00'] * 2
 
 def main_loop():
-	global rover, rover_serial, laser, spectrometer, tlc,sdcard, active_errors, files_transferring, files_transfer_thread
 	"""This will be the main loop that checks for and processes commands"""
-	
+	global active_errors, files_transferring, files_transfer_thread
+
 	while rover_serial.in_waiting() == 0:
 		if files_transferring: # RS422: Check if still in use
 			if not files_transfer_thread.is_alive(): #finished
 				files_transferring = False
-		a = '' # just do nothing for now, we use this because the readByte call will repeatedly timeout
+
 	if files_transferring: # RS422: Check if still in use
 		if not files_transfer_thread.is_alive():  # finished
 			files_transferring = False
@@ -65,9 +70,12 @@ def main_loop():
 	if len(past_two_commands) > 2:
 		past_two_commands.pop(2)
 
-	if not error_checking.is_valid_command(laser.states_laser, spectrometer.states_spectrometer, active_errors, past_two_commands[0]):
-		rover.send_cmd_rejected_response(laser.states_laser, spectrometer.states_spectrometer, active_errors, past_two_commands[0])
-	elif files_transferring: # RS422: Line is in use, unfortunately there is nothing you can do but ignore the command.
+	if not error_checking.is_valid_command(laser.states_laser,\
+	spectrometer.states_spectrometer, active_errors, past_two_commands[0]):
+		rover.send_cmd_rejected_response(laser.states_laser,\
+			spectrometer.states_spectrometer, active_errors, past_two_commands[0])
+
+	elif files_transferring: #Line is in use, nothing you can do but ignore the command.
 		pass
 	else:
 		if command == b'\x01':
@@ -101,8 +109,7 @@ def main_loop():
 
 		elif command == b'\x0A':
 			rover.status_request(laser.states_laser, spectrometer.states_spectrometer,
-												  tlc.get_temperatures(), tlc.get_duty_cycles(),
-												  active_errors, past_two_commands[1])
+					tlc.get_temperatures(), tlc.get_duty_cycles(), active_errors, past_two_commands[1])
 		elif command == b'\x0B':  # RS422: Begin to use the rover line for extended period of time
 			files_transferring = True
 			files_transfer_thread = threading.Thread(target=rover.status_dump)
@@ -118,39 +125,33 @@ def main_loop():
 		elif command == b'\xF0':
 			debug.pi_tune()
 
-		# TODO: remove!
-		elif command == b'\x75':
-			rover_serial.sendFile(open("test.txt", "rb"), "test.txt")
-
 if DEBUG_MODE:
 	fm = file_manager.FileManager(DEBUG_SD_PATH, DEBUG_FLASH_PATH)
 else:
 	fm = file_manager.FileManager(SD_PATH, FLASH_PATH)
 
 # Talk to Tyler to learn what this line does :)
-rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE, debug_tx_port=ROVER_TX_PORT,
-										debug_rx_port=ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
+rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE,
+		debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
 
-tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE, debug_tx_port=TLC_TX_PORT,
-									  debug_rx_port=TLC_RX_PORT)
+tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE,
+		debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
+
 tlc = TLC(tlc_serial)
 rover = roverio.Rover(rover_serial, fm)
-laser = laserio.Laser(oasis_serial = rover_serial)
+laser = laserio.Laser(oasis_serial=rover_serial)
 
-spectrometer = spectrometerio.Spectrometer(serial = rover_serial, file_manager=fm)
+spectrometer = spectrometerio.Spectrometer(serial=rover_serial, file_manager=fm)
 
-
-#For logging file
-def log_Timer_Callback():
+def log_timer_callback():
+	"""This is the callback function that repeatedly logs the current status to the status log."""
 	status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer,
-											  tlc.get_temperatures(), tlc.get_duty_cycles(),
-											  active_errors, past_two_commands[1])
+			tlc.get_temperatures(), tlc.get_duty_cycles(),
+			active_errors, past_two_commands[1])
 	fm.log_status(status_array, 0)
-	log_data_timer = threading.Timer(LOGGING_INTERVAL, function=log_Timer_Callback)
-	log_data_timer.start()
 
-log_data_timer = threading.Timer(LOGGING_INTERVAL, function=log_Timer_Callback) # Log our status every second
+log_data_timer = RepeatedTimer(LOGGING_INTERVAL, log_timer_callback)
 log_data_timer.start()
 
-while (True):
+while True:
 	main_loop()
