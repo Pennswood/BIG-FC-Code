@@ -27,8 +27,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with pylint
       run: |
-	cd ../
-        pylint --rcfile=.pylint-rc BIG-FC-CODE/
+        pylint --rcfile=.pylint-rc `pwd`
     - name: Test with pytest
       run: |
         pytest
