@@ -1,3 +1,7 @@
+[MASTER]
+fail-under=7
+ignore=practice,science
+
 [BASIC]
 
 argument-naming-style=snake_case
@@ -9,10 +13,16 @@ variable-naming-style=snake_case
 
 good-names=i,j,k,f,s,d,t
 
-[FORMAT]
+[MESSAGES CONTROL]
+disable=C0330,global-statement
 
-indent-string='\t'
+[FORMAT]
+indent-string='	'
+indent-after-paren=1
 
 [STRING]
 check-quote-consistency=no
 
+[DESIGN]
+max-branches=30
+max-statements=70
