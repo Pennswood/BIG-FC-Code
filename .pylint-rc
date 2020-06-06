@@ -10,6 +10,7 @@ const-naming-style=UPPER_CASE
 function-naming-style=snake_case
 method-naming-style=camelCase
 variable-naming-style=snake_case
+module-naming-style=any
 
 good-names=i,j,k,f,s,d,t
 
