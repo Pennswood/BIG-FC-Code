@@ -26,7 +26,7 @@ def is_valid_command(laser_status, spec_status, active_errors, cmd):
     elif cmd == b'\x07' or cmd == b'\x08': # Sample
         if spec_status == 1 or active_errors[16] or active_errors[18]: #Sampling, excessive current draw, or temp high.
             return False
-    elif cmd == b'\x09' or cmd == b'\x0B' or cmd == b'\x0C' or cmd == b'\x0D': # Send files
+    elif cmd == b'\x09' or cmd == b'\x0B' or cmd == b'\x0D': # Send files
         if laser_status != 0 or spec_status == 1: # laser not turned off or spectrometer integrating
             return False
     return True
