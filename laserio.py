@@ -3,6 +3,7 @@ import time
 import Adafruit_BBIO.GPIO as GPIO       # Adafruit library for safe GPIO control
 from enum import Enum
 import numpy
+import threading
 """
 Task:   turn TLC to operations temperature, followed by turning on laser.
         This function can be expected to be continuously called until laser is warmed up.
@@ -53,7 +54,7 @@ class LASER_STATE(Enum):
 class LASER_STATUS_BITS(Enum):
     SPARE = 15
     SPARE = 14
-    HIGH_POWER_MODE = 13
+    HIGH_POWER_MODE = 13    
     LOW_POWER_MODE = 12
     READY_TO_FIRE = 11
     READY_TO_ENABLE = 10
@@ -71,14 +72,20 @@ class LASER_STATUS_BITS(Enum):
 # Configure the laser mode 
 # When should we check this?
 class LASER_CONFIG(Enum):
-    ENERGY_MODE = 2  # High power. We barely have enough poewr to ablate with this level.
+    ENERGY_MODE = 2         # High power. We barely have enough poewr to ablate with this level.
     DIODE_TRIGGER_MODE = 0  # Internal trigger, meaning we use commands to fire the laser rather than a GPIO pin.
-    MODE = 1 # Single shot
+    MODE = 1                # Single shot
+    WARMUP_TIMER = 15      # wait 15 seconds before checking if warmup was successful
 
 # declare array for the status bits (faster & uses less memory than list)
 status_bit_array = numpy.arrange(16)
 
+
+# make a global variable, initialized to 0, for the warmup delay because threading.Timer is annoying
+warmup_status = 0
+
 class Laser():
+
 
     # Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
     # need to laser inactive, laser disabled, laser not ready to fire, laser not ready to enable
@@ -95,7 +102,10 @@ class Laser():
         # Laser is already off. Perfect case so we don't need to check anything else. uC is active so we have data even though 48V is off.
         if (SBArray[LASER_STATUS_BITS.POWER_FAILURE] == 0 and SBArray[LASER_STATUS_BITS.RESONATOR_OVERTEMP] == 0 and SBArray[LASER_STATUS_BITS.ELECTRICAL_OVERTEMP] == 0 and SBArray[LASER_STATUS_BITS.LASER_ENABLED] == 0 and SBArray[LASER_STATUS_BITS.LASER_ACTIVE] == 0 and SBArray[LASER_STATUS_BITS.READY_TO_ENABLE] == 0 and SBArray[LASER_STATUS_BITS.READY_TO_FIRE] == 0):
             GPIO.output("P9_42", GPIO.HIGH)     # Set pin HIGH to enable 48V converter, and power up the laser
-            self.oasis_serial(b'\x23')          # report that we are enabling
+            self.oasis_serial(b'\x21')          # report that we are warming up
+            warmupTimer = threading.Timer(LASER_CONFIG.WARMUP_TIMER, self.get_warmup_delay_status)
+            warmupTimer.start()    
+           
         else:
             if (SBArray[LASER_STATUS_BITS.POWER_FAILURE] == 1):
                 self.oasis_serial(b'\00') # error placeholder
@@ -174,6 +184,15 @@ class Laser():
             status_bit_array[i] = status_bit_value
             
         return status_bit_array
+
+    def get_warmup_delay_status(self):
+        status = self.get_status()
+        warmup_status = self.get_status_bit(status, LASER_STATUS_BITS.READY_TO_ENABLE)
+        if warmup_status == 1:
+            self.oasis_serial(b'\x22')
+        else:
+            self.oasis_serial(b'\x21')  
+
     """
     """
     def __init__(self, oasis_serial):
