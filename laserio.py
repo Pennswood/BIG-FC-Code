@@ -2,6 +2,7 @@ from science import laser_control
 import time
 import Adafruit_BBIO.GPIO as GPIO       # Adafruit library for safe GPIO control
 from enum import Enum
+import numpy
 """
 Task:   turn TLC to operations temperature, followed by turning on laser.
         This function can be expected to be continuously called until laser is warmed up.
@@ -55,11 +56,11 @@ class LASER_STATUS_BITS(Enum):
     HIGH_POWER_MODE = 13
     LOW_POWER_MODE = 12
     READY_TO_FIRE = 11
-    READ_TO_ENABLE = 10
+    READY_TO_ENABLE = 10
     POWER_FAILURE = 9
     ELECTRICAL_OVERTEMP = 8
     RESONATOR_OVERTEMP = 7
-    EXTERNAL_INTERLOCK = 6
+    EXTERNAL_INTERLOCK = 6      # currently not checked in any function. Discuss with science if this could ever possibly be turned on by accident.
     RESERVED_5 = 5
     RESERVED_4 = 4
     DIODE_EXTERNAL_TRIGGER = 3
@@ -68,29 +69,48 @@ class LASER_STATUS_BITS(Enum):
     LASER_ENABLED = 0
 
 # Configure the laser mode 
+# When should we check this?
 class LASER_CONFIG(Enum):
     ENERGY_MODE = 2  # High power. We barely have enough poewr to ablate with this level.
     DIODE_TRIGGER_MODE = 0  # Internal trigger, meaning we use commands to fire the laser rather than a GPIO pin.
     MODE = 1 # Single shot
 
-
-
+# declare array for the status bits (faster & uses less memory than list)
+status_bit_array = numpy.arrange(16)
 
 class Laser():
 
     # Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
+    # need to laser inactive, laser disabled, laser not ready to fire, laser not ready to enable
+    # 1) get the status
+    # 2) check relevent status bits for hazards
+    #   a) check if already warmed-up: ready-to-enable. 
+    #   b) check if beyond warm-up state: laser active, laser enabled, laser ready-to-fire
+    # 3) if safe, send the warm-up command (send power to the laser)
     def warm_up_laser(self):
         status = self.get_status()
+        SBArray = status_bit_array(status)
         self.oasis_serial(b'\x01')
-        if self.states_laser < 1: # If the laser is already warmed up + armed, it can still run this command and not change anything
-            self.states_laser = 1
-
-        while status < 1: # We don't have a signal yet
-            status = self.get_status()
-        self.oasis_serial(b'\x23') # TODO: Fix from command.
-        self.states_laser = 2
-
-        GPIO.output("P9_42", GPIO.HIGH)     # Set pin HIGH to enable 48V converter, and thus the laser
+        
+        # Laser is already off. Perfect case so we don't need to check anything else. uC is active so we have data even though 48V is off.
+        if (SBArray[LASER_STATUS_BITS.POWER_FAILURE] == 0 and SBArray[LASER_STATUS_BITS.RESONATOR_OVERTEMP] == 0 and SBArray[LASER_STATUS_BITS.ELECTRICAL_OVERTEMP] == 0 and SBArray[LASER_STATUS_BITS.LASER_ENABLED] == 0 and SBArray[LASER_STATUS_BITS.LASER_ACTIVE] == 0 and SBArray[LASER_STATUS_BITS.READY_TO_ENABLE] == 0 and SBArray[LASER_STATUS_BITS.READY_TO_FIRE] == 0):
+            GPIO.output("P9_42", GPIO.HIGH)     # Set pin HIGH to enable 48V converter, and power up the laser
+            self.oasis_serial(b'\x23')          # report that we are enabling
+        else:
+            if (SBArray[LASER_STATUS_BITS.POWER_FAILURE] == 1):
+                self.oasis_serial(b'\00') # error placeholder
+            if(SBArray[LASER_STATUS_BITS.RESONATOR_OVERTEMP] == 1):
+                self.oasis_serial(b'\00') # error placeholder
+            if(SBArray[LASER_STATUS_BITS.ELECTRICAL_OVERTEMP] == 1):
+                self.oasis_serial(b'\00') # error placeholder    
+            if(SBArray[LASER_STATUS_BITS.LASER_ENABLED] == 1):
+                self.oasis_serial(b'\00') # placeholder    
+            if(SBArray[LASER_STATUS_BITS.LASER_ACTIVE] == 1):
+                self.oasis_serial(b'\00') # placeholder
+            if(SBArray[LASER_STATUS_BITS.READY_TO_FIRE] == 1):
+                self.oasis_serial(b'\00') # placeholder 
+            if(SBArray[LASER_STATUS_BITS.READY_TO_ENABLE] == 1):
+                self.oasis_serial(b'\00') #error placeholder       
         return
     """
     """
@@ -141,11 +161,19 @@ class Laser():
         raw_status = self.laser_commands.get_status()
         return raw_status
 
-    # gets specific bits from the laser status response.
+    # gets a specific bit from the laser status response.
     # Pass it the response from the laser for status_response, and LASER_STATUS_BITS.whatever for the offset
     def get_status_bit(self, raw_status, offset):
         status_bit_value = (raw_status >> offset & 1)
         return status_bit_value
+    
+    # makes an array of status bits from the raw laser status response.
+    def get_status_array(self, raw_status):
+        for i in range (0,15):
+            status_bit_value = (raw_status >> i & 1)
+            status_bit_array[i] = status_bit_value
+            
+        return status_bit_array
     """
     """
     def __init__(self, oasis_serial):
