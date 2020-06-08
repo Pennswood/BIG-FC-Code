@@ -1,8 +1,8 @@
-import serial
-import serial.tools.list_ports
 import time
 import threading as thread
 
+import serial
+import serial.tools.list_ports
 
 class Laser:
     def __init__(self):

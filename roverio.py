@@ -1,28 +1,39 @@
+"""
+roverio.py
+Manages commands that interact with the Rover.
+Such as: pinging, status request, transferring samples.
+"""
 import subprocess
 import platform
 
 class Rover():
-
 	"""
-	Task: sends a response to the rover.
-	Input: An OasisSerial object
-	Returns: a boolean value, True for success and False for unsuccessful (line occupied, etc for debugging purposes)
+	This class really doesn't represent the Rover at all.
+	It's just a neat way to organize a bunch of methods.
+	This should really be refactored.
 	"""
 	def ping(self):
+		"""
+		Task: sends a response to the rover.
+		Input: An OasisSerial object
+		Returns: a boolean value, True for success and False for unsuccessful
+		"""
 		print("INFO: Got PING, sending PONG back")
 		self.oasis_serial.sendBytes(b'\x01')
 
-	'''
-	Task: sends the command rejected response for roverio
-	Input: int for laser status, int for spectrometer status, 21X1 boolean array for active errors, bytes for prev_cmd
-	Returns: None
-	'''
+
 	def send_cmd_rejected_response(self, laser_status, spec_status, active_errors, prev_cmd):
+		'''
+		Task: sends the command rejected response for roverio
+		Input: int for laser status, int for spectrometer status,\
+			21X1 boolean array for active errors, bytes for prev_cmd
+		Returns: None
+		'''
 		cmd_rejected_array = bytearray()
 
 		if laser_status == 0:
 			cmd_rejected_array += (b'\x20')			# Laser status | 1 byte
-		elif laser_status==1:
+		elif laser_status == 1:
 			cmd_rejected_array += (b'\x21')
 		elif laser_status == 2:
 			cmd_rejected_array += (b'\x22')
@@ -52,13 +63,12 @@ class Rover():
 		for i in cmd_rejected_array:
 			self.oasis_serial.sendBytes(i)
 		# maybe check number of bytes in array for error handling?
-		return None
 
-	"""
-	Task: sends all spectrometer data to the rover
-	Returns: integer, 0 for success, other numbers for failure to open file (for debugging purposes)
-	"""
 	def all_spectrometer_data(self):
+		"""
+		Task: sends all spectrometer data to the rover
+		Returns: integer, 0 for success, other numbers for failure to open file (for debugging purposes)
+		"""
 		self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
 		self.oasis_serial.sendString("samples/;")		# send directory name
 
@@ -77,24 +87,26 @@ class Rover():
 				debug_int = 1
 		return debug_int
 
-	'''
-	Task: Organizes all the status logs into a byte array
-	Inputs:
-			An integer laser_status
-			An integer spec_status
-			A float array temp_data
-			An int (0-255) array efdc (etch foil duty cycle)
-			A boolean array error_codes
-			A byte prev_cmd
-	Return: A bytearray of status log
-	'''
+
 	# TODO: add comments for what each sendBytes indicates and what inputs are expected
 	def get_status_array(self, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
+		'''
+		Task: Organizes all the status logs into a byte array
+		Inputs:
+				An integer laser_status
+				An integer spec_status
+				A float array temp_data
+				An int (0-255) array efdc (etch foil duty cycle)
+				A boolean array error_codes
+				A byte prev_cmd
+		Return: A bytearray of status log
+		'''
 		status_array = bytearray()
 
+		# Laser status | 1 byte
 		if laser_status == 0:
-			status_array += (b'\x20')			# Laser status | 1 byte
-		elif laser_status==1:
+			status_array += (b'\x20')
+		elif laser_status == 1:
 			status_array += (b'\x21')
 		elif laser_status == 2:
 			status_array += (b'\x22')
@@ -105,52 +117,56 @@ class Rover():
 		elif laser_status == 5:
 			status_array += (b'\x25')
 
-		if spec_status == 0:					# Spectrometer status | 1 byte
+		# Spectrometer status | 1 byte
+		if spec_status == 0:
 			status_array += (b'\x01')
 		elif spec_status == 1:
 			status_array += (b'\x02')
 		elif spec_status == 2:
 			status_array += (b'\xFC')
 
-		for f in temp_data:						# Assuming that temp_data is an array
-			s = "{:0=+4d}{:0=-3d}".format(int(f),int(abs(abs(f)-abs(int(f)))*1000))		# Temperature data | 56 bytes
+		for f in temp_data: # Assuming that temp_data is an array
+			# Encode each float into a standard sized ASCII string
+			s = "{:0=+4d}{:0=-3d}".format(int(f), int(abs(abs(f)-abs(int(f)))*1000))
 			status_array += s.encode("ascii")
 
-		for i in efdc:							# Assuming EFDC is an array of integers (0-255)
+		for i in efdc: # Assuming EFDC is an array of integers (0-255)
 			b = i.to_bytes(1, byteorder="big", signed=False)
-			status_array += b					# Etch foil duty cycle (EFDC) | 3 bytes
+			status_array += b # Etch foil duty cycle (EFDC) | 3 bytes
 
-		errors = 0								# Error codes | 3 bytes
-		for index, error in enumerate(error_codes):		# Convert bits into int to bytes
+		errors = 0 # Error codes | 3 bytes
+		for index, error in enumerate(error_codes): # Convert bits into int to bytes
 			errors += error * (2**index)
 		b = errors.to_bytes(3, byteorder="big", signed=False)
 		status_array += b
 
-		status_array += prev_cmd				# Previous command | 1 byte
+		status_array += prev_cmd # Previous command | 1 byte
 		return status_array
 
-	"""
-	Task: sends back a byte list of status data (in accordance to table III in rover commands) to the rover)
-	Inputs: A byte array of status logs
-	Returns: integer, 0 for success, other numbers for failure to send data (for debugging purposes)
-	"""
+
 	def status_request(self, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
-		self.oasis_serial.sendBytes(b'\x10')		# send nominal response status_message
+		"""
+		Task: sends back a byte list of status data (in accordance to table III in rover commands)
+		Inputs: A byte array of status logs
+		Returns: integer, 0 for success, other numbers for failure to send data
+		"""
+		self.oasis_serial.sendBytes(b'\x10') # send nominal response status_message
 		status_array = self.get_status_array(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd)
 		self.oasis_serial.sendBytes(status_array)
-		
-		if len(status_array) == 72:					# fix this when the number of thermistors are finalized, currently set to 9
-			return 0
-		else:
-			return 1
 
-	'''
-	Task: dumps all the status file information to the rover
-	Inputs: 
-	'''
+		# TODO: Why does this if statement exist?
+		if len(status_array) == 72:
+			return 0
+
+		return 1
+
 	def status_dump(self):
-		self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
-		self.oasis_serial.sendString("logs/;")			# send directory name
+		'''
+		Task: dumps all the status file information to the rover
+		Inputs:
+		'''
+		self.oasis_serial.sendBytes(b'\x14') # send nominal response directory_start
+		self.oasis_serial.sendString("logs/;") # send directory name
 
 		file_list = self.fm.list_all_logs()
 		for i in file_list:
@@ -163,18 +179,16 @@ class Rover():
 				f.close()
 			except:
 				print("ERROR: Unable to open file: " + i)
-		return None
 
-	'''
-	Task: Sends over the two most recent spectrometer data files
-	Input: 
-	Returns: 0 for successful completion, 1 for error
-	'''
 	def transfer_sample(self):
-		recent_two = self.fm.get_last_two_samples()   	# Saves last 2 spectrometer files to recent_two
-		for i in recent_two:                            # Iterating through both files
-			if i == None:
-				continue                                # Incase of empty string with no file, skip it
+		"""
+		Sends the two most recent spectrometer sample files.
+		Returns: 0 for successful completion, 1 for error
+		"""
+		recent_two = self.fm.get_last_two_samples() # Saves last 2 spectrometer files to recent_two
+		for i in recent_two: # Iterating through both files
+			if i is None:
+				continue # Incase of empty string with no file, skip it
 			try:
 				f = open(i, 'rb')
 				if f.readable():
@@ -188,8 +202,12 @@ class Rover():
 
 
 	def clock_sync(self):
+		"""
+		Called when the CLOCK SYNC command code is received. Sets the system clock to the
+		received UNIX timestamp.
+		"""
 		t = self.oasis_serial.readSignedInteger()
-		if t == None:
+		if t is None:
 			print("WARNING: Reading timestamp from Rover timed out!")
 			return False
 
@@ -197,16 +215,16 @@ class Rover():
 		if not platform.system() == "Linux":
 			print("WARNING: Not running actual command because not on Linux system...")
 			return True
-		else:
-			try:
-				subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True, timeout=5)
-				print("INFO: Set system time to: " + str(t))
 
-				self.oasis_serial.sendBytes(b'\x01')
-				return True
-			except:
-				print("ERROR: The set time command failed!")
-				return False
+		try:
+			subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True, timeout=5)
+			print("INFO: Set system time to: " + str(t))
+
+			self.oasis_serial.sendBytes(b'\x01')
+			return True
+		except:
+			print("ERROR: The set time command failed!")
+			return False
 
 
 	def __init__(self, oasis_serial, filemanager):

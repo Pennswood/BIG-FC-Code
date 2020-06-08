@@ -1,15 +1,6 @@
-import pickle
-import os
-import time
-from pathlib import Path
-
-# How many status logs we can fit into a single log file
-LOGS_PER_FILE = 200
-
-# Length (in bytes) of a single status log
-STATUS_SIZE = 75
-
 """
+file_manager.py
+Logging, saving spectrometer samples
 If you need to save a file please use/call functions here
 
 Basic file hierarchy for Oasis:
@@ -33,6 +24,18 @@ manifest.log Format
 		This means that if two files have the same timestamp, the file with a lower file # was taken first.
 
 """
+
+import pickle
+import os
+import time
+from pathlib import Path
+
+# How many status logs we can fit into a single log file
+LOGS_PER_FILE = 200
+
+# Length (in bytes) of a single status log
+STATUS_SIZE = 75
+
 class FileManager():
 	"""
 	Task: After the spectrometer finishes sampling, it will send the data to this function to be saved.
@@ -69,7 +72,7 @@ class FileManager():
 			return [None] * 2
 		elif len(l) == 1:
 			l.append(None) # Just shove a None to the end
-			
+
 		return l[0:2] # return the most recent, and next oldest spectrometer file paths, in that order
 
 	"""
@@ -80,10 +83,10 @@ class FileManager():
 	"""
 	def list_all_samples(self):
 		return sorted(self.samples_directory_path.glob("*.bin"))
-		
+
 	def list_all_logs(self):
 		return sorted(self.log_directory_path.glob("*.statlog"))
-		
+
 	def get_latest_log_file(self):
 		l = sorted(self.log_directory_path.glob("*.statlog"), reverse=True)
 		if len(l) == 0:
@@ -102,7 +105,7 @@ class FileManager():
 		data += status_array
 		data += log_reason.to_bytes(1, byteorder="big", signed=False)
 		self.log_file.write(data)
-		
+
 		if self.current_log_file_path.stat().st_size > LOGS_PER_FILE * STATUS_SIZE:
 			self.log_index += 1
 			self.current_log_file_path = self.log_directory_path / (str(self.log_index) + ".statlog")
@@ -117,7 +120,7 @@ class FileManager():
 				sd_path.mkdir(parents=True)
 			except:
 				print("ERROR: Failed to create SD_PATH directory " + str(sd_path))
-		
+
 		if not sd_path.is_dir():
 			print("ERROR: SD_PATH " + str(sd_path) + " is not a directory! Did you forget to mount or insert the SD card?")
 			# TODO: Switch over to flash only
@@ -129,11 +132,11 @@ class FileManager():
 				flash_path.mkdir(parents=True)
 			except:
 				print("ERROR: Failed to create FLASH_PATH directory " + str(flash_path))
-		
+
 		if not flash_path.is_dir():
 			print("ERROR: FLASH_PATH " + str(flash_path) + " is not a directory!")
 			# TODO: Uh oh, this is like super bad... how do we even respond to this?
-		
+
 		# Set up the paths to the directories we will be working with
 		self.samples_directory_path = self.sd_path / "samples/"
 		if not self.samples_directory_path.exists():
@@ -143,7 +146,7 @@ class FileManager():
 			except:
 				print("ERROR: Failed to create samples directory " + str(self.samples_directory_path))
 
-		
+
 		self.log_directory_path = self.sd_path / "logs/"
 		if not self.log_directory_path.exists():
 			print("WARNING: Log directory " + str(self.log_directory_path) + " does not exist! Attempting to create...")
@@ -152,7 +155,7 @@ class FileManager():
 			except:
 				print("ERROR: Failed to create log directory " + str(self.log_directory_path))
 
-		
+
 		self.debug_directory_path = self.sd_path / "debug/"
 		if not self.debug_directory_path.exists():
 			print("WARNING: debug directory " + str(self.debug_directory_path) + " does not exist! Attempting to create...")
@@ -175,5 +178,5 @@ class FileManager():
 				self.current_log_file_path = self.log_directory_path / (str(self.log_index) + ".statlog")
 
 		self.log_file = self.current_log_file_path.open("ab", buffering=STATUS_SIZE)
-		
+
 		print("INFO: FileManager initialized.")
