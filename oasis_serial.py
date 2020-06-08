@@ -3,13 +3,13 @@ oasis_serial.py
 Module for connecting to either physical serial lines or "virtual" serial lines (UDP sockets) for debugging.
 Handles low level reading of integers, strings, floats, files.
 """
-import serial
 import socket
 import os
 import zlib
 import hashlib
 import threading
 import socketserver
+import serial
 
 BUFFER_SIZE = 1024
 
@@ -18,12 +18,19 @@ INTEGER_SIZE = 4
 
 # Unless Tyler tells you to, DONT touch this file. If you are getting errors in your code its probably because your code is wrong :) If you really think it's this code, message me
 
-def DebugUDPHandlerFactory(oserial):
+def _debug_udp_handler_factory(oserial):
+	"""Class factory for DebugUDPHandler so that we can pass in an OasisSerial object to the object."""
+
 	class DebugUDPHandler(socketserver.BaseRequestHandler):
-		def setup(self):	# This is disgusting that it actually works, but Python was designed to do this so whatever
+		"""Callback for when the UDP socket server receives data"""
+
+		def setup(self):
+			"""Called after initialization, this is where we make sure the object has access to
+			an OasisSerial object, so that it can fill its rx_buffer."""
 			self.oasis_serial = oserial
 
 		def handle(self):
+			"""We got data from our socket, fill the rx buffer."""
 			self.data = self.request[0]
 
 			self.oasis_serial.rx_buffer_lock.acquire()
@@ -33,17 +40,23 @@ def DebugUDPHandlerFactory(oserial):
 			self.oasis_serial.rx_buffer_lock.release()
 	return DebugUDPHandler
 
-def timeoutTimer(oserial):
+def _debug_udp_timeout_timer(oserial):
+	"""Callback for when reading bytes from debug serial input timesout"""
 	print("Timeout")
 	oserial.read_timeout = True
 
 class OasisSerial():
-	def in_waiting(self):
+	"""Class that represents a serial connection.
+	Passing debug_mode=True will cause this to open up a UDP
+	server to receive debug serial data, and will write all
+	serial data to a UDP port as well"""
+
+	def inWaiting(self):
 		if self.debug:
 			self.rx_buffer_lock.acquire()
-			c = len(self.rx_buffer)
+			count = len(self.rx_buffer)
 			self.rx_buffer_lock.release()
-			return c
+			return count
 		else:
 			return self.serial_connection.in_waiting
 
@@ -53,41 +66,42 @@ class OasisSerial():
 		else:
 			self.serial_connection.write(b)
 
-	#Sends a signed (positive or negative), big endian integer
 	def sendInteger(self, i, size=INTEGER_SIZE):
+		"""Sends a signed (positive or negative), big endian integer"""
 		b = i.to_bytes(size, byteorder="big", signed=True)
 		self.sendBytes(b)
 
-	#Sends a signed (positive or negative), big endian integer
 	def sendSignedInteger(self, i, size=INTEGER_SIZE):
+		"""Sends a signed (positive or negative), big endian integer"""
 		b = i.to_bytes(size, byteorder="big", signed=True)
 		self.sendBytes(b)
 
-	#Sends an unsigned (positive only), big endian integer
 	def sendUnsignedInteger(self, i, size=INTEGER_SIZE):
+		"""Sends an unsigned (positive only), big endian integer"""
 		b = i.to_bytes(size, byteorder="big", signed=False)
 		self.sendBytes(b)
 
-	#This is our "ASCII encoded float" way of sending floats. This may be changed in the future.
 	def sendFloat(self, f):
-		s = "{:0=+4d}{:0=-3d}".format(int(f),int(abs(abs(f)-abs(int(f)))*1000)) # Please don't touch this, it took like an hour to make. Thank you.
+		"""This is our "ASCII encoded float" way of sending floats. This may be changed in the future."""
+		# Please don't touch this, it took like an hour to make. Thank you.
+		s = "{:0=+4d}{:0=-3d}".format(int(f), int(abs(abs(f)-abs(int(f)))*1000))
 		self.sendString(s)
 
-	#Sends an ASCII string
 	def sendString(self, s):
+		"""Sends an ASCII string"""
 		self.sendBytes(s.encode('ascii'))
 
-	# Returns a single byte read from the serial connection. Returns None if timed out reading the byte
 	def readByte(self):
+		"""Returns a single byte read from the serial connection. Returns None if timed out reading the byte"""
 		b, timeout = self.readBytes(1)
 		if timeout:
 			return None
 		return b
 
-	# Returns a bytearray of length `count` read from the serial connection and a boolean value saying whether or not the read timed out
-	def readBytes(self, count): # Default to 5 seconds of waiting before timing out
+	def readBytes(self, count):
+		"""Returns a bytearray of length `count` read from the serial connection and a boolean value saying whether or not the read timed out"""
 		if self.debug:
-			timeout_timer = threading.Timer(5.0, timeoutTimer, (self,))
+			timeout_timer = threading.Timer(5.0, _debug_udp_timeout_timer, (self,)) # Default to 5 seconds of waiting before timing out
 			self.read_timeout = False
 			timeout_timer.start()
 			a = bytearray()
@@ -99,47 +113,49 @@ class OasisSerial():
 			if not self.read_timeout:
 				timeout_timer.cancel()
 			return a, self.read_timeout
-		else:
-			b = self.serial_connection.read(count)
-			if len(b) < count: # Reading the bytes from the serial connection timed out
-				return None, True
 
-	# Returns a signed (positive or negative) integer read from the serial connection
+		b = self.serial_connection.read(count)
+		if len(b) < count: # Reading the bytes from the serial connection timed out
+			return None, True
+
 	def readSignedInteger(self, size=INTEGER_SIZE):
+		"""Returns a signed (positive or negative) integer read from the serial connection"""
 		b, timeout = self.readBytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 
-	# Returns a signed (positive only) integer read from the serial connection
 	def readUnsignedInteger(self, size=INTEGER_SIZE):
+		"""Returns a signed (positive only) integer read from the serial connection"""
 		b, timeout = self.readBytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=False)
 
-	# Returns a signed (positive or negative) integer read from the serial connection
 	def readInteger(self, size=INTEGER_SIZE):
+		"""Returns a signed (positive or negative) integer read from the serial connection"""
 		b, timeout = self.readBytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 
-	# Returns a float read from the serial connection that was represented in our special ASCII encoded format
-	def read_float(self):
+	def readFloat(self):
+		"""Returns a float read from the serial connection that was represented in our special ASCII encoded format"""
 		b, timeout = bytearray(self.readBytes(7))
 		if timeout:
 			return None
 		s = b.decode("ascii")
-		l = int(s[1:4])
-		r = int(s[4:7])
-		f = float(l) + (0.001 * float(r))
+		left_side = int(s[1:4])
+		right_side = int(s[4:7])
+		f = float(left_side) + (0.001 * float(right_side))
 		if s[0] == '-':
 			f = f * -1.0
 		return f
 
-	# Transmits a file through serial, using error correction and packetization
 	def sendFile(self, f, filename):
+		"""
+		Transmits a file through serial, using error correction and packetization
+		"""
 		if self.sending_file:
 			print("ERROR] Cannot send mutliple files at once!")
 			return False
@@ -178,21 +194,21 @@ class OasisSerial():
 					d = self.readByte()
 					if d.decode('ascii') == ";": #possible bug if we never receive a ; character
 						break
-					else:
-						check_filename += d.decode('ascii')
-				if not check_filename == filename:
+
+					check_filename += d.decode('ascii')
+				if check_filename != filename:
 					reply_ok = False
 				check_size = self.readUnsignedInteger(size=4)
-				if not file_size == check_size:
+				if file_size != check_size:
 					reply_ok = False
 				check_p_size = self.readUnsignedInteger(size=2)
-				if not check_p_size == packet_size:
+				if check_p_size != packet_size:
 					reply_ok = False
 				check_digest, tout = self.readBytes(16)
-				if not check_digest == file_hash:
+				if check_digest != file_hash:
 					reply_ok = False
 				a = self.readByte()
-				if not a == b'\x2a':
+				if a != b'\x2a':
 					reply_ok = False
 
 				if reply_ok:
@@ -235,12 +251,12 @@ class OasisSerial():
 					print("Got ACK " + str(ack_packet_number))
 					if ack_hash == packet_crc and ack_packet_number == packet_number: # if the ack's crc32 hash matches and the packet number matches, move on to the next packet
 						break
-					else:
-						print("INFO: ACK packet's crc32 does not match ours. Resending packet.")
+
+					print("INFO: ACK packet's crc32 does not match ours. Resending packet.")
 				elif d == b'\x77': # NACK
 					nack_packet_number = self.readUnsignedInteger(size=2)
 					print("Got NACK " + str(nack_packet_number))
-					if not nack_packet_number == packet_number:
+					if nack_packet_number != packet_number:
 						print("NACK says packet numbers don't match! Nothing we can really do other than resend data packet...")
 
 				retry_count += 1
@@ -250,7 +266,10 @@ class OasisSerial():
 		print("Done sending file.")
 		self.sending_file = False
 
-	def receiveFile(self,fname="None"):
+	def receiveFile(self, fname="None"):
+		"""
+		Prepares to receive a file. Mainly used in dummy_rover.py
+		"""
 		if self.sending_file or self.receiving_file:
 			print("ERROR] Unable to receive multiple files or receive while sending!")
 			return False
@@ -259,19 +278,19 @@ class OasisSerial():
 		print("Waiting for start packet...")
 
 		rx_filename = ''
-		file_size = 0			# size of the file we are sending, in bytes
-		packet_size = 0			# size of the data contained in each packet we receive
-		packet_number = 0		# the current packet number
+		file_size = 0 # size of the file we are sending, in bytes
+		packet_size = 0	# size of the data contained in each packet we receive
+		packet_number = 0 # the current packet number
 		last_packet_number = -1 # the number of the laster received packet, ensures that we are receiving in sequence
-		sent_sack = False		# keeps track of whether or not we acknowledged the start packet
+		sent_sack = False # keeps track of whether or not we acknowledged the start packet
 
-		b=b'' # Control Byte read
+		b = b'' # Control Byte read
 
 		# First we will loop until we get a start packet
 		done = False
 		while not done: # TODO: Replace this with a timeout
-			while self.in_waiting() == 0:
-				b=b'' # do nothing while we wait for bytes to come in
+			while self.inWaiting() == 0:
+				b = b'' # do nothing while we wait for bytes to come in
 
 			b = self.readByte()
 
@@ -282,8 +301,8 @@ class OasisSerial():
 					d = self.readByte()
 					if d.decode('ascii') == ";":
 						break
-					else:
-						rx_filename += d.decode('ascii')
+
+					rx_filename += d.decode('ascii')
 				print("rx_filename is: " + rx_filename)
 				file_size = self.readUnsignedInteger(size=4)
 				packet_size = self.readUnsignedInteger(size=2)
@@ -361,18 +380,18 @@ class OasisSerial():
 			else:
 				print("WARNING: Got command byte other than 0x55 during file transfer mode! Ignoring...")
 
-			while self.in_waiting() == 0:
-				b=b'' # do nothing while we wait for bytes to come in
+			while self.inWaiting() == 0:
+				b = b'' # do nothing while we wait for bytes to come in
 			b = self.readByte()
 
 		self.receiving_file = False
 
-	"""
-	When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
-	debug_rx_port will be the UDP port that we will listen to for incoming connections
-	debug_tx_port will be the UDP port that we will connect to when sending bytes
-	"""
 	def __init__(self, serial_device, baud_rate=9600, debug_mode=False, debug_rx_port=0, debug_tx_port=0, rx_print_prefix=None):
+		"""
+		When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
+		debug_rx_port will be the UDP port that we will listen to for incoming connections
+		debug_tx_port will be the UDP port that we will connect to when sending bytes
+		"""
 		self.debug = debug_mode
 		self.read_timeout = False
 		self.rx_print_prefix = rx_print_prefix
@@ -399,7 +418,7 @@ class OasisSerial():
 
 			self.rx_buffer = bytearray()
 			self.rx_buffer_lock = threading.Lock()
-			self.rx_serv = socketserver.UDPServer(("localhost", debug_rx_port), DebugUDPHandlerFactory(self))
+			self.rx_serv = socketserver.UDPServer(("localhost", debug_rx_port), _debug_udp_handler_factory(self))
 			self.rx_thread = threading.Thread(target=self.rx_serv.serve_forever)
 			self.rx_thread.daemon = True
 			self.rx_thread.start()
