@@ -5,9 +5,7 @@ Handling communication and data processing with the Thermal Logic Controller (TL
 """
 import threading
 import time
-
-THERMISTER_COUNT = 9
-DUTY_CYCLE_COUNT = 1
+from oasis_config import THERMISTER_COUNT, DUTY_CYCLE_COUNT
 
 def read_tlc_stream(tlc):
 	"""Thread loop that continuously reads the stream of serial data from the TLC"""

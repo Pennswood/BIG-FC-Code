@@ -33,11 +33,18 @@ second delay between when the laser is first enabled and the laser is able to fi
 3) Confirm power mode with Science team
 
 """
-from science import laser_control
-import time
-import Adafruit_BBIO.GPIO as GPIO		# Adafruit library for safe GPIO control
 from enum import IntEnum, Enum
+import time
 import threading
+
+from oasis_config import DEBUG_MODE
+
+if not DEBUG_MODE:
+	import Adafruit_BBIO.GPIO as GPIO # Adafruit library for safe GPIO control
+else:
+	from debug import DummyGPIO as GPIO
+
+from science import laser_control
 import oasis_serial
 
 

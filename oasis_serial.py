@@ -11,10 +11,7 @@ import threading
 import socketserver
 import serial
 
-BUFFER_SIZE = 1024
-
-# Number of bytes that an integer (signed or unsigned) takes up.
-INTEGER_SIZE = 4
+from oasis_config import DEBUG_MODE, DEBUG_BUFFER_SIZE, INTEGER_SIZE
 
 # Unless Tyler tells you to, DONT touch this file. If you are getting errors in your code its probably because your code is wrong :) If you really think it's this code, message me
 

@@ -17,26 +17,9 @@ import error_checking
 import debug
 from tlc import TLC
 
-# File hierarchy constants
-SD_PATH = Path("/mnt/SD/") # Path to where the SD card is mounted
-DEBUG_SD_PATH = Path.cwd() / "debug_fs" / "SD/"
-
-FLASH_PATH = Path("/home/debian/") # Path to where to store files on the flash
-DEBUG_FLASH_PATH = Path.cwd() / "debug_fs" / "flash/"
-
-# Amount of time (seconds) between writing to status log file periodically
-LOGGING_INTERVAL = 1
-
-# Rover IO constants
-# The two value below are for debugging purposes only, they mean nothing to the TLC or BBB
-ROVER_TX_PORT = 420  # Emulate sending to the Rover on this port
-ROVER_RX_PORT = 421  # Emulate receiving from the Rover
-
-TLC_TX_PORT = 320  # Emulate sending to the TLC on this port
-TLC_RX_PORT = 321  # Emulate receiving from the TLC on this port
-
-# Set this to False when testing on the Beagle Bone Black
-DEBUG_MODE = True
+from oasis_config import ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT,\
+	TLC_TX_PORT, DEBUG_MODE, SD_PATH, DEBUG_FLASH_PATH, FLASH_PATH,\
+	DEBUG_SD_PATH, LOGGING_INTERVAL, ROVER_BAUD_RATE, TLC_BAUD_RATE
 
 # States:
 files_transferring = False
