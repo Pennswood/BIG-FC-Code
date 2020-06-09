@@ -43,9 +43,9 @@ def main_loop():
 				files_transferring = False
 
 	if files_transferring: # RS422: Check if still in use
-		if not files_transfer_thread.is_alive():  # finished
+		if not files_transfer_thread.is_alive(): # finished
 			files_transferring = False
-	command = rover_serial.readByte()
+	command = rover_serial.read_byte()
 
 	# Adds the command into the status list
 	past_two_commands.insert(0, command)

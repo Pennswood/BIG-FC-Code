@@ -63,8 +63,8 @@ class LASER_STATE(Enum):
 
 # Define the locations of the status bit
 class LASER_STATUS_BITS(IntEnum):
-	SPARE = 15
-	SPARE = 14
+	SPARE_1 = 15
+	SPARE_2 = 14
 	HIGH_POWER_MODE = 13
 	LOW_POWER_MODE = 12
 	READY_TO_FIRE = 11

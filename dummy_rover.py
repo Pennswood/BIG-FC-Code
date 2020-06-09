@@ -4,16 +4,9 @@ import threading
 import time
 import random
 
+from oasis_config import THERMISTER_COUNT, DUTY_CYCLE_COUNT, DEBUG_BUFFER_SIZE, ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT, TLC_TX_PORT
+
 IP_ADDRESS = "127.0.0.1"
-ROVER_RX_PORT = 420 # Emulate receiving from the BBB on this port (we are the Rover)
-ROVER_TX_PORT = 421 # Emulate sending to the BBB on this port
-
-TLC_RX_PORT = 320 # Emulate receiving from the BBB on this port (we are the TLC)
-TLC_TX_PORT = 321 # Emulate sending to the BBB on this port
-
-BUFFER_SIZE = 1024
-
-THERMISTER_COUNT = 9 # Used to emulate the TLC stream
 
 def print_received(oserial, prefix):
 	while True:
@@ -29,18 +22,18 @@ def print_received(oserial, prefix):
 def emulate_tlc_stream(tlc_serial):
 	global THERMISTER_COUNT
 	while True:
-		tlc_serial.sendString("|")
+		tlc_serial.send_string("|")
 		for i in range(THERMISTER_COUNT):
-			tlc_serial.sendString(str(random.random() * 400)[0:6] + ",") # send randomized thermister values
-		tlc_serial.sendString(str(random.random())[0:6]) # send randomized duty cycle value
+			tlc_serial.send_string(str(random.random() * 400)[0:6] + ",") # send randomized thermister values
+		tlc_serial.send_string(str(random.random())[0:6]) # send randomized duty cycle value
 		time.sleep(1)
 		
 def main():
 	global ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT
 	print("Setting up UDP sockets...")
-	rover_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="ROVER RX] ")
+	rover_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=ROVER_RX_PORT, debug_rx_port=ROVER_TX_PORT, rx_print_prefix="ROVER RX] ")
 
-	tlc_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT, rx_print_prefix="TLC RX] ")
+	tlc_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=TLC_RX_PORT, debug_rx_port=TLC_TX_PORT, rx_print_prefix="TLC RX] ")
 	
 	tlc_stream = threading.Thread(target=emulate_tlc_stream, args=(tlc_serial,))
 	tlc_stream.daemon = True
@@ -68,28 +61,28 @@ def main():
 		elif command == ":exit" or command == ":quit":
 			done = True
 		elif command == ":ping":
-			rover_serial.sendBytes(b'\x01')
+			rover_serial.send_bytes(b'\x01')
 		elif command == ":status":
-			rover_serial.sendBytes(b'\x0A')
+			rover_serial.send_bytes(b'\x0A')
 		elif command == ":clk_sync":
-			rover_serial.sendBytes(b'\x0E')
-			rover_serial.sendSignedInteger(int(time.time()))
+			rover_serial.send_bytes(b'\x0E')
+			rover_serial.send_signed_integer(int(time.time()))
 		elif command == ":send_ascii":
-			rover_serial.sendString(input("Input string to send and press enter:"))
+			rover_serial.send_string(input("Input string to send and press enter:"))
 		elif command == ":send_sint":
-			rover_serial.sendSignedInteger(int(input("Input integer: ")))
+			rover_serial.send_signed_integer(int(input("Input integer: ")))
 		elif command == ":send_uint":
-			rover_serial.sendUnsignedInteger(int(input("Input integer: ")))
+			rover_serial.send_unsigned_integer(int(input("Input integer: ")))
 		elif command == ":send_bytes":
-			rover_serial.sendBytes(bytes.fromhex(input("Input bytes: ")))
+			rover_serial.send_bytes(bytes.fromhex(input("Input bytes: ")))
 		elif command == ":send_float":
-			rover_serial.sendFloat(float(input("Input float: ")))
+			rover_serial.send_float(float(input("Input float: ")))
 		elif command == ":tx_file":
 			fname = input("File to send:")
 			f = open(fname, "rb")
-			rover_serial.sendFile(f, fname)
+			rover_serial.send_file(f, fname)
 		elif command == ":rx_file":
 			fname = input("Location to save received file:")
-			rover_serial.receiveFile(fname=fname)
+			rover_serial.receive_file(fname=fname)
 		time.sleep(0.5)
 main()

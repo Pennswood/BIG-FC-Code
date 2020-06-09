@@ -30,11 +30,7 @@ import os
 import time
 from pathlib import Path
 
-# How many status logs we can fit into a single log file
-LOGS_PER_FILE = 200
-
-# Length (in bytes) of a single status log
-STATUS_SIZE = 75
+from oasis_config import LOGS_PER_FILE, STATUS_SIZE
 
 class FileManager():
 	"""

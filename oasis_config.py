@@ -1,10 +1,10 @@
 """
 config.py
 This module holds all global constants that may change frequently.
-DO NOT IMPORT ANY OTHER MODULES FROM HERE.
 This is meant to be a configuration file that any script can pull from.
 It is to be lightweight and contain only constants.
 """
+from pathlib import Path
 
 # Thermal Logic Controller
 # Number of thermisters being used in the payload
@@ -24,6 +24,15 @@ DEBUG_FLASH_PATH = Path.cwd() / "debug_fs" / "flash/"
 # Logging
 # Amount of time (seconds) between writing to status log file periodically
 LOGGING_INTERVAL = 1
+
+# How many status logs we can fit into a single log file
+LOGS_PER_FILE = 200
+
+# Length (in bytes) of a single status log
+# Calculate size of status log entry: timestamp (4), thermisters (7 bytes each)
+#heaters (1 byte each), laser status (1 byte), spectrometer status (1 byte)
+#error flags (3 bytes), previous command (1 byte), log reason (1 byte)
+STATUS_SIZE = 4 + (7 * THERMISTER_COUNT) + DUTY_CYCLE_COUNT + 1 + 1 + 3 + 1 + 1
 
 # Serial Communication
 # Number of bytes that an integer (signed or unsigned) takes up.

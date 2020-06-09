@@ -48,54 +48,54 @@ class OasisSerial():
 	server to receive debug serial data, and will write all
 	serial data to a UDP port as well"""
 
-	def inWaiting(self):
+	def in_waiting(self):
 		if self.debug:
 			self.rx_buffer_lock.acquire()
 			count = len(self.rx_buffer)
 			self.rx_buffer_lock.release()
 			return count
-		else:
-			return self.serial_connection.in_waiting
 
-	def sendBytes(self, b):
+		return self.serial_connection.in_waiting
+
+	def send_bytes(self, b):
 		if self.debug:
 			self.udp_tx_socket.sendto(b, ("localhost", self.tx_port))
 		else:
 			self.serial_connection.write(b)
 
-	def sendInteger(self, i, size=INTEGER_SIZE):
+	def send_integer(self, i, size=INTEGER_SIZE):
 		"""Sends a signed (positive or negative), big endian integer"""
 		b = i.to_bytes(size, byteorder="big", signed=True)
-		self.sendBytes(b)
+		self.send_bytes(b)
 
-	def sendSignedInteger(self, i, size=INTEGER_SIZE):
+	def send_signed_integer(self, i, size=INTEGER_SIZE):
 		"""Sends a signed (positive or negative), big endian integer"""
 		b = i.to_bytes(size, byteorder="big", signed=True)
-		self.sendBytes(b)
+		self.send_bytes(b)
 
-	def sendUnsignedInteger(self, i, size=INTEGER_SIZE):
+	def send_unsigned_integer(self, i, size=INTEGER_SIZE):
 		"""Sends an unsigned (positive only), big endian integer"""
 		b = i.to_bytes(size, byteorder="big", signed=False)
-		self.sendBytes(b)
+		self.send_bytes(b)
 
-	def sendFloat(self, f):
+	def send_float(self, f):
 		"""This is our "ASCII encoded float" way of sending floats. This may be changed in the future."""
 		# Please don't touch this, it took like an hour to make. Thank you.
 		s = "{:0=+4d}{:0=-3d}".format(int(f), int(abs(abs(f)-abs(int(f)))*1000))
-		self.sendString(s)
+		self.send_string(s)
 
-	def sendString(self, s):
+	def send_string(self, s):
 		"""Sends an ASCII string"""
-		self.sendBytes(s.encode('ascii'))
+		self.send_bytes(s.encode('ascii'))
 
-	def readByte(self):
+	def read_byte(self):
 		"""Returns a single byte read from the serial connection. Returns None if timed out reading the byte"""
-		b, timeout = self.readBytes(1)
+		b, timeout = self.read_bytes(1)
 		if timeout:
 			return None
 		return b
 
-	def readBytes(self, count):
+	def read_bytes(self, count):
 		"""Returns a bytearray of length `count` read from the serial connection and a boolean value saying whether or not the read timed out"""
 		if self.debug:
 			timeout_timer = threading.Timer(5.0, _debug_udp_timeout_timer, (self,)) # Default to 5 seconds of waiting before timing out
@@ -115,30 +115,30 @@ class OasisSerial():
 		if len(b) < count: # Reading the bytes from the serial connection timed out
 			return None, True
 
-	def readSignedInteger(self, size=INTEGER_SIZE):
+	def read_signed_integer(self, size=INTEGER_SIZE):
 		"""Returns a signed (positive or negative) integer read from the serial connection"""
-		b, timeout = self.readBytes(size)
+		b, timeout = self.read_bytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 
-	def readUnsignedInteger(self, size=INTEGER_SIZE):
+	def read_unsigned_integer(self, size=INTEGER_SIZE):
 		"""Returns a signed (positive only) integer read from the serial connection"""
-		b, timeout = self.readBytes(size)
+		b, timeout = self.read_bytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=False)
 
-	def readInteger(self, size=INTEGER_SIZE):
+	def read_integer(self, size=INTEGER_SIZE):
 		"""Returns a signed (positive or negative) integer read from the serial connection"""
-		b, timeout = self.readBytes(size)
+		b, timeout = self.read_bytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 
-	def readFloat(self):
+	def read_float(self):
 		"""Returns a float read from the serial connection that was represented in our special ASCII encoded format"""
-		b, timeout = bytearray(self.readBytes(7))
+		b, timeout = bytearray(self.read_bytes(7))
 		if timeout:
 			return None
 		s = b.decode("ascii")
@@ -149,7 +149,7 @@ class OasisSerial():
 			f = f * -1.0
 		return f
 
-	def sendFile(self, f, filename):
+	def send_file(self, f, filename):
 		"""
 		Transmits a file through serial, using error correction and packetization
 		"""
@@ -176,35 +176,35 @@ class OasisSerial():
 		f.seek(0)
 
 		while retry_count < 5: # We will only resend the start packet 5 times before giving up on transmission
-			self.sendBytes(b'\x12') # magic command code
-			self.sendString(filename + ";") # filename terminated by semicolon
-			self.sendUnsignedInteger(file_size, size=4) # send file size
-			self.sendUnsignedInteger(packet_size, size=2) # send the number of bytes that will be contained in each packet
-			self.sendBytes(file_hash) # send the 16 bytes of the md5 digest
-			self.sendUnsignedInteger(retry_count, size=1) # send the number of times that we have tried to send the start packet
+			self.send_bytes(b'\x12') # magic command code
+			self.send_string(filename + ";") # filename terminated by semicolon
+			self.send_unsigned_integer(file_size, size=4) # send file size
+			self.send_unsigned_integer(packet_size, size=2) # send the number of bytes that will be contained in each packet
+			self.send_bytes(file_hash) # send the 16 bytes of the md5 digest
+			self.send_unsigned_integer(retry_count, size=1) # send the number of times that we have tried to send the start packet
 
-			d = self.readByte()
+			d = self.read_byte()
 			if d == b'\x1a':
 				reply_ok = True
 				check_filename = ''
 				while True:
-					d = self.readByte()
+					d = self.read_byte()
 					if d.decode('ascii') == ";": #possible bug if we never receive a ; character
 						break
 
 					check_filename += d.decode('ascii')
 				if check_filename != filename:
 					reply_ok = False
-				check_size = self.readUnsignedInteger(size=4)
+				check_size = self.read_unsigned_integer(size=4)
 				if file_size != check_size:
 					reply_ok = False
-				check_p_size = self.readUnsignedInteger(size=2)
+				check_p_size = self.read_unsigned_integer(size=2)
 				if check_p_size != packet_size:
 					reply_ok = False
-				check_digest, tout = self.readBytes(16)
+				check_digest, tout = self.read_bytes(16)
 				if check_digest != file_hash:
 					reply_ok = False
-				a = self.readByte()
+				a = self.read_byte()
 				if a != b'\x2a':
 					reply_ok = False
 
@@ -235,23 +235,23 @@ class OasisSerial():
 
 			retry_count = 0
 			while retry_count < 10:
-				self.sendBytes(b'\x55')
-				self.sendUnsignedInteger(retry_count, size=1)
-				self.sendUnsignedInteger(packet_number, size=2)
-				self.sendUnsignedInteger(packet_crc, size=4)
-				self.sendBytes(data)
+				self.send_bytes(b'\x55')
+				self.send_unsigned_integer(retry_count, size=1)
+				self.send_unsigned_integer(packet_number, size=2)
+				self.send_unsigned_integer(packet_crc, size=4)
+				self.send_bytes(data)
 
-				d = self.readByte()
+				d = self.read_byte()
 				if d == b'\x60': # ACK
-					ack_packet_number = self.readUnsignedInteger(size=2)
-					ack_hash = self.readUnsignedInteger(size=4)
+					ack_packet_number = self.read_unsigned_integer(size=2)
+					ack_hash = self.read_unsigned_integer(size=4)
 					print("Got ACK " + str(ack_packet_number))
 					if ack_hash == packet_crc and ack_packet_number == packet_number: # if the ack's crc32 hash matches and the packet number matches, move on to the next packet
 						break
 
 					print("INFO: ACK packet's crc32 does not match ours. Resending packet.")
 				elif d == b'\x77': # NACK
-					nack_packet_number = self.readUnsignedInteger(size=2)
+					nack_packet_number = self.read_unsigned_integer(size=2)
 					print("Got NACK " + str(nack_packet_number))
 					if nack_packet_number != packet_number:
 						print("NACK says packet numbers don't match! Nothing we can really do other than resend data packet...")
@@ -263,7 +263,7 @@ class OasisSerial():
 		print("Done sending file.")
 		self.sending_file = False
 
-	def receiveFile(self, fname="None"):
+	def receive_file(self, fname="None"):
 		"""
 		Prepares to receive a file. Mainly used in dummy_rover.py
 		"""
@@ -289,34 +289,34 @@ class OasisSerial():
 			while self.inWaiting() == 0:
 				b = b'' # do nothing while we wait for bytes to come in
 
-			b = self.readByte()
+			b = self.read_byte()
 
 			if b == b'\x12':
 				print("Got start file control byte...")
 				rx_filename = ''
 				while True:
-					d = self.readByte()
+					d = self.read_byte()
 					if d.decode('ascii') == ";":
 						break
 
 					rx_filename += d.decode('ascii')
 				print("rx_filename is: " + rx_filename)
-				file_size = self.readUnsignedInteger(size=4)
-				packet_size = self.readUnsignedInteger(size=2)
-				digest, timeout = self.readBytes(16)
+				file_size = self.read_unsigned_integer(size=4)
+				packet_size = self.read_unsigned_integer(size=2)
+				digest, timeout = self.read_bytes(16)
 				if timeout:
 					print("Timed out while reading the MD5 digest for the file!")
 					self.receiving_file = False
 					return False
-				retry_number = self.readByte()
+				retry_number = self.read_byte()
 
 				# Send SACK
-				self.sendBytes(b'\x1A')
-				self.sendString(rx_filename + ";")
-				self.sendUnsignedInteger(file_size)
-				self.sendUnsignedInteger(packet_size, size=2)
-				self.sendBytes(digest)
-				self.sendBytes(b'\x2A')
+				self.send_bytes(b'\x1A')
+				self.send_string(rx_filename + ";")
+				self.send_unsigned_integer(file_size)
+				self.send_unsigned_integer(packet_size, size=2)
+				self.send_bytes(digest)
+				self.send_bytes(b'\x2A')
 				sent_sack = True
 				print("Sent SACK")
 			elif sent_sack and b == b'\x55':
@@ -332,11 +332,11 @@ class OasisSerial():
 
 		while to_read > 0:
 			if b == b'\x55': # data packet
-				retry_number = self.readByte()
-				packet_number = self.readUnsignedInteger(size=2)
+				retry_number = self.read_byte()
+				packet_number = self.read_unsigned_integer(size=2)
 
-				fec = self.readUnsignedInteger(size=4) # read the crc32 hash they sent for the packet data
-				data, tout = self.readBytes(packet_size)
+				fec = self.read_unsigned_integer(size=4) # read the crc32 hash they sent for the packet data
+				data, tout = self.read_bytes(packet_size)
 
 				number_ok = last_packet_number == packet_number or packet_number == last_packet_number + 1 # Make sure the packet number they sent makes sense, we should be sending sequentially (or resending the current packet number)
 				if not number_ok:
@@ -353,13 +353,13 @@ class OasisSerial():
 					fec_ok = fec == calculated_fec # double check that the received crc32 hash and our calculated one match
 
 				if fec_ok and number_ok and not tout: # crc32 hashes match, packet number makes sense, so send an ACK
-					self.sendBytes(b'\x60') # send an ACK
-					self.sendUnsignedInteger(packet_number, size=2) # send the packet number we are acknowledging
-					self.sendUnsignedInteger(calculated_fec, size=4) # send them the crc32 hash we calculated to double check that we heard their crc32 hash correctly
+					self.send_bytes(b'\x60') # send an ACK
+					self.send_unsigned_integer(packet_number, size=2) # send the packet number we are acknowledging
+					self.send_unsigned_integer(calculated_fec, size=4) # send them the crc32 hash we calculated to double check that we heard their crc32 hash correctly
 					print("Sent ACK " + str(packet_number))
 				else:
-					self.sendBytes(b'\x77') # send a NACK
-					self.sendUnsignedInteger(packet_number, size=2) # send the packet number that we want them to resend
+					self.send_bytes(b'\x77') # send a NACK
+					self.send_unsigned_integer(packet_number, size=2) # send the packet number that we want them to resend
 					print("Sent NACK " + str(packet_number))
 
 				if fec_ok: # we sent our ACK, so write down the data we received
@@ -379,7 +379,7 @@ class OasisSerial():
 
 			while self.inWaiting() == 0:
 				b = b'' # do nothing while we wait for bytes to come in
-			b = self.readByte()
+			b = self.read_byte()
 
 		self.receiving_file = False
 

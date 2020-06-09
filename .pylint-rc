@@ -7,12 +7,12 @@ ignore=practice,science
 argument-naming-style=snake_case
 class-naming-style=PascalCase
 const-naming-style=UPPER_CASE
-function-naming-style=snake_case
-method-naming-style=camelCase
+function-naming-style=camelCase
+method-naming-style=snake_case
 variable-naming-style=snake_case
 module-naming-style=any
 
-good-names=i,j,k,f,s,d,t,a,b
+good-names=i,j,k,f,s,d,t,a,b,fm,h,r
 
 [MESSAGES CONTROL]
 disable=C0330,global-statement

@@ -19,8 +19,7 @@ class Rover():
 		Returns: a boolean value, True for success and False for unsuccessful
 		"""
 		print("INFO: Got PING, sending PONG back")
-		self.oasis_serial.sendBytes(b'\x01')
-
+		self.oasis_serial.send_bytes(b'\x01')
 
 	def send_cmd_rejected_response(self, laser_status, spec_status, active_errors, prev_cmd):
 		'''
@@ -59,9 +58,9 @@ class Rover():
 
 		cmd_rejected_array += prev_cmd
 
-		self.oasis_serial.sendBytes(b'\xFF')		# send command rejected
+		self.oasis_serial.send_bytes(b'\xFF')		# send command rejected
 		for i in cmd_rejected_array:
-			self.oasis_serial.sendBytes(i)
+			self.oasis_serial.send_bytes(i)
 		# maybe check number of bytes in array for error handling?
 
 	def all_spectrometer_data(self):
@@ -69,8 +68,8 @@ class Rover():
 		Task: sends all spectrometer data to the rover
 		Returns: integer, 0 for success, other numbers for failure to open file (for debugging purposes)
 		"""
-		self.oasis_serial.sendBytes(b'\x14')			# send nominal response directory_start
-		self.oasis_serial.sendString("samples/;")		# send directory name
+		self.oasis_serial.send_bytes(b'\x14')			# send nominal response directory_start
+		self.oasis_serial.send_string("samples/;")		# send directory name
 
 		debug_int = 0									# return 1 if error for debugging purposes
 		file_list = self.fm.list_all_samples()
@@ -78,7 +77,7 @@ class Rover():
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					self.oasis_serial.sendFile(f, i)
+					self.oasis_serial.send_file(f, i)
 				else:
 					print("ERROR: Unable to read file" + i)
 				f.close()
@@ -150,9 +149,9 @@ class Rover():
 		Inputs: A byte array of status logs
 		Returns: integer, 0 for success, other numbers for failure to send data
 		"""
-		self.oasis_serial.sendBytes(b'\x10') # send nominal response status_message
+		self.oasis_serial.send_bytes(b'\x10') # send nominal response status_message
 		status_array = self.get_status_array(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd)
-		self.oasis_serial.sendBytes(status_array)
+		self.oasis_serial.send_bytes(status_array)
 
 		# TODO: Why does this if statement exist?
 		if len(status_array) == 72:
@@ -165,15 +164,15 @@ class Rover():
 		Task: dumps all the status file information to the rover
 		Inputs:
 		'''
-		self.oasis_serial.sendBytes(b'\x14') # send nominal response directory_start
-		self.oasis_serial.sendString("logs/;") # send directory name
+		self.oasis_serial.send_bytes(b'\x14') # send nominal response directory_start
+		self.oasis_serial.send_string("logs/;") # send directory name
 
 		file_list = self.fm.list_all_logs()
 		for i in file_list:
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					self.oasis_serial.sendFile(f, i)
+					self.oasis_serial.send_file(f, i)
 				else:
 					print("ERROR: Unable to read file" + i)
 				f.close()
@@ -192,7 +191,7 @@ class Rover():
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					self.oasis_serial.sendFile(f, i)
+					self.oasis_serial.send_file(f, i)
 				else:
 					print("ERROR: Unable to read file" + i)
 				f.close()
@@ -206,7 +205,7 @@ class Rover():
 		Called when the CLOCK SYNC command code is received. Sets the system clock to the
 		received UNIX timestamp.
 		"""
-		t = self.oasis_serial.readSignedInteger()
+		t = self.oasis_serial.read_signed_integer()
 		if t is None:
 			print("WARNING: Reading timestamp from Rover timed out!")
 			return False
@@ -220,7 +219,7 @@ class Rover():
 			subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True, timeout=5)
 			print("INFO: Set system time to: " + str(t))
 
-			self.oasis_serial.sendBytes(b'\x01')
+			self.oasis_serial.send_bytes(b'\x01')
 			return True
 		except:
 			print("ERROR: The set time command failed!")

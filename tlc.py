@@ -12,7 +12,7 @@ def read_tlc_stream(tlc):
 	while tlc.running:
 		while tlc.tlc_serial.in_waiting() == 0:
 			a = b'' # do nothing
-		b = tlc.tlc_serial.readByte()
+		b = tlc.tlc_serial.read_byte()
 
 		# The read timed out, either connection is down or we have not started the TLC emulator
 		if b is None:
@@ -22,7 +22,7 @@ def read_tlc_stream(tlc):
 			# Found start character, start reading stream data
 
 			# 6 chars for temperature, and 1 char for comma, 5 chars for duty cycle
-			s, tout = tlc.tlc_serial.readBytes((THERMISTER_COUNT*7) + 5)
+			s, tout = tlc.tlc_serial.read_bytes((THERMISTER_COUNT * 7) + 5)
 			if tout:
 				print("WARNING: Timed-out while reading TLC data stream!")
 			else:
@@ -45,14 +45,14 @@ def read_tlc_stream(tlc):
 class TLC():
 	"""Class to handle communication and data collection of the Thermal Logic Controller (TLC)."""
 
-	def getTemperatures(self):
+	def get_temperatures(self):
 		"""Returns an array of floats representing the temperatures of the thermisters in Kelvin"""
 		self.read_lock.acquire()
 		t = self.temperatures
 		self.read_lock.release()
 		return t
 
-	def getDutyCycles(self):
+	def get_duty_cycles(self):
 		"""Returns an array of unsigned integers (0-255) representing
 		the PWM duty cycle set on each heater"""
 		self.read_lock.acquire()
@@ -60,7 +60,7 @@ class TLC():
 		self.read_lock.release()
 		return d
 
-	def getData(self):
+	def get_data(self):
 		"""Returns a tuple representing the most recent data from the TLC.
 		A tuple: array of floats of temperatures in Kelvin, array of integers
 		of duty cycle (0 to 255), and the timestamp of the last update
@@ -74,7 +74,7 @@ class TLC():
 
 	def ping(self):
 		"""Sends a PING command to the TLC"""
-		self.tlc_serial.sendBytes(b'\x01') #TODO: Replace this with the correct PING command code
+		self.tlc_serial.send_bytes(b'\x01') #TODO: Replace this with the correct PING command code
 		# TODO: Implement a return value to indicate if the PING was successful or not
 
 	# Must pass an OasisSerial object to the constructor.
