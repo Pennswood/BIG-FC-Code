@@ -40,8 +40,9 @@ from enum import IntEnum, Enum
 import threading
 import oasis_serial
 
-# Possible Laser States. This is ***NOT*** the status value returned by pinging the laser.
+
 class LASER_STATE(Enum):
+	"""Possible Laser States. This is ***NOT*** the status value returned by pinging the laser."""
 	OFF = 0
 	WARMING_UP = 1
 	WARMED_UP = 2
@@ -127,7 +128,7 @@ class Laser():
 		self.laser_commands.arm()
 		status = self.get_status()
 		self.oasis_serial.sendBytes(b'\x01')
-		if self.states_laser <3:
+		if self.states_laser < 3:
 			self.states_laser = 3	 # arming
 		while status == 2:
 			status = self.get_status()
@@ -175,7 +176,7 @@ class Laser():
 
 	# makes an array of status bits from the raw laser status response.
 	def get_status_array(self, raw_status):
-		for i in range (0,15):
+		for i in range(0, 15):
 			status_bit_value = (raw_status >> i & 1)
 			status_bit_array[i] = status_bit_value
 
