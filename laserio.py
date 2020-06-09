@@ -36,9 +36,9 @@ second delay between when the laser is first enabled and the laser is able to fi
 from science import laser_control
 import time
 import Adafruit_BBIO.GPIO as GPIO		# Adafruit library for safe GPIO control
-from enum import Enum
-import numpy
+from enum import IntEnum, Enum
 import threading
+import oasis_serial
 
 # Possible Laser States. This is ***NOT*** the status value returned by pinging the laser.
 class LASER_STATE(Enum):
@@ -54,7 +54,7 @@ class LASER_STATE(Enum):
 	POWER_FAILURE = 9
 
 # Define the locations of the status bit
-class LASER_STATUS_BITS(Enum):
+class LASER_STATUS_BITS(IntEnum):
 	SPARE = 15
 	SPARE = 14
 	HIGH_POWER_MODE = 13
@@ -78,14 +78,10 @@ class LASER_CONFIG(Enum):
 	ENERGY_MODE = 2			# High power. We barely have enough poewr to ablate with this level.
 	DIODE_TRIGGER_MODE = 0	# Internal trigger, meaning we use commands to fire the laser rather than a GPIO pin.
 	MODE = 1				# Single shot
-	WARMUP_TIMER = 15	   # wait 15 seconds before checking if warmup was successful
+	WARMUP_TIMER = 15	   	# wait 15 seconds before checking if warmup was successful
 
 # declare array for the status bits (faster & uses less memory than list)
-status_bit_array = numpy.arrange(16)
-
-
-# make a global variable, initialized to 0, for the warmup delay because threading.Timer is annoying
-warmup_status = 0
+status_bit_array = [0] * 16
 
 class Laser():
 
@@ -98,61 +94,58 @@ class Laser():
 	#	b) check if beyond warm-up state: laser active, laser enabled, laser ready-to-fire
 	# 3) if safe, send the warm-up command (send power to the laser)
 	def warm_up_laser(self):
-		status = self.get_status()
-		SBArray = status_bit_array(status)
-		self.oasis_serial(b'\x01')
+		status = self.get_status()	
+		SBArray = self.get_status_array(status)
+		self.oasis_serial.sendBytes(b'\x01')
 
 		# Laser is already off. Perfect case so we don't need to check anything else. uC is active so we have data even though 48V is off.
 		if (SBArray[LASER_STATUS_BITS.POWER_FAILURE] == 0 and SBArray[LASER_STATUS_BITS.RESONATOR_OVERTEMP] == 0 and SBArray[LASER_STATUS_BITS.ELECTRICAL_OVERTEMP] == 0 and SBArray[LASER_STATUS_BITS.LASER_ENABLED] == 0 and SBArray[LASER_STATUS_BITS.LASER_ACTIVE] == 0 and SBArray[LASER_STATUS_BITS.READY_TO_ENABLE] == 0 and SBArray[LASER_STATUS_BITS.READY_TO_FIRE] == 0):
 			GPIO.output("P9_42", GPIO.HIGH)		# Set pin HIGH to enable 48V converter, and power up the laser
-			self.oasis_serial(b'\x21')			# report that we are warming up
+			self.oasis_serial.sendBytes(b'\x21')			# report that we are warming up
 			warmupTimer = threading.Timer(LASER_CONFIG.WARMUP_TIMER, self.get_warmup_delay_status)
 			warmupTimer.start()
 
 		else:
 			if (SBArray[LASER_STATUS_BITS.POWER_FAILURE] == 1):
-				self.oasis_serial(b'\00') # error placeholder
+				self.oasis_serial.sendBytes(b'\00') # error placeholder
 			if(SBArray[LASER_STATUS_BITS.RESONATOR_OVERTEMP] == 1):
-				self.oasis_serial(b'\00') # error placeholder
+				self.oasis_serial.sendBytes(b'\00') # error placeholder
 			if(SBArray[LASER_STATUS_BITS.ELECTRICAL_OVERTEMP] == 1):
-				self.oasis_serial(b'\00') # error placeholder
+				self.oasis_serial.sendBytes(b'\00') # error placeholder
 			if(SBArray[LASER_STATUS_BITS.LASER_ENABLED] == 1):
-				self.oasis_serial(b'\00') # placeholder
+				self.oasis_serial.sendBytes(b'\00') # placeholder
 			if(SBArray[LASER_STATUS_BITS.LASER_ACTIVE] == 1):
-				self.oasis_serial(b'\00') # placeholder
+				self.oasis_serial.sendBytes(b'\00') # placeholder
 			if(SBArray[LASER_STATUS_BITS.READY_TO_FIRE] == 1):
-				self.oasis_serial(b'\00') # placeholder
+				self.oasis_serial.sendBytes(b'\00') # placeholder
 			if(SBArray[LASER_STATUS_BITS.READY_TO_ENABLE] == 1):
-				self.oasis_serial(b'\00') #error placeholder
-		return
+				self.oasis_serial.sendBytes(b'\00') #error placeholder
 	"""
 	"""
 	# Laser is powered-up and ARMED. While arming, state is 3. When ARMED, state is 4.
 	def laser_arm(self):
 		self.laser_commands.arm()
 		status = self.get_status()
-		self.oasis_serial(b'\x01')
+		self.oasis_serial.sendBytes(b'\x01')
 		if self.states_laser <3:
 			self.states_laser = 3	 # arming
 		while status == 2:
 			status = self.get_status()
-		self.oasis_serial(b'\x20') # TODO: Fix from command.
+		self.oasis_serial.sendBytes(b'\x20') # TODO: Fix from command.
 		self.states_laser = 4
-		return
+
 	"""
 	"""
 	# Laser is powered-up and DISARMED
 	def laser_disarm(self):
 		self.laser_commands.disarm()
 		self.states_laser = 2				# WARMED UP
-		return
 	"""
 	"""
 	# Laser must already be powered-up and ARMED to fire. When firing, state is 5.
 	def laser_fire(self):
 		self.laser_commands.fire_laser()
 		self.states_laser = 5				# FIRING
-		return
 	"""
 	"""
 	# Laser is powered-off. When off, state is 0.
@@ -189,12 +182,24 @@ class Laser():
 		return status_bit_array
 
 	def get_warmup_delay_status(self):
-		status = self.get_status()
-		warmup_status = self.get_status_bit(status, LASER_STATUS_BITS.READY_TO_ENABLE)
-		if warmup_status == 1:
-			self.oasis_serial(b'\x22')
-		else:
-			self.oasis_serial(b'\x21')
+		retry_count = 0
+		while retry_count < 2:
+			status = self.get_status()
+			if len(status) != 2:
+				retry_count += 1
+				time.sleep(5.0) # Wait for 5 seconds to try reading a response again
+				continue
+
+			warmup_status = self.get_status_bit(status, LASER_STATUS_BITS.READY_TO_ENABLE)
+			if warmup_status == 1:
+				self.oasis_serial.sendBytes(b'\x22')
+			else:
+				self.oasis_serial.sendBytes(b'\x21')
+				time.sleep(5.0)
+				if warmup_status == 1:
+					self.oasis_serial.sendBytes(b'\x22')
+				else:
+					self.oasis_serial.sendBytes(b'\x21')	
 
 	"""
 	"""
@@ -205,3 +210,4 @@ class Laser():
 		self.timer = time.time()		# Only to initalize variable, not used.
 		GPIO.setup("P9_42", GPIO.OUT)	# 48V enable is on P9_42. ON = GPIO HIGH. OFF = GPIO LOW.
 		GPIO.output("P9_42", GPIO.LOW)	# make sure the laser is OFF
+		CURRENT_LASER_STATE = 0			# initialize the laser state
