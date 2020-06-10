@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Oasis’s documentation! &#8212; Oasis 1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-tlc">
+<span id="welcome-to-oasis-s-documentation"></span><h1>Welcome to Oasis’s documentation!<a class="headerlink" href="#module-tlc" title="Permalink to this headline">¶</a></h1>
+<p>tlc.py
+Handling communication and data processing with the Thermal Logic Controller (TLC)</p>
+<dl class="py class">
+<dt id="tlc.TLC">
+<em class="property">class </em><code class="sig-prename descclassname">tlc.</code><code class="sig-name descname">TLC</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">serial_connection</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to handle communication and data collection of the Thermal Logic Controller (TLC).</p>
+<dl class="py method">
+<dt id="tlc.TLC.get_data">
+<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple representing the most recent data from the TLC.
+A tuple: array of floats of temperatures in Kelvin, array of integers
+of duty cycle (0 to 255), and the timestamp of the last update</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tlc.TLC.get_duty_cycles">
+<code class="sig-name descname">get_duty_cycles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC.get_duty_cycles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of unsigned integers (0-255) representing
+the PWM duty cycle set on each heater</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tlc.TLC.get_temperatures">
+<code class="sig-name descname">get_temperatures</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC.get_temperatures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of floats representing the temperatures of the thermisters in Kelvin</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tlc.TLC.ping">
+<code class="sig-name descname">ping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC.ping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a PING command to the TLC</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="tlc.read_tlc_stream">
+<code class="sig-prename descclassname">tlc.</code><code class="sig-name descname">read_tlc_stream</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tlc</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tlc.read_tlc_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thread loop that continuously reads the stream of serial data from the TLC</p>
+</dd></dl>
+
+<span class="target" id="module-roverio"></span><p>roverio.py
+Manages commands that interact with the Rover.
+Such as: pinging, status request, transferring samples.</p>
+<dl class="py class">
+<dt id="roverio.Rover">
+<em class="property">class </em><code class="sig-prename descclassname">roverio.</code><code class="sig-name descname">Rover</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">oasis_serial</span></em>, <em class="sig-param"><span class="n">filemanager</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class really doesn’t represent the Rover at all.
+It’s just a neat way to organize a bunch of methods.
+This should really be refactored.</p>
+<dl class="py method">
+<dt id="roverio.Rover.all_spectrometer_data">
+<code class="sig-name descname">all_spectrometer_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.all_spectrometer_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task: sends all spectrometer data to the rover
+Returns: integer, 0 for success, other numbers for failure to open file (for debugging purposes)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roverio.Rover.clock_sync">
+<code class="sig-name descname">clock_sync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.clock_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the CLOCK SYNC command code is received. Sets the system clock to the
+received UNIX timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roverio.Rover.get_status_array">
+<code class="sig-name descname">get_status_array</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">temp_data</span></em>, <em class="sig-param"><span class="n">efdc</span></em>, <em class="sig-param"><span class="n">error_codes</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.get_status_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task: Organizes all the status logs into a byte array
+Inputs:</p>
+<blockquote>
+<div><p>An integer laser_status
+An integer spec_status
+A float array temp_data
+An int (0-255) array efdc (etch foil duty cycle)
+A boolean array error_codes
+A byte prev_cmd</p>
+</div></blockquote>
+<p>Return: A bytearray of status log</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roverio.Rover.ping">
+<code class="sig-name descname">ping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.ping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task: sends a response to the rover.
+Input: An OasisSerial object
+Returns: a boolean value, True for success and False for unsuccessful</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roverio.Rover.send_cmd_rejected_response">
+<code class="sig-name descname">send_cmd_rejected_response</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">active_errors</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.send_cmd_rejected_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task: sends the command rejected response for roverio
+Input: int for laser status, int for spectrometer status,                       21X1 boolean array for active errors, bytes for prev_cmd
+Returns: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roverio.Rover.status_dump">
+<code class="sig-name descname">status_dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.status_dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task: dumps all the status file information to the rover
+Inputs:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roverio.Rover.status_request">
+<code class="sig-name descname">status_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">temp_data</span></em>, <em class="sig-param"><span class="n">efdc</span></em>, <em class="sig-param"><span class="n">error_codes</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.status_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task: sends back a byte list of status data (in accordance to table III in rover commands)
+Inputs: A byte array of status logs
+Returns: integer, 0 for success, other numbers for failure to send data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roverio.Rover.transfer_sample">
+<code class="sig-name descname">transfer_sample</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.transfer_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the two most recent spectrometer sample files.
+Returns: 0 for successful completion, 1 for error</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Oasis</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, SSPL.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
