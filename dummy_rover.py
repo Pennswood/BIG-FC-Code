@@ -1,3 +1,4 @@
+"""This module is used to simulate a rover interface with our flight computer"""
 #!/usr/bin/python3
 import oasis_serial
 import threading
@@ -9,6 +10,14 @@ from oasis_config import THERMISTER_COUNT, DUTY_CYCLE_COUNT, DEBUG_BUFFER_SIZE, 
 IP_ADDRESS = "127.0.0.1"
 
 def print_received(oserial, prefix):
+	""" Insert description
+
+	Parameters
+	----------
+	oserial : object
+		Oasis serial connection
+	prefix : string
+	"""
 	while True:
 		oserial.rx_buffer_lock.acquire()
 		d=bytearray()
@@ -20,6 +29,13 @@ def print_received(oserial, prefix):
 			print(prefix + " RX]\t" + str(bytes(d)))
 			
 def emulate_tlc_stream(tlc_serial):
+	""" Insert description
+
+	Parameters
+	----------
+	tlc_serial : object
+		TLC serial connection
+	"""
 	global THERMISTER_COUNT
 	while True:
 		tlc_serial.send_string("|")
@@ -29,6 +45,8 @@ def emulate_tlc_stream(tlc_serial):
 		time.sleep(1)
 		
 def main():
+	""" Main loop for dummy rover
+	"""
 	global ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT
 	print("Setting up UDP sockets...")
 	rover_serial = oasis_serial.OasisSerial("/dev/null", debug_mode=True, debug_tx_port=ROVER_RX_PORT, debug_rx_port=ROVER_TX_PORT, rx_print_prefix="ROVER RX] ")
