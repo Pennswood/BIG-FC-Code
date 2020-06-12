@@ -1,5 +1,4 @@
 """
-spectrometerio.py
 Manages communication with the spectrometer through the SeaBreeze library.
 """
 import time
@@ -11,10 +10,16 @@ class Spectrometer():
 	"""Class for interacting with the spectrometer through seabreeze."""
 
 	def _setupSpectrometer(self):
-		'''
-		Set up the spectrometer
-		Return: a spectrometer object or None if error
-		'''
+		"""
+		Set up method for the spectrometer.
+		
+		Returns
+		-------
+		object
+			A spectrometer object
+		None
+			If an error occurs
+		"""
 		if seabreeze.spectrometers.list_devices():
 			self.states_spectrometer = 0
 			spec = seabreeze.spectrometers.Spectrometer.from_first_available()
@@ -26,9 +31,16 @@ class Spectrometer():
 
 	def sample(self, milliseconds):
 		"""
-		Task: Starting integrating for x milliseconds
-		Input: int integration time in milliseconds
-		Returns: none
+		This function is used to signal the spectrometer to integrate for a set amount of time.
+
+		Parameters
+		----------
+		milliseconds : int
+			Inputted integration time for spectrometer
+		
+		Returns
+		-------
+		None
 		"""
 		self.spec.trigger_mode = 0 # Setting the trigger mode to normal
 		self.spec.integration_time_micros(milliseconds*1000) # Set integration time for spectrometer

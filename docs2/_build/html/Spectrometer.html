@@ -167,8 +167,7 @@
 <h1><span class="section-number">4. </span><strong>Spectrometer Modules</strong><a class="headerlink" href="#spectrometer-modules" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-spectrometerio">
 <span id="spectrometerio"></span><h2><span class="section-number">4.1. </span>Spectrometerio<a class="headerlink" href="#module-spectrometerio" title="Permalink to this headline">¶</a></h2>
-<p>spectrometerio.py
-Manages communication with the spectrometer through the SeaBreeze library.</p>
+<p>Manages communication with the spectrometer through the SeaBreeze library.</p>
 <dl class="py class">
 <dt id="spectrometerio.Spectrometer">
 <em class="property">class </em><code class="sig-prename descclassname">spectrometerio.</code><code class="sig-name descname">Spectrometer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">serial</span></em>, <em class="sig-param"><span class="n">file_manager</span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrometerio.Spectrometer" title="Permalink to this definition">¶</a></dt>
@@ -176,9 +175,33 @@ Manages communication with the spectrometer through the SeaBreeze library.</p>
 <dl class="py method">
 <dt id="spectrometerio.Spectrometer.sample">
 <code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">milliseconds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrometerio.Spectrometer.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Task: Starting integrating for x milliseconds
-Input: int integration time in milliseconds
-Returns: none</p>
+<dd><p>This function is used to signal the spectrometer to integrate for a set amount of time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>milliseconds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Inputted integration time for spectrometer</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="spectrometerio.Spectrometer.setupSpectrometer">
+<code class="sig-name descname">setupSpectrometer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spectrometerio.Spectrometer.setupSpectrometer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up method for the spectrometer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><em>object</em> – A spectrometer object</p></li>
+<li><p><em>None</em> – If an error occurs</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
