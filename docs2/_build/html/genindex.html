@@ -33,6 +33,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
 </head>
@@ -222,21 +223,14 @@
       </ul></li>
       <li><a href="Laser.html#laserio.LASER_STATUS_BITS.DIODE_EXTERNAL_TRIGGER">DIODE_EXTERNAL_TRIGGER (laserio.LASER_STATUS_BITS attribute)</a>
 </li>
-      <li><a href="Laser.html#laserio.LASER_CONFIG.DIODE_TRIGGER_MODE">DIODE_TRIGGER_MODE (laserio.LASER_CONFIG attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Laser.html#laserio.LASER_CONFIG.DIODE_TRIGGER_MODE">DIODE_TRIGGER_MODE (laserio.LASER_CONFIG attribute)</a>
+</li>
       <li><a href="Oasis.science.html#science.laser_control.Laser.disarm">disarm() (science.laser_control.Laser method)</a>
 </li>
       <li><a href="Oasis.science.html#science.testing_utils.dummy_laser">dummy_laser (class in science.testing_utils)</a>
 </li>
-      <li>
-    dummy_rover
-
-      <ul>
-        <li><a href="Rover.html#module-dummy_rover">module</a>
-</li>
-      </ul></li>
       <li><a href="Flight_Computer.html#debug.DummyGPIO">DummyGPIO (class in debug)</a>
 </li>
   </ul></td>
@@ -246,8 +240,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Laser.html#laserio.LASER_STATUS_BITS.ELECTRICAL_OVERTEMP">ELECTRICAL_OVERTEMP (laserio.LASER_STATUS_BITS attribute)</a>
-</li>
-      <li><a href="Rover.html#dummy_rover.emulate_tlc_stream">emulate_tlc_stream() (in module dummy_rover)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -292,14 +284,16 @@
 </li>
       <li><a href="Flight_Computer.html#file_manager.FileManager.get_latest_log_file">get_latest_log_file() (file_manager.FileManager method)</a>
 </li>
+      <li><a href="Flight_Computer.html#read_log.get_log_files">get_log_files() (in module read_log)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Laser.html#laserio.Laser.get_status">get_status() (laserio.Laser method)</a>
 
       <ul>
         <li><a href="Oasis.science.html#science.laser_control.Laser.get_status">(science.laser_control.Laser method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Laser.html#laserio.Laser.get_status_array">get_status_array() (laserio.Laser method)</a>
 
       <ul>
@@ -391,8 +385,6 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="Rover.html#dummy_rover.main">main() (in module dummy_rover)</a>
-</li>
       <li><a href="Laser.html#laserio.LASER_CONFIG.MODE">MODE (laserio.LASER_CONFIG attribute)</a>
 </li>
       <li>
@@ -401,8 +393,6 @@
       <ul>
         <li><a href="Flight_Computer.html#module-debug">debug</a>
 </li>
-        <li><a href="Rover.html#module-dummy_rover">dummy_rover</a>
-</li>
         <li><a href="Flight_Computer.html#module-file_manager">file_manager</a>
 </li>
         <li><a href="Laser.html#module-laserio">laserio</a>
@@ -410,6 +400,8 @@
         <li><a href="Flight_Computer.html#module-oasis_config">oasis_config</a>
 </li>
         <li><a href="Flight_Computer.html#module-oasis_serial">oasis_serial</a>
+</li>
+        <li><a href="Flight_Computer.html#module-read_log">read_log</a>
 </li>
         <li><a href="Flight_Computer.html#module-repeated_timer">repeated_timer</a>
 </li>
@@ -484,8 +476,6 @@
         <li><a href="Laser.html#laserio.LASER_STATUS_BITS.POWER_FAILURE">(laserio.LASER_STATUS_BITS attribute)</a>
 </li>
       </ul></li>
-      <li><a href="Rover.html#dummy_rover.print_received">print_received() (in module dummy_rover)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -500,6 +490,13 @@
 </li>
       <li><a href="Flight_Computer.html#oasis_serial.OasisSerial.read_integer">read_integer() (oasis_serial.OasisSerial method)</a>
 </li>
+      <li>
+    read_log
+
+      <ul>
+        <li><a href="Flight_Computer.html#module-read_log">module</a>
+</li>
+      </ul></li>
       <li><a href="Flight_Computer.html#file_manager.FileManager.read_sample">read_sample() (file_manager.FileManager method)</a>
 </li>
       <li><a href="Flight_Computer.html#oasis_serial.OasisSerial.read_signed_integer">read_signed_integer() (oasis_serial.OasisSerial method)</a>
@@ -512,10 +509,10 @@
 </li>
       <li><a href="Laser.html#laserio.LASER_STATUS_BITS.READY_TO_FIRE">READY_TO_FIRE (laserio.LASER_STATUS_BITS attribute)</a>
 </li>
-      <li><a href="Oasis.science.html#science.testing_utils.dummy_laser.receive_command">receive_command() (science.testing_utils.dummy_laser method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="Oasis.science.html#science.testing_utils.dummy_laser.receive_command">receive_command() (science.testing_utils.dummy_laser method)</a>
+</li>
       <li><a href="Flight_Computer.html#oasis_serial.OasisSerial.receive_file">receive_file() (oasis_serial.OasisSerial method)</a>
 </li>
       <li>

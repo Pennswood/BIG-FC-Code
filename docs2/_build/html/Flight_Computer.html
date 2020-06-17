@@ -33,6 +33,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="2. Rover Modules" href="Rover.html" />
@@ -95,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-file_manager">1.2. File Manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-oasis_config">1.3. Oasis Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-oasis_serial">1.4. Oasis Serial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#read-log">1.5. Read Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-read_log">1.5. Read Log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-repeated_timer">1.6. Repeated Timer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-view_oasis_log">1.7. View Oasis Log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-debug">1.8. Debug</a></li>
@@ -177,73 +178,179 @@
 </div>
 <div class="section" id="module-file_manager">
 <span id="file-manager"></span><h2><span class="section-number">1.2. </span>File Manager<a class="headerlink" href="#module-file_manager" title="Permalink to this headline">¶</a></h2>
-<p>file_manager.py
-Logging, saving spectrometer samples
+<p>Logging, saving spectrometer samples
 If you need to save a file please use/call functions here</p>
 <p>Basic file hierarchy for Oasis:</p>
 <blockquote>
 <div><dl class="simple">
-<dt>OASIS_SD_PATH/          (This is all on the SD card)</dt><dd><p><a href="#id1"><span class="problematic" id="id2">|</span></a>- logs/
-|       + [All of our status logs] 0.statlog, 1.statlog, 2.statlog, 3.statlog…
-<a href="#id3"><span class="problematic" id="id4">|</span></a>- samples/
-|       + [All of our spectrometer samples] file extension: .bin
-|                       Spectrometer samples are named using the UNIX timestamp they were taken at as well as the fractional amount of seconds (just pass in time.time(), don’t cast to an int)
-<a href="#id5"><span class="problematic" id="id6">|</span></a>- debug/
-|       + [Any debug logs generated, probably unused]</p>
+<dt>OASIS_SD_PATH/          (This is all on the SD card)</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>logs/</dt><dd><ul>
+<li><p>[All of our status logs] 0.statlog, 1.statlog, 2.statlog, 3.statlog…</p></li>
+</ul>
 </dd>
-<dt>OASIS_FLASH_PATH/       (This is all on the flash memory)</dt><dd><p><a href="#id7"><span class="problematic" id="id8">|</span></a>- To be decided…</p>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>samples/</dt><dd><ul>
+<li><p>[All of our spectrometer samples] file extension: .bin</p></li>
+<li><p>Spectrometer samples are named using the UNIX timestamp they were taken at as well as the fractional amount of seconds (just pass in time.time(), don’t cast to an int)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>debug/</dt><dd><ul>
+<li><p>[Any debug logs generated, probably unused]</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>OASIS_FLASH_PATH/       (This is all on the flash memory)</dt><dd><ul class="simple">
+<li><p>To be decided…</p></li>
+</ul>
 </dd>
 </dl>
 </div></blockquote>
 <dl>
-<dt>manifest.log Format</dt><dd><p>Each line in manifest.log corresponds to the number of .dat file (For example, the first line corresponds to file 0.dat, second line corresponds to 1.dat, fourth line corresponds to 3.dat…)
-Each line contains the UNIX timestamp that the sample was taken at
-The order that samples occured in can be deduced through a combination of the file #, and the UNIX timestamp.</p>
-<blockquote>
-<div><p>This means that if two files have the same timestamp, the file with a lower file # was taken first.</p>
-</div></blockquote>
+<dt>manifest.log format</dt><dd><p>Each line in manifest.log corresponds to the number of .dat file (For example, the first line corresponds to file 0.dat, second line corresponds to 1.dat, fourth line corresponds to 3.dat…)</p>
+<p>Each line contains the UNIX timestamp that the sample was taken at</p>
+<p>The order that samples occured in can be deduced through a combination of the file #, and the UNIX timestamp. This means that if two files have the same timestamp, the file with a lower file # was taken first.</p>
 </dd>
 </dl>
 <dl class="py class">
 <dt id="file_manager.FileManager">
 <em class="property">class </em><code class="sig-prename descclassname">file_manager.</code><code class="sig-name descname">FileManager</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sd_path</span></em>, <em class="sig-param"><span class="n">flash_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager" title="Permalink to this definition">¶</a></dt>
-<dd><p>Task: After the spectrometer finishes sampling, it will send the data to this function to be saved.
-Inputs: 1) a string in the format [timestamp].[file extension], 2) the 2 by 3648 data array from the spectrometer, 3) the time of the sample
-Outputs: integer, 0 for success, other numbers for failure to save file (for debugging purposes)</p>
-<dl class="py method">
+<dd><dl class="py method">
 <dt id="file_manager.FileManager.get_last_two_samples">
 <code class="sig-name descname">get_last_two_samples</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.get_last_two_samples" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the two string of the last 2 spectrometer sample files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>This will be a 2x1 string array containing the data of the last two spectrometer sample files. The first string being the most recent followed by the second string being the second most recent</dt><dd><ul class="simple">
+<li><p>Array format: {[most recent file name].[file extension], [next recent file name].[file extension]}</p></li>
+<li><p>If less than 2 files exist, then the second (and possibly the first) string will be left an empty string</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="file_manager.FileManager.get_latest_log_file">
 <code class="sig-name descname">get_latest_log_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.get_latest_log_file" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns most recent log file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>log_file</strong> – A string of the file name for the most recent log file recorded.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="file_manager.FileManager.list_all_logs">
 <code class="sig-name descname">list_all_logs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.list_all_logs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns all log files in an array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p><strong>log_files</strong> –</p>
+<dl class="simple">
+<dt>An array composed of every log file saved on Oasis’ sd card</dt><dd><ul class="simple">
+<li><p>The array will be in the format: {[most recent file], [next most recent file], …}</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="file_manager.FileManager.list_all_samples">
 <code class="sig-name descname">list_all_samples</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.list_all_samples" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns strings of all spectrometer sample files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p><strong>sample_files</strong> –</p>
+<dl class="simple">
+<dt>A nx1 string array of all n spectrometer files sorted from most recent to least recent.</dt><dd><ul class="simple">
+<li><p>The array will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], …}</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="file_manager.FileManager.log_status">
 <code class="sig-name descname">log_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_array</span></em>, <em class="sig-param"><span class="n">log_reason</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.log_status" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Append data into the log file. May automatically create a new file.
+Inputs: Bit string data to input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status_array</strong> (<em>array</em>) – This is a byte array of status data</p></li>
+<li><p><strong>log_reason</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – 0 = regular time log, 1 = command sent, 2 = new error, 3 = error resolved</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>number</strong> – 0 = success. Another number = failure to save file (for debugging purposes)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="file_manager.FileManager.read_sample">
 <code class="sig-name descname">read_sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timestamp</span></em><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.read_sample" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the data array of the specific file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>string</em>) – Specific file name for an array of spectrometer data at a certain time. This will be formatted as [name].[file extension]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>data</strong> – A 2 by 3648 data array from the spectrometer (wavelength, intensity)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="file_manager.FileManager.save_sample">
 <code class="sig-name descname">save_sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timestamp</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.save_sample" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>After the spectrometer finishes sampling, it will send the data to this function to be saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> (<em>string</em>) – A string of current linux time to be formatted [timestamp].[file extension]</p></li>
+<li><p><strong>data</strong> (<em>array</em>) – A 2 by 3648 data array containing the recorded data from the spectrometer (wavelength, intensity)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -358,8 +465,13 @@ serial data to a UDP port as well</p>
 </dd></dl>
 
 </div>
-<div class="section" id="read-log">
-<h2><span class="section-number">1.5. </span>Read Log<a class="headerlink" href="#read-log" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-read_log">
+<span id="read-log"></span><h2><span class="section-number">1.5. </span>Read Log<a class="headerlink" href="#module-read_log" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="read_log.get_log_files">
+<code class="sig-prename descclassname">read_log.</code><code class="sig-name descname">get_log_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#read_log.get_log_files" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="module-repeated_timer">
 <span id="repeated-timer"></span><h2><span class="section-number">1.6. </span>Repeated Timer<a class="headerlink" href="#module-repeated_timer" title="Permalink to this headline">¶</a></h2>

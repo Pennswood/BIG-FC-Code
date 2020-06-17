@@ -33,6 +33,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="6. Oasis Science Package" href="Oasis.science.html" />
@@ -169,44 +170,101 @@
 <span id="laserio"></span><h2><span class="section-number">5.1. </span>Laserio<a class="headerlink" href="#module-laserio" title="Permalink to this headline">¶</a></h2>
 <p>laserio.py
 Manages the laser used for LIBS. Reads status/error codes from laser and handles initialization and arming.</p>
-<dl class="simple">
-<dt>Task:</dt><dd><p>This function can be expected to be continuously called until laser is warmed up.</p>
-</dd>
-</dl>
-<p>Input: none
-Output: Integer. 0 = laser warmed up, 1 = laser warming up, 2 = TLC warming module up, &gt;2 = some sort of error.</p>
 <p>Random Notes:
-1) Laser Enable – “This enables the laser and readies it for firing. Note: there will be an 8
+1. Laser Enable – “This enables the laser and readies it for firing. Note: there will be an 8
 second delay between when the laser is first enabled and the laser is able to fire.” uJewel manual</p>
 <ol class="arabic simple" start="2">
-<li><dl class="simple">
-<dt>Laser Status Bits:   Bit 15: Spare</dt><dd><p>Bit 14: Spare
-Bit 13: High-Power Mode
-Bit 12: Low-Power Mode
-Bit 11: Ready To Fire                           // Laser is enabled AND ready to fire. See note 1.
-Bit 10: Ready To Enable                         // Proxy for laser is warmed up? Laser is warmed up and therefore CAN be enabled (armed/disarmed).
-Bit      9: Power Failure (uhh boss, how do you tell me you’ve had a power failure when you don’t have the power to respond? USB Power?)
-Bit      8: Electrical Over Temp
-Bit      7: Resonator Over Temp
-Bit      6: External Interlock                  // Not used?
-Bit      5: Reserved
-Bit      4: Reserved
-Bit      3: Diode External Trigger
-Bit      2: Reserved
-Bit      1: Laser Active                                // Laser is firing
-Bit      0: Laser Enabled                               // “laser is ready to fire”. Armed/Disarmed state.</p>
-</dd>
-</dl>
-</li>
+<li><p>Laser Status Bits</p></li>
 </ol>
-<p>^^^This will be converted to a Sphinx table after I learn how to do that^^^</p>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">Laser Status Bits</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 67%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Bit</p></th>
+<th class="head"><p>uJewel Doc Name</p></th>
+<th class="head"><p>Explanation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>15</p></td>
+<td><p>Spare</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>14</p></td>
+<td><p>Spare</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>13</p></td>
+<td><p>High-Power Mode</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>Low-Power Mode</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>11</p></td>
+<td><p>Ready To Fire</p></td>
+<td><p>Laser is enabled AND ready to fire. See note 1.</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>Ready To Enable</p></td>
+<td><p>Proxy for laser is warmed up? Laser is warmed up and therefore CAN be enabled (armed/disarmed).</p></td>
+</tr>
+<tr class="row-even"><td><p>9</p></td>
+<td><p>Power Failure</p></td>
+<td><p>Undocumented “feature”. There must be a uC pulling usb power. (uhh boss, how do you tell me you’ve had a power failure when you don’t have the power to respond? USB Power?)</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>Electrical Over Temp</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>Resonator Over Temp</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>External Interlock</p></td>
+<td><p>(not used?)</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>Reserved</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>Reserved</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>Diode External Trigger</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>Reserved</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>Laser Active</p></td>
+<td><p>Laser is firing</p></td>
+</tr>
+<tr class="row-odd"><td><p>0</p></td>
+<td><p>Laser Enabled</p></td>
+<td><p>“laser is ready to fire”. Armed/Disarmed state.</p></td>
+</tr>
+</tbody>
+</table>
 <ol class="arabic simple" start="3">
-<li><p>Confirm power mode with Science team</p></li>
+<li><p>Confirm power mode with Science team. Will power mode change with the uJewel modded to 13mJ from the base 8mJ?</p></li>
+<li><p>Used “:member-order: bysource” in the .rst file for laserio to get Enums to sort by #. The global for :member-order must be alphabetical for CDH.</p></li>
+<li><p>Used <a class="reference external" href="https://stackoverflow.com/questions/26534184/can-sphinx-ignore-certain-tags-in-python-docstrings">https://stackoverflow.com/questions/26534184/can-sphinx-ignore-certain-tags-in-python-docstrings</a> to fix line wrapping in Sphinx’s HTML talbes</p></li>
 </ol>
 <dl class="py class">
 <dt id="laserio.LASER_CONFIG">
 <em class="property">class </em><code class="sig-prename descclassname">laserio.</code><code class="sig-name descname">LASER_CONFIG</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#laserio.LASER_CONFIG" title="Permalink to this definition">¶</a></dt>
-<dd><p>An enumeration.</p>
+<dd><p>Configuration parameters for the uJewel.</p>
 <dl class="py attribute">
 <dt id="laserio.LASER_CONFIG.DIODE_TRIGGER_MODE">
 <code class="sig-name descname">DIODE_TRIGGER_MODE</code><em class="property"> = 0</em><a class="headerlink" href="#laserio.LASER_CONFIG.DIODE_TRIGGER_MODE" title="Permalink to this definition">¶</a></dt>
@@ -288,7 +346,7 @@ Bit      0: Laser Enabled                               // “laser is ready to 
 <dl class="py class">
 <dt id="laserio.LASER_STATUS_BITS">
 <em class="property">class </em><code class="sig-prename descclassname">laserio.</code><code class="sig-name descname">LASER_STATUS_BITS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#laserio.LASER_STATUS_BITS" title="Permalink to this definition">¶</a></dt>
-<dd><p>An enumeration.</p>
+<dd><p>Possible Laser States. This is <strong>*NOT*</strong> the status value returned by pinging the laser.</p>
 <dl class="py attribute">
 <dt id="laserio.LASER_STATUS_BITS.DIODE_EXTERNAL_TRIGGER">
 <code class="sig-name descname">DIODE_EXTERNAL_TRIGGER</code><em class="property"> = 3</em><a class="headerlink" href="#laserio.LASER_STATUS_BITS.DIODE_EXTERNAL_TRIGGER" title="Permalink to this definition">¶</a></dt>
@@ -417,7 +475,20 @@ Bit      0: Laser Enabled                               // “laser is ready to 
 <dl class="py method">
 <dt id="laserio.Laser.warm_up_laser">
 <code class="sig-name descname">warm_up_laser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#laserio.Laser.warm_up_laser" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
+needs: laser inactive, laser disabled, laser not ready to fire, laser not ready to enable</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Get the status</p></li>
+</ol>
+<p>2. Check relevent status bits for hazards
+a) check if already warmed-up: ready-to-enable.
+b) check if beyond warm-up state: laser active, laser enabled, laser ready-to-fire</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>if safe, send the warm-up command (send power to the laser)</p></li>
+</ol>
+</dd></dl>
 
 </dd></dl>
 

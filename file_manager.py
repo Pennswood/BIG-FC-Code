@@ -1,29 +1,30 @@
 """
-file_manager.py
 Logging, saving spectrometer samples
 If you need to save a file please use/call functions here
 
 Basic file hierarchy for Oasis:
 
 	OASIS_SD_PATH/		(This is all on the SD card)
-		|- logs/
-		|	+ [All of our status logs] 0.statlog, 1.statlog, 2.statlog, 3.statlog...
-		|- samples/
-		|	+ [All of our spectrometer samples] file extension: .bin
-		|			Spectrometer samples are named using the UNIX timestamp they were taken at as well as the fractional amount of seconds (just pass in time.time(), don't cast to an int)
-		|- debug/
-		|	+ [Any debug logs generated, probably unused]
+		* logs/
+			* [All of our status logs] 0.statlog, 1.statlog, 2.statlog, 3.statlog...
+		* samples/
+			* [All of our spectrometer samples] file extension: .bin
+			* Spectrometer samples are named using the UNIX timestamp they were taken at as well as the fractional amount of seconds (just pass in time.time(), don't cast to an int)
+		* debug/
+			* [Any debug logs generated, probably unused]
 
 	OASIS_FLASH_PATH/	(This is all on the flash memory)
-		|- To be decided...
+		* To be decided...
 
-manifest.log Format
+manifest.log format
 	Each line in manifest.log corresponds to the number of .dat file (For example, the first line corresponds to file 0.dat, second line corresponds to 1.dat, fourth line corresponds to 3.dat...)
-	Each line contains the UNIX timestamp that the sample was taken at
-	The order that samples occured in can be deduced through a combination of the file #, and the UNIX timestamp.
-		This means that if two files have the same timestamp, the file with a lower file # was taken first.
 
+	Each line contains the UNIX timestamp that the sample was taken at
+
+	The order that samples occured in can be deduced through a combination of the file #, and the UNIX timestamp. This means that if two files have the same timestamp, the file with a lower file # was taken first.
 """
+
+#TODO: Does list_all_samples and list_all_logs need to be reverse sorted so most recent is at the head of the array?
 
 import pickle
 import os
@@ -33,36 +34,55 @@ from pathlib import Path
 from oasis_config import LOGS_PER_FILE, STATUS_SIZE
 
 class FileManager():
-	"""
-	Task: After the spectrometer finishes sampling, it will send the data to this function to be saved.
-	Inputs: 1) a string in the format [timestamp].[file extension], 2) the 2 by 3648 data array from the spectrometer, 3) the time of the sample
-	Outputs: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
-	"""
+
 	def save_sample(self, timestamp, data):
+		"""
+		After the spectrometer finishes sampling, it will send the data to this function to be saved.
+		
+		Parameters
+		----------
+		timestamp : string
+			A string of current linux time to be formatted [timestamp].[file extension]
+		data : array
+			A 2 by 3648 data array containing the recorded data from the spectrometer (wavelength, intensity)
+
+		"""
+		# TODO: other numbers for failure to save file (for debugging purposes)
 		file_name = str(timestamp).replace(".","_") + ".bin" # Get the filename from the timestamp and extension
 		f = (self.samples_directory_path / file_name).open("wb")
 		pickle.dump(data, f) # This writes the data
 		f.close()
 		return
 
-	"""
-	Task: Returns the data array of the specific file.
-	Inputs: a string in the format [name].[file extension]
-	Outputs: a 2 by 3648 data array from the spectrometer (wavelength, intensity)
-	"""
 	def read_sample(self, timestamp):
+		"""
+		Returns the data array of the specific file.
+
+		Parameters
+		----------
+		time : string
+			Specific file name for an array of spectrometer data at a certain time. This will be formatted as [name].[file extension]
+
+		Returns
+		-------
+		data : array
+			A 2 by 3648 data array from the spectrometer (wavelength, intensity)
+		"""
 		file_name = str(timestamp).replace(",","_") + ".bin"
 		f = (self.samples_directory_path / file_name).open("rb")
 		return pickle.load(f)
 
-	"""
-	Task: Returns the two string of the last 2 spectrometer sample files.
-	Inputs: N/A
-	Outputs: a 2x1 String array of the last two spectrometer sample files, with the first being the most recent and the second being the next recent
-	The string will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension]}
-	If less than 2 files exist, then the 2nd (and possibly 1st) string will be an empty string.
-	"""
 	def get_last_two_samples(self):
+		"""
+		Returns the two string of the last 2 spectrometer sample files.
+
+		Returns
+		-------
+		array
+			This will be a 2x1 string array containing the data of the last two spectrometer sample files. The first string being the most recent followed by the second string being the second most recent
+				* Array format: {[most recent file name].[file extension], [next recent file name].[file extension]}
+				* If less than 2 files exist, then the second (and possibly the first) string will be left an empty string
+		"""
 		l = sorted(self.samples_directory_path.glob("*.bin"), reverse=True)
 		if len(l) == 0:
 			return [None] * 2
@@ -71,31 +91,62 @@ class FileManager():
 
 		return l[0:2] # return the most recent, and next oldest spectrometer file paths, in that order
 
-	"""
-	Task: Returns all strings of all spectrometer sample files.
-	Inputs: N/A
-	Returns: a nx1 String array of all n spectrometer sample files, with the first being the most recent and the last being the least recent
-	The string will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], ...}
-	"""
 	def list_all_samples(self):
+		"""
+		Returns strings of all spectrometer sample files.
+
+		Returns
+		-------
+		sample_files : array
+			A nx1 string array of all n spectrometer files sorted from most recent to least recent.
+				* The array will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], ...}
+		"""
 		return sorted(self.samples_directory_path.glob("*.bin"))
 
 	def list_all_logs(self):
+		"""
+		Returns all log files in an array.
+
+		Returns
+		-------
+		log_files : array
+			An array composed of every log file saved on Oasis' sd card
+				* The array will be in the format: {[most recent file], [next most recent file], ...}
+		"""
 		return sorted(self.log_directory_path.glob("*.statlog"))
 
 	def get_latest_log_file(self):
+		"""
+		Returns most recent log file.
+		
+		Returns
+		-------
+		log_file : string
+			A string of the file name for the most recent log file recorded.
+		"""
 		l = sorted(self.log_directory_path.glob("*.statlog"), reverse=True)
 		if len(l) == 0:
 			return None
 		return l[0]
 
-	"""
-	Task: Append data into the log file. May automatically create a new file.
-	Inputs: Bit string data to input.
-	log_reason: 0 = regular time log, 1 = command sent, 2 = new error, 3 = error resolved
-	Returns: integer, 0 for success, other numbers for failure to save file (for debugging purposes)
-	"""
+
 	def log_status(self, status_array, log_reason=0):
+		"""
+		Append data into the log file. May automatically create a new file.
+		Inputs: Bit string data to input.
+
+		Parameters
+		----------
+		status_array : array
+			This is a byte array of status data
+		log_reason : int
+			0 = regular time log, 1 = command sent, 2 = new error, 3 = error resolved
+
+		Returns
+		-------
+		number : int
+			0 = success. Another number = failure to save file (for debugging purposes)
+		"""
 		global STATUS_SIZE, LOGS_PER_FILE
 		data = int(time.time()).to_bytes(4, byteorder="big", signed=True)
 		data += status_array
