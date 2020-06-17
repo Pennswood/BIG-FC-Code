@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>3. Thermal Logic Controller (TLC) Modules &mdash; Oasis  documentation</title>
+  <title>4. Spectrometer Modules &mdash; Oasis  documentation</title>
   
 
   
@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="4. Spectrometer Modules" href="Spectrometer.html" />
-    <link rel="prev" title="2. Rover Modules" href="Rover.html" /> 
+    <link rel="next" title="5. Laser Modules" href="Laser.html" />
+    <link rel="prev" title="3. Thermal Logic Controller (TLC) Modules" href="TLC.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -93,11 +93,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Flight_Computer.html">1. <strong>Flight Computer Modules</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Rover.html">2. <strong>Rover Modules</strong></a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">3. <strong>Thermal Logic Controller (TLC) Modules</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-tlc">3.1. TLC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TLC.html">3. <strong>Thermal Logic Controller (TLC) Modules</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. <strong>Spectrometer Modules</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-spectrometerio">4.1. Spectrometerio</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Spectrometer.html">4. <strong>Spectrometer Modules</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Laser.html">5. <strong>Laser Modules</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Oasis.science.html">6. <strong>Oasis Science Package</strong></a></li>
 </ul>
@@ -145,13 +145,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li><span class="section-number">3. </span><strong>Thermal Logic Controller (TLC) Modules</strong></li>
+      <li><span class="section-number">4. </span><strong>Spectrometer Modules</strong></li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/TLC.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Spectrometer.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -164,49 +164,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="thermal-logic-controller-tlc-modules">
-<h1><span class="section-number">3. </span><strong>Thermal Logic Controller (TLC) Modules</strong><a class="headerlink" href="#thermal-logic-controller-tlc-modules" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-tlc">
-<span id="tlc"></span><h2><span class="section-number">3.1. </span>TLC<a class="headerlink" href="#module-tlc" title="Permalink to this headline">¶</a></h2>
-<p>tlc.py
-Handling communication and data processing with the Thermal Logic Controller (TLC)</p>
+  <div class="section" id="spectrometer-modules">
+<h1><span class="section-number">4. </span><strong>Spectrometer Modules</strong><a class="headerlink" href="#spectrometer-modules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-spectrometerio">
+<span id="spectrometerio"></span><h2><span class="section-number">4.1. </span>Spectrometerio<a class="headerlink" href="#module-spectrometerio" title="Permalink to this headline">¶</a></h2>
+<p>Manages communication with the spectrometer through the SeaBreeze library.</p>
 <dl class="py class">
-<dt id="tlc.TLC">
-<em class="property">class </em><code class="sig-prename descclassname">tlc.</code><code class="sig-name descname">TLC</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">serial_connection</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class to handle communication and data collection of the Thermal Logic Controller (TLC).</p>
+<dt id="spectrometerio.Spectrometer">
+<em class="property">class </em><code class="sig-prename descclassname">spectrometerio.</code><code class="sig-name descname">Spectrometer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">serial</span></em>, <em class="sig-param"><span class="n">file_manager</span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrometerio.Spectrometer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for interacting with the spectrometer through seabreeze.</p>
 <dl class="py method">
-<dt id="tlc.TLC.get_data">
-<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC.get_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a tuple representing the most recent data from the TLC.
-A tuple: array of floats of temperatures in Kelvin, array of integers
-of duty cycle (0 to 255), and the timestamp of the last update</p>
+<dt id="spectrometerio.Spectrometer.sample">
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">milliseconds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrometerio.Spectrometer.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to signal the spectrometer to integrate for a set amount of time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>milliseconds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Inputted integration time for spectrometer</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="tlc.TLC.get_duty_cycles">
-<code class="sig-name descname">get_duty_cycles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC.get_duty_cycles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns an array of unsigned integers (0-255) representing
-the PWM duty cycle set on each heater</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="tlc.TLC.get_temperatures">
-<code class="sig-name descname">get_temperatures</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC.get_temperatures" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns an array of floats representing the temperatures of the thermisters in Kelvin</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="tlc.TLC.ping">
-<code class="sig-name descname">ping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlc.TLC.ping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a PING command to the TLC</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt id="tlc.read_tlc_stream">
-<code class="sig-prename descclassname">tlc.</code><code class="sig-name descname">read_tlc_stream</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tlc</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tlc.read_tlc_stream" title="Permalink to this definition">¶</a></dt>
-<dd><p>Thread loop that continuously reads the stream of serial data from the TLC</p>
 </dd></dl>
 
 </div>
@@ -220,10 +197,10 @@ the PWM duty cycle set on each heater</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Spectrometer.html" class="btn btn-neutral float-right" title="4. Spectrometer Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Laser.html" class="btn btn-neutral float-right" title="5. Laser Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Rover.html" class="btn btn-neutral float-left" title="2. Rover Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="TLC.html" class="btn btn-neutral float-left" title="3. Thermal Logic Controller (TLC) Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

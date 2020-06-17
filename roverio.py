@@ -92,12 +92,12 @@ class Rover():
 		'''
 		Task: Organizes all the status logs into a byte array
 		Inputs:
-				An integer laser_status
-				An integer spec_status
-				A float array temp_data
-				An int (0-255) array efdc (etch foil duty cycle)
-				A boolean array error_codes
-				A byte prev_cmd
+			An integer laser_status
+			An integer spec_status
+			A float array temp_data
+			An int (0-255) array efdc (etch foil duty cycle)
+			A boolean array error_codes
+			A byte prev_cmd
 		Return: A bytearray of status log
 		'''
 		status_array = bytearray()

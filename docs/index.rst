@@ -1,20 +1,37 @@
 .. Oasis documentation master file, created by
-   sphinx-quickstart on Wed Jun 10 15:51:49 2020.
+   sphinx-quickstart on Wed Jun 10 18:01:00 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Oasis's documentation!
-=================================
+**Penn State SSPL Oasis Documentation**
+=======================================
 
-.. automodule:: tlc
-   :members:
-
-.. automodule:: roverio
-   :members:
+The BeagleBone and TLC code for NASA's 2020 BIG Idea Challenge, Penn State team.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
+   :caption: Components and Requirements:
+
+   Components
+
+   Requirements
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Table of Contents:
+   :numbered:
+
+   Flight_Computer
+
+   Rover
+
+   TLC
+
+   Spectrometer
+
+   Laser
+
+   Oasis.science
 
 Indices and tables
 ==================
