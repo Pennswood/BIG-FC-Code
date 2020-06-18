@@ -53,8 +53,8 @@ class FileManager():
 		# TODO: other numbers for failure to save file (for debugging purposes)
 		file_name = str(timestamp).replace(".","_") + ".bin" # Get the filename from the timestamp and extension
 		f = (self.samples_directory_path / file_name).open("wb")
-		for i in range(data):
-			for j in range(data[i]):
+		for i in range(len(data)):
+			for j in range(len(data[i])):
 				data[i][j] = bytes(struct.pack("f",data[i][j]))
 				f.write(data)
 		#pickle.dump(data, f) # This writes the data
