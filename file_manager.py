@@ -56,7 +56,7 @@ class FileManager():
 		for i in range(len(data)):
 			for j in range(len(data[i])):
 				data[i][j] = bytes(struct.pack("f",data[i][j]))
-				f.write(data)
+				f.write(data[i][j])
 		#pickle.dump(data, f) # This writes the data
 		f.close()
 		return
