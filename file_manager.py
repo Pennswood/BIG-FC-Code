@@ -28,7 +28,10 @@ manifest.log Format
 import pickle
 import os
 import time
+import oasis_config
+import unireedsolomon as rs
 from pathlib import Path
+import struct
 
 from oasis_config import LOGS_PER_FILE, STATUS_SIZE
 
@@ -41,7 +44,11 @@ class FileManager():
 	def save_sample(self, timestamp, data):
 		file_name = str(timestamp).replace(".","_") + ".bin" # Get the filename from the timestamp and extension
 		f = (self.samples_directory_path / file_name).open("wb")
-		pickle.dump(data, f) # This writes the data
+		for i in range(data):
+			for j in range(data[i]):
+				data[i][j] = bytes(struct.pack("f",data[i][j]))
+				f.write(data)
+		#pickle.dump(data, f) # This writes the data
 		f.close()
 		return
 
@@ -53,7 +60,12 @@ class FileManager():
 	def read_sample(self, timestamp):
 		file_name = str(timestamp).replace(",","_") + ".bin"
 		f = (self.samples_directory_path / file_name).open("rb")
-		return pickle.load(f)
+		output = [[],[]]
+		for x in range(oasis_config.SPECTROMETER_PIXEL_NUMBER):
+			output[0].append(struct.unpack("f",f.read(4)))
+		for x in range(oasis_config.SPECTROMETER_PIXEL_NUMBER):
+			output[1].append(struct.unpack("f",f.read(4)))
+		return output
 
 	"""
 	Task: Returns the two string of the last 2 spectrometer sample files.
