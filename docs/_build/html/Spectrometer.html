@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; Oasis  documentation</title>
+  <title>4. Spectrometer Modules &mdash; Oasis  documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script src="_static/searchtools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -36,7 +35,9 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="5. Laser Modules" href="Laser.html" />
+    <link rel="prev" title="3. Thermal Logic Controller (TLC) Modules" href="TLC.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -66,7 +67,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -89,11 +90,14 @@
 <li class="toctree-l1"><a class="reference internal" href="Requirements.html"><strong>Requirements</strong></a></li>
 </ul>
 <p class="caption"><span class="caption-text">Table of Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Flight_Computer.html">1. <strong>Flight Computer Modules</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Rover.html">2. <strong>Rover Modules</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="TLC.html">3. <strong>Thermal Logic Controller (TLC) Modules</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="Spectrometer.html">4. <strong>Spectrometer Modules</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. <strong>Spectrometer Modules</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-spectrometerio">4.1. Spectrometerio</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Laser.html">5. <strong>Laser Modules</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Oasis.science.html">6. <strong>Oasis Science Package</strong></a></li>
 </ul>
@@ -141,12 +145,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Search</li>
+      <li><span class="section-number">4. </span><strong>Spectrometer Modules</strong></li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/Spectrometer.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -158,24 +164,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search
-      functionality.
-    </p>
-  </div>
-  </noscript>
+  <div class="section" id="spectrometer-modules">
+<h1><span class="section-number">4. </span><strong>Spectrometer Modules</strong><a class="headerlink" href="#spectrometer-modules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-spectrometerio">
+<span id="spectrometerio"></span><h2><span class="section-number">4.1. </span>Spectrometerio<a class="headerlink" href="#module-spectrometerio" title="Permalink to this headline">¶</a></h2>
+<p>Manages communication with the spectrometer through the SeaBreeze library.</p>
+<dl class="py class">
+<dt id="spectrometerio.Spectrometer">
+<em class="property">class </em><code class="sig-prename descclassname">spectrometerio.</code><code class="sig-name descname">Spectrometer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">serial</span></em>, <em class="sig-param"><span class="n">file_manager</span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrometerio.Spectrometer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for interacting with the spectrometer through seabreeze.</p>
+<dl class="py method">
+<dt id="spectrometerio.Spectrometer.sample">
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">milliseconds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrometerio.Spectrometer.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to signal the spectrometer to integrate for a set amount of time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>milliseconds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Inputted integration time for spectrometer</p>
+</dd>
+</dl>
+</dd></dl>
 
-  
-  <div id="search-results">
-  
-  </div>
+</dd></dl>
+
+</div>
+</div>
+
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Laser.html" class="btn btn-neutral float-right" title="5. Laser Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="TLC.html" class="btn btn-neutral float-left" title="3. Thermal Logic Controller (TLC) Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -208,14 +235,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

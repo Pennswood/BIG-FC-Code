@@ -2,16 +2,12 @@
 laserio.py
 Manages the laser used for LIBS. Reads status/error codes from laser and handles initialization and arming.
 
-Task:
-		This function can be expected to be continuously called until laser is warmed up.
-Input: none
-Output: Integer. 0 = laser warmed up, 1 = laser warming up, 2 = TLC warming module up, >2 = some sort of error.
-
 Random Notes:
-1) Laser Enable – "This enables the laser and readies it for firing. Note: there will be an 8
+1. Laser Enable – "This enables the laser and readies it for firing. Note: there will be an 8
 second delay between when the laser is first enabled and the laser is able to fire." uJewel manual
 
-2) Laser Status Bits:	Bit 15: Spare
+2. Laser Status Bits    
+IGNORE:					Bit 15: Spare
 						Bit 14: Spare
 						Bit 13: High-Power Mode
 						Bit 12: Low-Power Mode
@@ -27,10 +23,69 @@ second delay between when the laser is first enabled and the laser is able to fi
 						Bit	 2: Reserved
 						Bit	 1: Laser Active				// Laser is firing
 						Bit	 0: Laser Enabled				// "laser is ready to fire". Armed/Disarmed state.
+IGNORE
 
-^^^This will be converted to a Sphinx table after I learn how to do that^^^
+.. list-table:: Laser Status Bits
+   :widths: 25 25 100
+   :header-rows: 1
 
-3) Confirm power mode with Science team
+   * - Bit
+     - uJewel Doc Name
+     - Explanation
+   * - 15
+     - Spare
+     - 
+   * - 14
+     - Spare
+     - 
+   * - 13
+     - High-Power Mode
+     - 
+   * - 12
+     - Low-Power Mode
+     -
+   * - 11
+     - Ready To Fire
+     - Laser is enabled AND ready to fire. See note 1.
+   * - 10
+     - Ready To Enable
+     - Proxy for laser is warmed up? Laser is warmed up and therefore CAN be enabled (armed/disarmed).
+   * - 9
+     - Power Failure
+     - Undocumented "feature". There must be a uC pulling usb power. (uhh boss, how do you tell me you've had a power failure when you don't have the power to respond? USB Power?)
+   * - 8
+     - Electrical Over Temp
+     - 
+   * - 7
+     - Resonator Over Temp
+     -
+   * - 6
+     - External Interlock
+     - (not used?)
+   * - 5
+     - Reserved
+     -
+   * - 4
+     - Reserved
+     - 
+   * - 3
+     - Diode External Trigger
+     - 
+   * - 2
+     - Reserved
+     -
+   * - 1
+     - Laser Active
+     - Laser is firing
+   * - 0
+     - Laser Enabled
+     - "laser is ready to fire". Armed/Disarmed state.
+
+3. Confirm power mode with Science team. Will power mode change with the uJewel modded to 13mJ from the base 8mJ?
+
+4. Used ":member-order: bysource" in the .rst file for laserio to get Enums to sort by #. The global for :member-order must be alphabetical for CDH.
+
+5. Used https://stackoverflow.com/questions/26534184/can-sphinx-ignore-certain-tags-in-python-docstrings to fix line wrapping in Sphinx's HTML talbes
 
 """
 from enum import IntEnum, Enum
@@ -63,6 +118,7 @@ class LASER_STATE(Enum):
 
 # Define the locations of the status bit
 class LASER_STATUS_BITS(IntEnum):
+	"""Possible Laser States. This is ***NOT*** the status value returned by pinging the laser."""
 	SPARE_1 = 15
 	SPARE_2 = 14
 	HIGH_POWER_MODE = 13
@@ -83,6 +139,7 @@ class LASER_STATUS_BITS(IntEnum):
 # Configure the laser mode
 # When should we check this?
 class LASER_CONFIG(Enum):
+	"""Configuration parameters for the uJewel."""
 	ENERGY_MODE = 2			# High power. We barely have enough poewr to ablate with this level.
 	DIODE_TRIGGER_MODE = 0	# Internal trigger, meaning we use commands to fire the laser rather than a GPIO pin.
 	MODE = 1				# Single shot
@@ -94,14 +151,15 @@ status_bit_array = [0] * 16
 class Laser():
 
 
-	# Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
-	# need to laser inactive, laser disabled, laser not ready to fire, laser not ready to enable
-	# 1) get the status
-	# 2) check relevent status bits for hazards
-	#	a) check if already warmed-up: ready-to-enable.
-	#	b) check if beyond warm-up state: laser active, laser enabled, laser ready-to-fire
-	# 3) if safe, send the warm-up command (send power to the laser)
+	
 	def warm_up_laser(self):
+		"""Laser is powered-up and DISARMED. While warming up, state is 1. When warmed up, state is 2.
+			needs: laser inactive, laser disabled, laser not ready to fire, laser not ready to enable
+		 		1. Get the status
+		 		2. Check relevent status bits for hazards
+	        		a) check if already warmed-up: ready-to-enable.
+	        		b) check if beyond warm-up state: laser active, laser enabled, laser ready-to-fire
+	     		3. if safe, send the warm-up command (send power to the laser)"""
 		status = self.get_status()	
 		SBArray = self.get_status_array(status)
 		self.oasis_serial.sendBytes(b'\x01')

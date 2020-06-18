@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 """
-tlc.py
 Handling communication and data processing with the Thermal Logic Controller (TLC)
 """
 import threading
@@ -8,7 +7,14 @@ import time
 from oasis_config import THERMISTER_COUNT, DUTY_CYCLE_COUNT
 
 def read_tlc_stream(tlc):
-	"""Thread loop that continuously reads the stream of serial data from the TLC"""
+	"""
+	Thread loop that continuously reads the stream of serial data from the TLC
+
+	Parameters
+	----------
+	tlc : object
+		A TLC Object
+	"""
 	while tlc.running:
 		while tlc.tlc_serial.in_waiting() == 0:
 			a = b'' # do nothing
@@ -43,27 +49,50 @@ def read_tlc_stream(tlc):
 					tlc.read_lock.release()
 
 class TLC():
-	"""Class to handle communication and data collection of the Thermal Logic Controller (TLC)."""
+	"""
+	Class to handle communication and data collection of the Thermal Logic Controller (TLC).
+	"""
 
 	def get_temperatures(self):
-		"""Returns an array of floats representing the temperatures of the thermisters in Kelvin"""
+		"""
+		Gets the temperatures of the thermisters in Kelvin
+
+		Returns
+		-------
+		array
+			An array of floats representing the temperature (Kelvin)
+		"""
 		self.read_lock.acquire()
 		t = self.temperatures
 		self.read_lock.release()
 		return t
 
 	def get_duty_cycles(self):
-		"""Returns an array of unsigned integers (0-255) representing
-		the PWM duty cycle set on each heater"""
+		"""
+		Gets the PWM duty cycle set on each heater
+
+		Returns
+		-------
+		array
+			An array of unsigned ints (0-255) representing the duty cycle
+		"""
 		self.read_lock.acquire()
 		d = self.duty_cycles
 		self.read_lock.release()
 		return d
 
 	def get_data(self):
-		"""Returns a tuple representing the most recent data from the TLC.
-		A tuple: array of floats of temperatures in Kelvin, array of integers
-		of duty cycle (0 to 255), and the timestamp of the last update
+		"""
+		Gets the most recent data from the TLC.
+		
+		Returns
+		-------
+		tuple
+			A tuple that contains 2 arrays and a string
+
+			* An array of floats representing temperatures (Kelvin)
+			* An array of unsigned ints (0-255) representing duty cycles
+			* An string representing the timestamp of the last update
 		"""
 		self.read_lock.acquire()
 		d = self.duty_cycles
@@ -73,7 +102,9 @@ class TLC():
 		return t, d, s
 
 	def ping(self):
-		"""Sends a PING command to the TLC"""
+		"""
+		Sends a PING command to the TLC
+		"""
 		self.tlc_serial.send_bytes(b'\x01') #TODO: Replace this with the correct PING command code
 		# TODO: Implement a return value to indicate if the PING was successful or not
 

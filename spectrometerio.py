@@ -37,10 +37,6 @@ class Spectrometer():
 		----------
 		milliseconds : int
 			Inputted integration time for spectrometer
-		
-		Returns
-		-------
-		None
 		"""
 		self.spec.trigger_mode = 0 # Setting the trigger mode to normal
 		self.spec.integration_time_micros(milliseconds*1000) # Set integration time for spectrometer
