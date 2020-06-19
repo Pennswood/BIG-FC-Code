@@ -172,6 +172,7 @@ class FileManager():
 			self.log_file = self.current_log_file_path.open("ab", buffering=STATUS_SIZE)
 
 	def __init__(self, sd_path, flash_path):
+		""" I am the constructor """
 		self.sd_path = sd_path
 		if not sd_path.exists():
 			print("WARNING: SD_PATH " + str(sd_path) + " does not exist! Attempting to create...")

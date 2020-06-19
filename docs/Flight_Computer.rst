@@ -12,6 +12,7 @@ File Manager
 .. automodule:: file_manager
     :members:
     :undoc-members:
+    :special-members: __init__
 
 Oasis Configuration
 --------------------
@@ -26,6 +27,7 @@ Oasis Serial
 .. automodule:: oasis_serial
     :members:
     :undoc-members:
+    :special-members: __init__
 
 Read Log
 ------------------
@@ -33,6 +35,7 @@ Read Log
 .. automodule:: read_log
     :members:
     :undoc-members:
+    :special-members: __init__
 
 Repeated Timer
 ------------------
@@ -40,6 +43,7 @@ Repeated Timer
 .. automodule:: repeated_timer
     :members:
     :undoc-members:
+    :special-members: __init__
 
 View Oasis Log
 ------------------
@@ -54,3 +58,4 @@ Debug
 .. automodule:: debug
     :members:
     :undoc-members:
+    :special-members: __init__

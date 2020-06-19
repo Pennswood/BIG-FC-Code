@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Spectrometer.html">4. <strong>Spectrometer Modules</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Laser.html">5. <strong>Laser Modules</strong></a></li>
 <li class="toctree-l1"><a class="reference internal" href="Oasis.science.html">6. <strong>Oasis Science Package</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">7. <strong>Oasis Constants</strong></a></li>
 </ul>
 
             
@@ -223,7 +224,14 @@ If you need to save a file please use/call functions here</p>
 <dl class="py class">
 <dt id="file_manager.FileManager">
 <em class="property">class </em><code class="sig-prename descclassname">file_manager.</code><code class="sig-name descname">FileManager</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sd_path</span></em>, <em class="sig-param"><span class="n">flash_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>I am the constructor</p>
+<dl class="py method">
+<dt id="file_manager.FileManager.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sd_path</span></em>, <em class="sig-param"><span class="n">flash_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>I am the constructor</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="file_manager.FileManager.get_last_two_samples">
 <code class="sig-name descname">get_last_two_samples</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.get_last_two_samples" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the two string of the last 2 spectrometer sample files.</p>
@@ -374,6 +382,17 @@ Handles low level reading of integers, strings, floats, files.</p>
 Passing debug_mode=True will cause this to open up a UDP
 server to receive debug serial data, and will write all
 serial data to a UDP port as well</p>
+<p>When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
+debug_rx_port will be the UDP port that we will listen to for incoming connections
+debug_tx_port will be the UDP port that we will connect to when sending bytes</p>
+<dl class="py method">
+<dt id="oasis_serial.OasisSerial.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">serial_device</span></em>, <em class="sig-param"><span class="n">baud_rate</span><span class="o">=</span><span class="default_value">9600</span></em>, <em class="sig-param"><span class="n">debug_mode</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">debug_rx_port</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">debug_tx_port</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">rx_print_prefix</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#oasis_serial.OasisSerial.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
+debug_rx_port will be the UDP port that we will listen to for incoming connections
+debug_tx_port will be the UDP port that we will connect to when sending bytes</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="oasis_serial.OasisSerial.in_waiting">
 <code class="sig-name descname">in_waiting</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#oasis_serial.OasisSerial.in_waiting" title="Permalink to this definition">¶</a></dt>
@@ -477,6 +496,12 @@ Allows for a timer to be set every _interval_ seconds to execute a function.</p>
 <dt id="repeated_timer.RepeatedTimer">
 <em class="property">class </em><code class="sig-prename descclassname">repeated_timer.</code><code class="sig-name descname">RepeatedTimer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">interval</span></em>, <em class="sig-param"><span class="n">function</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#repeated_timer.RepeatedTimer" title="Permalink to this definition">¶</a></dt>
 <dd><p>RepeatedTimer calls a function every _interval_ seconds until stop() is called.</p>
+<dl class="py method">
+<dt id="repeated_timer.RepeatedTimer.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">interval</span></em>, <em class="sig-param"><span class="n">function</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#repeated_timer.RepeatedTimer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="repeated_timer.RepeatedTimer.start">
 <code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#repeated_timer.RepeatedTimer.start" title="Permalink to this definition">¶</a></dt>

@@ -7,3 +7,4 @@ TLC
 .. automodule:: tlc
     :members:
     :undoc-members:
+    :special-members: __init__
