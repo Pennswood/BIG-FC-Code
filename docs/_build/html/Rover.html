@@ -188,69 +188,115 @@ This should really be refactored.</p>
 <dl class="py method">
 <dt id="roverio.Rover.all_spectrometer_data">
 <code class="sig-name descname">all_spectrometer_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.all_spectrometer_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Task: sends all spectrometer data to the rover
-Returns: integer, 0 for success, other numbers for failure to open file (for debugging purposes)</p>
+<dd><p>Sends all spectrometer data to the rover</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>success</strong> – This will return 0 for success, otherwise this will return other numbers for failure to open file (for debugging purposes)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roverio.Rover.clock_sync">
 <code class="sig-name descname">clock_sync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.clock_sync" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called when the CLOCK SYNC command code is received. Sets the system clock to the
-received UNIX timestamp.</p>
+<dd><p>Called when the CLOCK SYNC command code is received. Sets the system clock to the received UNIX timestamp.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roverio.Rover.get_status_array">
 <code class="sig-name descname">get_status_array</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">temp_data</span></em>, <em class="sig-param"><span class="n">efdc</span></em>, <em class="sig-param"><span class="n">error_codes</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.get_status_array" title="Permalink to this definition">¶</a></dt>
-<dd><p>Task: Organizes all the status logs into a byte array
-Inputs:</p>
-<blockquote>
-<div><p>An integer laser_status
-An integer spec_status
-A float array temp_data
-An int (0-255) array efdc (etch foil duty cycle)
-A boolean array error_codes
-A byte prev_cmd</p>
-</div></blockquote>
-<p>Return: A bytearray of status log</p>
+<dd><p>Organizes all the status logs into a byte array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>laser_status</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – This integer represents the state of the laser</p></li>
+<li><p><strong>spec_status</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – This integer represents the state of the spectrometer</p></li>
+<li><p><strong>temp_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A float array of tempurature data</p></li>
+<li><p><strong>duty_cycle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – An int (0-255) array efdc (etch foil duty cycle)</p></li>
+<li><p><strong>error_codes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A boolean array containing error codes</p></li>
+<li><p><strong>prev_cmd</strong> (<em>byte</em>) – A byte representing the last command send from rover</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>byte_array</strong> – A byte array of status log</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roverio.Rover.ping">
 <code class="sig-name descname">ping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.ping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Task: sends a response to the rover.
-Input: An OasisSerial object
-Returns: a boolean value, True for success and False for unsuccessful</p>
+<dd><p>Sends a response to the rover.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>oasis_serial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – An Oasis Serial object</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>successful</strong> – Returns True for success and False for unsuccessful</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roverio.Rover.send_cmd_rejected_response">
 <code class="sig-name descname">send_cmd_rejected_response</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">active_errors</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.send_cmd_rejected_response" title="Permalink to this definition">¶</a></dt>
-<dd><p>Task: sends the command rejected response for roverio
-Input: int for laser status, int for spectrometer status,                       21X1 boolean array for active errors, bytes for prev_cmd
-Returns: None</p>
+<dd><p>Sends the command rejected response for roverio</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>laser_status</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – This integer represents the state of the laser</p></li>
+<li><p><strong>spec_status</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – This integer represents the state of the spectrometer</p></li>
+<li><p><strong>active_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A 21x1 boolean array for active errors</p></li>
+<li><p><strong>prev_cmd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.8)"><em>bytes</em></a>) – These hold the most recent command send from the rover</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roverio.Rover.status_dump">
 <code class="sig-name descname">status_dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.status_dump" title="Permalink to this definition">¶</a></dt>
-<dd><p>Task: dumps all the status file information to the rover
-Inputs:</p>
+<dd><p>Dumps all the status file information to the rover</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roverio.Rover.status_request">
 <code class="sig-name descname">status_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">temp_data</span></em>, <em class="sig-param"><span class="n">efdc</span></em>, <em class="sig-param"><span class="n">error_codes</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.status_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Task: sends back a byte list of status data (in accordance to table III in rover commands)
-Inputs: A byte array of status logs
-Returns: integer, 0 for success, other numbers for failure to send data</p>
+<dd><p>Sends back a byte list of status data (in accordance to table III in rover commands)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>byte_array</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A byte array of status logs</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>success</strong> – integer, 0 for success, other numbers for failure to send data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roverio.Rover.transfer_sample">
 <code class="sig-name descname">transfer_sample</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roverio.Rover.transfer_sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends the two most recent spectrometer sample files.
-Returns: 0 for successful completion, 1 for error</p>
+<dd><p>Sends the two most recent spectrometer sample files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>success</strong> – 0 for successful completion, 1 for error</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
