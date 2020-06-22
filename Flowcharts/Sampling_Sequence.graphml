@@ -13,25 +13,8 @@
   <key attr.name="description" attr.type="string" for="edge" id="d9"/>
   <key for="edge" id="d10" yfiles.type="edgegraphics"/>
   <graph edgedefault="directed" id="G">
-    <data key="d0"/>
+    <data key="d0" xml:space="preserve"/>
     <node id="n0">
-      <data key="d6">
-        <y:GenericNode configuration="com.yworks.flowchart.process">
-          <y:Geometry height="839.4084999999997" width="512.8124999999995" x="40.73666869530962" y="54.87049999999999"/>
-          <y:Fill color="#FFCC00" color2="#FFCC00" transparent="false"/>
-          <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="254.40624999999977" y="417.70424999999983">
-            <y:LabelModel>
-              <y:SmartNodeLabelModel distance="4.0"/>
-            </y:LabelModel>
-            <y:ModelParameter>
-              <y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/>
-            </y:ModelParameter>
-          </y:NodeLabel>
-        </y:GenericNode>
-      </data>
-    </node>
-    <node id="n1">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.decision">
           <y:Geometry height="110.25" width="201.5" x="272.6429186953094" y="168.37274999999994"/>
@@ -42,7 +25,7 @@ WARMED UP?<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y
         </y:GenericNode>
       </data>
     </node>
-    <node id="n2">
+    <node id="n1">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.process">
           <y:Geometry height="53.0" width="144.0" x="301.3929186953094" y="319.37274999999994"/>
@@ -53,7 +36,7 @@ is WARMED UP<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel>
         </y:GenericNode>
       </data>
     </node>
-    <node id="n3">
+    <node id="n2">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.process">
           <y:Geometry height="53.0" width="144.0" x="301.3929186953094" y="398.3571250000002"/>
@@ -64,7 +47,7 @@ command<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:Mo
         </y:GenericNode>
       </data>
     </node>
-    <node id="n4">
+    <node id="n3">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.decision">
           <y:Geometry height="110.25" width="192.75" x="277.0179186953094" y="477.2399375"/>
@@ -75,7 +58,7 @@ reports ARMED<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel
         </y:GenericNode>
       </data>
     </node>
-    <node id="n5">
+    <node id="n4">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.process">
           <y:Geometry height="45.0" width="144.0" x="301.3929186953094" y="640.6227499999998"/>
@@ -86,7 +69,7 @@ laser to FIRE<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel
         </y:GenericNode>
       </data>
     </node>
-    <node id="n6">
+    <node id="n5">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.process">
           <y:Geometry height="53.0" width="144.0" x="211.89791869530927" y="719.62275"/>
@@ -96,7 +79,7 @@ laser to FIRE<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel
         </y:GenericNode>
       </data>
     </node>
-    <node id="n7">
+    <node id="n6">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.process">
           <y:Geometry height="53.0" width="144.0" x="383.0179186953094" y="719.62275"/>
@@ -106,7 +89,7 @@ laser to FIRE<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel
         </y:GenericNode>
       </data>
     </node>
-    <node id="n8">
+    <node id="n7">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.process">
           <y:Geometry height="53.0" width="144.0" x="297.0179186953094" y="829.62275"/>
@@ -117,7 +100,7 @@ is stored<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:
         </y:GenericNode>
       </data>
     </node>
-    <node id="n9">
+    <node id="n8">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.process">
           <y:Geometry height="69.5" width="143.25" x="73.79916869530962" y="183.62274999999994"/>
@@ -129,7 +112,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:GenericNode>
       </data>
     </node>
-    <node id="n10">
+    <node id="n9">
       <data key="d6">
         <y:GenericNode configuration="com.yworks.flowchart.process">
           <y:Geometry height="53.0" width="161.0" x="217.0491686953094" y="66.71650000000002"/>
@@ -140,7 +123,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:GenericNode>
       </data>
     </node>
-    <edge id="e0" source="n1" target="n1">
+    <edge id="e0" source="n0" target="n0">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -153,7 +136,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e1" source="n1" target="n2">
+    <edge id="e1" source="n0" target="n1">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -164,7 +147,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e2" source="n2" target="n3">
+    <edge id="e2" source="n1" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -174,7 +157,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e3" source="n4" target="n4">
+    <edge id="e3" source="n3" target="n3">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -187,7 +170,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e4" source="n3" target="n4">
+    <edge id="e4" source="n2" target="n3">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -197,7 +180,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e5" source="n4" target="n5">
+    <edge id="e5" source="n3" target="n4">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -208,7 +191,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e6" source="n5" target="n6">
+    <edge id="e6" source="n4" target="n5">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -221,7 +204,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e7" source="n5" target="n7">
+    <edge id="e7" source="n4" target="n6">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -234,7 +217,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e8" source="n6" target="n8">
+    <edge id="e8" source="n5" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -247,7 +230,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e9" source="n7" target="n8">
+    <edge id="e9" source="n6" target="n7">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -260,7 +243,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e10" source="n10" target="n9">
+    <edge id="e10" source="n9" target="n8">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -273,7 +256,7 @@ spectra) is sampled<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Labe
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e11" source="n10" target="n1">
+    <edge id="e11" source="n9" target="n0">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
