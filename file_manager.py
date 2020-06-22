@@ -29,7 +29,10 @@ manifest.log format
 import pickle
 import os
 import time
+import oasis_config
+import unireedsolomon as rs
 from pathlib import Path
+import struct
 
 from oasis_config import LOGS_PER_FILE, STATUS_SIZE
 
@@ -50,7 +53,11 @@ class FileManager():
 		# TODO: other numbers for failure to save file (for debugging purposes)
 		file_name = str(timestamp).replace(".","_") + ".bin" # Get the filename from the timestamp and extension
 		f = (self.samples_directory_path / file_name).open("wb")
-		pickle.dump(data, f) # This writes the data
+		for i in range(len(data)):
+			for j in range(len(data[i])):
+				data[i][j] = bytes(struct.pack("f",data[i][j]))
+				f.write(data[i][j])
+		#pickle.dump(data, f) # This writes the data
 		f.close()
 		return
 
@@ -70,7 +77,12 @@ class FileManager():
 		"""
 		file_name = str(timestamp).replace(",","_") + ".bin"
 		f = (self.samples_directory_path / file_name).open("rb")
-		return pickle.load(f)
+		output = [[],[]]
+		for x in range(oasis_config.SPECTROMETER_PIXEL_NUMBER):
+			output[0].append(struct.unpack("f",f.read(4)))
+		for x in range(oasis_config.SPECTROMETER_PIXEL_NUMBER):
+			output[1].append(struct.unpack("f",f.read(4)))
+		return output
 
 	def get_last_two_samples(self):
 		"""
@@ -160,6 +172,7 @@ class FileManager():
 			self.log_file = self.current_log_file_path.open("ab", buffering=STATUS_SIZE)
 
 	def __init__(self, sd_path, flash_path):
+		""" I am the constructor """
 		self.sd_path = sd_path
 		if not sd_path.exists():
 			print("WARNING: SD_PATH " + str(sd_path) + " does not exist! Attempting to create...")

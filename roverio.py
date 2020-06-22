@@ -14,19 +14,38 @@ class Rover():
 	"""
 	def ping(self):
 		"""
-		Task: sends a response to the rover.
-		Input: An OasisSerial object
-		Returns: a boolean value, True for success and False for unsuccessful
+		Sends a response to the rover.
+		
+		Parameters
+		----------
+		oasis_serial : object
+			An Oasis Serial object
+
+		Returns
+		-------
+		successful : boolean
+			Returns True for success and False for unsuccessful
 		"""
 		print("INFO: Got PING, sending PONG back")
 		self.oasis_serial.send_bytes(b'\x01')
 
 	def send_cmd_rejected_response(self, laser_status, spec_status, active_errors, prev_cmd):
 		'''
-		Task: sends the command rejected response for roverio
-		Input: int for laser status, int for spectrometer status,\
-			21X1 boolean array for active errors, bytes for prev_cmd
-		Returns: None
+		Sends the command rejected response for roverio
+
+		Parameters
+		----------
+		laser_status : int
+			This integer represents the state of the laser
+
+		spec_status : int
+			This integer represents the state of the spectrometer
+		
+		active_errors : list
+			A 21x1 boolean array for active errors
+
+		prev_cmd : bytes
+			These hold the most recent command send from the rover
 		'''
 		cmd_rejected_array = bytearray()
 
@@ -65,8 +84,12 @@ class Rover():
 
 	def all_spectrometer_data(self):
 		"""
-		Task: sends all spectrometer data to the rover
-		Returns: integer, 0 for success, other numbers for failure to open file (for debugging purposes)
+		Sends all spectrometer data to the rover
+
+		Returns
+		-------
+		success : int
+			This will return 0 for success, otherwise this will return other numbers for failure to open file (for debugging purposes)
 		"""
 		self.oasis_serial.send_bytes(b'\x14')			# send nominal response directory_start
 		self.oasis_serial.send_string("samples/;")		# send directory name
@@ -90,15 +113,32 @@ class Rover():
 	# TODO: add comments for what each sendBytes indicates and what inputs are expected
 	def get_status_array(self, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
 		'''
-		Task: Organizes all the status logs into a byte array
-		Inputs:
-			An integer laser_status
-			An integer spec_status
-			A float array temp_data
+		Organizes all the status logs into a byte array
+
+		Parameters
+		----------
+		laser_status : int
+			This integer represents the state of the laser
+		
+		spec_status : int
+			This integer represents the state of the spectrometer
+
+		temp_data : list
+			A float array of tempurature data
+
+		duty_cycle : list
 			An int (0-255) array efdc (etch foil duty cycle)
-			A boolean array error_codes
-			A byte prev_cmd
-		Return: A bytearray of status log
+
+		error_codes : list
+			A boolean array containing error codes
+		
+		prev_cmd : byte
+			A byte representing the last command send from rover
+
+		Return
+		------
+		byte_array : list
+			A byte array of status log
 		'''
 		status_array = bytearray()
 
@@ -145,9 +185,17 @@ class Rover():
 
 	def status_request(self, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
 		"""
-		Task: sends back a byte list of status data (in accordance to table III in rover commands)
-		Inputs: A byte array of status logs
-		Returns: integer, 0 for success, other numbers for failure to send data
+		Sends back a byte list of status data (in accordance to table III in rover commands)
+		
+		Parameters
+		----------
+		byte_array : list
+			A byte array of status logs
+		
+		Returns
+		-------
+		success : int
+			integer, 0 for success, other numbers for failure to send data
 		"""
 		self.oasis_serial.send_bytes(b'\x10') # send nominal response status_message
 		status_array = self.get_status_array(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd)
@@ -161,8 +209,7 @@ class Rover():
 
 	def status_dump(self):
 		'''
-		Task: dumps all the status file information to the rover
-		Inputs:
+		Dumps all the status file information to the rover
 		'''
 		self.oasis_serial.send_bytes(b'\x14') # send nominal response directory_start
 		self.oasis_serial.send_string("logs/;") # send directory name
@@ -182,7 +229,11 @@ class Rover():
 	def transfer_sample(self):
 		"""
 		Sends the two most recent spectrometer sample files.
-		Returns: 0 for successful completion, 1 for error
+
+		Returns
+		-------
+		success : int
+			0 for successful completion, 1 for error
 		"""
 		recent_two = self.fm.get_last_two_samples() # Saves last 2 spectrometer files to recent_two
 		for i in recent_two: # Iterating through both files
@@ -202,8 +253,7 @@ class Rover():
 
 	def clock_sync(self):
 		"""
-		Called when the CLOCK SYNC command code is received. Sets the system clock to the
-		received UNIX timestamp.
+		Called when the CLOCK SYNC command code is received. Sets the system clock to the received UNIX timestamp.
 		"""
 		t = self.oasis_serial.read_signed_integer()
 		if t is None:

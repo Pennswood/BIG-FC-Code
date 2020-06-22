@@ -31,6 +31,10 @@ author = 'Penn State SSPL'
 # ones.
 extensions = ['sphinx.ext.autodoc','sphinx.ext.napoleon','sphinx.ext.intersphinx']
 
+# Add __init__ class to documentation as well as normal methods
+autoclass_content = 'both'
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
