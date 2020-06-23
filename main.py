@@ -11,6 +11,7 @@ from repeated_timer import RepeatedTimer
 import roverio
 import file_manager
 import oasis_serial
+import oasis_config
 import laserio
 import spectrometerio
 import error_checking
@@ -80,10 +81,12 @@ def main_loop():
 			threading.Thread(target=laser.laser_off).start()
 
 		elif command == b'\x07':
-			threading.Thread(target=spectrometer.sample, args=(10,)).start()
+			threading.Thread(target=spectrometer.sample, args=(oasis_config.SPECTROMETER_SAMPLE_DURATION_MS,)).start()
 
 		elif command == b'\x08':
-			threading.Thread(target=spectrometer.sample, args=(20,)).start()
+			# depriciated
+			pass
+			# threading.Thread(target=spectrometer.sample, args=(20,)).start()
 
 		elif command == b'\x09':
 			files_transferring = True

@@ -53,11 +53,26 @@ class FileManager():
 		# TODO: other numbers for failure to save file (for debugging purposes)
 		file_name = str(timestamp).replace(".","_") + ".bin" # Get the filename from the timestamp and extension
 		f = (self.samples_directory_path / file_name).open("wb")
+		write_byte_stream = b""
 		for i in range(len(data)):
 			for j in range(len(data[i])):
 				data[i][j] = bytes(struct.pack("f",data[i][j]))
-				f.write(data[i][j])
-		#pickle.dump(data, f) # This writes the data
+				write_byte_stream = write_byte_stream + data[i][j]
+
+		encoder = rs.RSCoder(oasis_config.TOTAL_SPECTROMETER_FILE_SIZE, oasis_config.SPECTROMETER_DATA_SIZE)
+		if not len(write_byte_stream) == oasis_config.SPECTROMETER_DATA_SIZE:
+			# Just no encoding if we can't get a match. Hopefully the SD card doesn't act up.
+			print("Error: expected spectrometer data size is " + str(oasis_config.SPECTROMETER_DATA_SIZE) + ", but actual data size is " + str(len(write_byte_stream)))
+		else:
+			# Latin-1 encoding turns the string into a bytes stream that can be written.
+			# Default "encode" uses utf-8, which "wraps around" anything above \x80 or 128 bit, which mutates the data
+			# ASCII encode does even worse, it just throws an error if you give it any data above \x80.
+			# I've checked to make sure latin-1 encodes by turning string to byte stream without changing the data at all:
+			# Anything from \x00 to \xff WILL map 1-to-1 and onto to the right place.
+			write_byte_stream = encoder.encode(write_byte_stream).encode('latin-1')
+
+		f.write(write_byte_stream)
+		# pickle.dump(data, f) # This writes the data
 		f.close()
 		return
 
@@ -77,11 +92,32 @@ class FileManager():
 		"""
 		file_name = str(timestamp).replace(",","_") + ".bin"
 		f = (self.samples_directory_path / file_name).open("rb")
+		output_data = f.read()
+
+		if len(output_data) == oasis_config.TOTAL_SPECTROMETER_FILE_SIZE:
+			# data is encoded
+			decoder = rs.RSCoder(oasis_config.TOTAL_SPECTROMETER_FILE_SIZE, oasis_config.SPECTROMETER_DATA_SIZE)
+
+			# Latin-1 encoding turns the string into a bytes stream that can be written.
+			# Default "encode" uses utf-8, which "wraps around" anything above \x80 or 128 bit, which mutates the data
+			# ASCII encode does even worse, it just throws an error if you give it any data above \x80.
+			# I've checked to make sure latin-1 encodes by turning string to byte stream without changing the data at all:
+			# Anything from \x00 to \xff WILL map 1-to-1 and onto to the right place.
+			output_data = decoder.decode(output_data)[0].encode("latin-1")
+
+		else:
+			#data was not encoded
+			output_data = output_data.encode("latin-1")
+			print("Warning: data was not encrypted, data size "+str(len(output_data)) + ", expected data size "+str(oasis_config.TOTAL_SPECTROMETER_FILE_SIZE))
+
+
 		output = [[],[]]
 		for x in range(oasis_config.SPECTROMETER_PIXEL_NUMBER):
-			output[0].append(struct.unpack("f",f.read(4)))
+			output[0].append(struct.unpack("f", output_data[:4]))
+			output_data = output_data[4:]
 		for x in range(oasis_config.SPECTROMETER_PIXEL_NUMBER):
-			output[1].append(struct.unpack("f",f.read(4)))
+			output[1].append(struct.unpack("f", output_data[:4]))
+			output_data = output_data[4:]
 		return output
 
 	def get_last_two_samples(self):
