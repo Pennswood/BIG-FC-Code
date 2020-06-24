@@ -96,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-file_manager">1.2. File Manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-oasis_config">1.3. Oasis Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-oasis_serial">1.4. Oasis Serial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#read-log">1.5. Read Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-read_log">1.5. Read Log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-repeated_timer">1.6. Repeated Timer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-error_checking">1.7. Error Checking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-debug">1.8. Debug</a></li>
@@ -237,17 +237,15 @@ If you need to save a file please use/call functions here</p>
 <dd><p>Returns the two string of the last 2 spectrometer sample files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>This will be a 2x1 string array containing the data of the last two spectrometer sample files. The first string being the most recent followed by the second string being the second most recent</dt><dd><ul class="simple">
+<dd class="field-odd"><p><p>This will be a 2x1 string array containing the data of the last two spectrometer sample files. The first string being the most recent followed by the second string being the second most recent</p>
+<ul class="simple">
 <li><p>Array format: {[most recent file name].[file extension], [next recent file name].[file extension]}</p></li>
 <li><p>If less than 2 files exist, then the second (and possibly the first) string will be left an empty string</p></li>
 </ul>
-</dd>
-</dl>
 </p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>array</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -261,7 +259,7 @@ If you need to save a file please use/call functions here</p>
 <dd class="field-odd"><p><strong>log_file</strong> – A string of the file name for the most recent log file recorded.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>string</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -272,17 +270,11 @@ If you need to save a file please use/call functions here</p>
 <dd><p>Returns all log files in an array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><strong>log_files</strong> –</p>
-<dl class="simple">
-<dt>An array composed of every log file saved on Oasis’ sd card</dt><dd><ul class="simple">
-<li><p>The array will be in the format: {[most recent file], [next most recent file], …}</p></li>
-</ul>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><strong>log_files</strong> – An array composed of every log file saved on Oasis’ sd card.
+The array will be in the format: {[most recent file], [next most recent file], …}</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>array</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -293,17 +285,11 @@ If you need to save a file please use/call functions here</p>
 <dd><p>Returns strings of all spectrometer sample files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><strong>sample_files</strong> –</p>
-<dl class="simple">
-<dt>A nx1 string array of all n spectrometer files sorted from most recent to least recent.</dt><dd><ul class="simple">
-<li><p>The array will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], …}</p></li>
-</ul>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><strong>sample_files</strong> – A nx1 string array of all n spectrometer files sorted from most recent to least recent.
+The array will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], …}</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>array</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -311,12 +297,11 @@ If you need to save a file please use/call functions here</p>
 <dl class="py method">
 <dt id="file_manager.FileManager.log_status">
 <code class="sig-name descname">log_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_array</span></em>, <em class="sig-param"><span class="n">log_reason</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#file_manager.FileManager.log_status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Append data into the log file. May automatically create a new file.
-Inputs: Bit string data to input.</p>
+<dd><p>Append data into the log file. May automatically create a new file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>status_array</strong> (<em>array</em>) – This is a byte array of status data</p></li>
+<li><p><strong>status_array</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – This is a byte array of status data</p></li>
 <li><p><strong>log_reason</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – 0 = regular time log, 1 = command sent, 2 = new error, 3 = error resolved</p></li>
 </ul>
 </dd>
@@ -335,13 +320,13 @@ Inputs: Bit string data to input.</p>
 <dd><p>Returns the data array of the specific file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>time</strong> (<em>string</em>) – Specific file name for an array of spectrometer data at a certain time. This will be formatted as [name].[file extension]</p>
+<dd class="field-odd"><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Specific file name for an array of spectrometer data at a certain time. This will be formatted as [name].[file extension]</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>data</strong> – A 2 by 3648 data array from the spectrometer (wavelength, intensity)</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -353,8 +338,8 @@ Inputs: Bit string data to input.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>timestamp</strong> (<em>string</em>) – A string of current linux time to be formatted [timestamp].[file extension]</p></li>
-<li><p><strong>data</strong> (<em>array</em>) – A 2 by 3648 data array containing the recorded data from the spectrometer (wavelength, intensity)</p></li>
+<li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – A string of current linux time to be formatted [timestamp].[file extension]</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A 2 by 3648 data array containing the recorded data from the spectrometer (wavelength, intensity)</p></li>
 </ul>
 </dd>
 </dl>
@@ -595,8 +580,23 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 </dd></dl>
 
 </div>
-<div class="section" id="read-log">
-<h2><span class="section-number">1.5. </span>Read Log<a class="headerlink" href="#read-log" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-read_log">
+<span id="read-log"></span><h2><span class="section-number">1.5. </span>Read Log<a class="headerlink" href="#module-read_log" title="Permalink to this headline">¶</a></h2>
+<p>This module is used in conjuction with our other modules to make a list of all log files.</p>
+<dl class="py function">
+<dt id="read_log.get_log_files">
+<code class="sig-prename descclassname">read_log.</code><code class="sig-name descname">get_log_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#read_log.get_log_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns all log files as a list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>l</strong> – This contains all log files</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-repeated_timer">
 <span id="repeated-timer"></span><h2><span class="section-number">1.6. </span>Repeated Timer<a class="headerlink" href="#module-repeated_timer" title="Permalink to this headline">¶</a></h2>
@@ -649,7 +649,7 @@ This should really be refactored into the main code.</p>
 <dd class="field-even"><p><strong>is_valid</strong> – Boolean of whether it’s a valid command</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>boolean</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -662,7 +662,8 @@ during testing.</p>
 <dl class="py class">
 <dt id="debug.DummyGPIO">
 <em class="property">class </em><code class="sig-prename descclassname">debug.</code><code class="sig-name descname">DummyGPIO</code><a class="headerlink" href="#debug.DummyGPIO" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py attribute">
+<dd><p>This class simulates dummy GPIO pins</p>
+<dl class="py attribute">
 <dt id="debug.DummyGPIO.HIGH">
 <code class="sig-name descname">HIGH</code><em class="property"> = 'HIGH'</em><a class="headerlink" href="#debug.DummyGPIO.HIGH" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>

@@ -22,7 +22,7 @@ def is_valid_command(laser_status, spec_status, active_errors, cmd):
 	
 	Returns
 	-------
-	is_valid : boolean
+	is_valid : bool
 		Boolean of whether it's a valid command
 	'''
 	if cmd == b'\x02': # warm up laser

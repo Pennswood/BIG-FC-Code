@@ -8,6 +8,7 @@ def pi_tune():
 	return
 	
 class DummyGPIO():
+	"""This class simulates dummy GPIO pins"""
 	OUT = "OUT"
 	# TODO: Is there an IN pin mode?
 	LOW = "LOW"

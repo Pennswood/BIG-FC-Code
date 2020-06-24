@@ -46,9 +46,9 @@ class FileManager():
 		
 		Parameters
 		----------
-		timestamp : string
+		timestamp : str
 			A string of current linux time to be formatted [timestamp].[file extension]
-		data : array
+		data : list
 			A 2 by 3648 data array containing the recorded data from the spectrometer (wavelength, intensity)
 
 		"""
@@ -84,12 +84,12 @@ class FileManager():
 
 		Parameters
 		----------
-		time : string
+		time : str
 			Specific file name for an array of spectrometer data at a certain time. This will be formatted as [name].[file extension]
 
 		Returns
 		-------
-		data : array
+		data : list
 			A 2 by 3648 data array from the spectrometer (wavelength, intensity)
 		"""
 		file_name = str(timestamp).replace(",","_") + ".bin"
@@ -128,10 +128,12 @@ class FileManager():
 
 		Returns
 		-------
-		array
+		list
 			This will be a 2x1 string array containing the data of the last two spectrometer sample files. The first string being the most recent followed by the second string being the second most recent
-				* Array format: {[most recent file name].[file extension], [next recent file name].[file extension]}
-				* If less than 2 files exist, then the second (and possibly the first) string will be left an empty string
+			
+			* Array format: {[most recent file name].[file extension], [next recent file name].[file extension]}
+			
+			* If less than 2 files exist, then the second (and possibly the first) string will be left an empty string
 		"""
 		l = sorted(self.samples_directory_path.glob("*.bin"), reverse=True)
 		if len(l) == 0:
@@ -147,9 +149,9 @@ class FileManager():
 
 		Returns
 		-------
-		sample_files : array
-			A nx1 string array of all n spectrometer files sorted from most recent to least recent.
-				* The array will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], ...}
+		sample_files : list
+			A nx1 string array of all n spectrometer files sorted from most recent to least recent. 
+			The array will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], ...}
 		"""
 		return sorted(self.samples_directory_path.glob("*.bin"))
 
@@ -159,9 +161,9 @@ class FileManager():
 
 		Returns
 		-------
-		log_files : array
-			An array composed of every log file saved on Oasis' sd card
-				* The array will be in the format: {[most recent file], [next most recent file], ...}
+		log_files : list
+			An array composed of every log file saved on Oasis' sd card. 
+			The array will be in the format: {[most recent file], [next most recent file], ...}
 		"""
 		return sorted(self.log_directory_path.glob("*.statlog"))
 
@@ -171,7 +173,7 @@ class FileManager():
 		
 		Returns
 		-------
-		log_file : string
+		log_file : str
 			A string of the file name for the most recent log file recorded.
 		"""
 		l = sorted(self.log_directory_path.glob("*.statlog"), reverse=True)
@@ -183,11 +185,10 @@ class FileManager():
 	def log_status(self, status_array, log_reason=0):
 		"""
 		Append data into the log file. May automatically create a new file.
-		Inputs: Bit string data to input.
 
 		Parameters
 		----------
-		status_array : array
+		status_array : list
 			This is a byte array of status data
 		log_reason : int
 			0 = regular time log, 1 = command sent, 2 = new error, 3 = error resolved
