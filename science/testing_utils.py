@@ -9,11 +9,22 @@ def generate_dummy_spectra(central_spectra=(500, 730, 380), width=100, bins=1E4,
     """
     Generates dummy spectra for debugging purposes. Outputs tuple of arrays, index 0 holds the wavelength and index 1
     holds the intensity value. Useful when no spectrometers is present.
-    :param central_spectra: integer list of wavelengths to center on
-    :param width: width of individual line
-    :param bins: number of samples
-    :param optical_range: range of values to be generated
-    :return: tuple of arrays. index 0 holds wavelengths, index 1 holds intensity data
+    
+    Parameters
+    ----------
+    central_spectra : list
+        Integer list of wavelengths to center on
+    width : int
+        Width of individual line
+    bins : int
+        Number of samples
+    optical_range : tuple
+        Range of values to be generated
+    
+    Returns
+    -------
+    tuple
+        Ruple of arrays. index 0 holds wavelengths, index 1 holds intensity data
     """
 
     wavelengths = []

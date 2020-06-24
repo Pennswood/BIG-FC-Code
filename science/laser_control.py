@@ -23,12 +23,21 @@ class Laser:
         self.__lock = thread.Lock()
 
     def __kicker(self):  # queries for status every second in order to kick the laser's WDT on shots >= 2s
+        """Queries for status every second in order to kick the laser's WDT on shots >= 2s"""
         while True:
             if self.__kicker_control:
                 self.__ser.write(';LA:SS?<CR>')
             time.sleep(1)
 
     def __send_command(self, cmd):  # sends command to laser
+        """
+        Sends command to laser
+
+        Parameters
+        ----------
+        cmd : bytes
+            This contains the byte signature of the command to be sent
+        """
         last_line = self.__ser.readline()
         responses = []
         if not (isinstance(cmd, int) or isinstance(cmd, list) or isinstance(cmd, tuple)):
@@ -51,6 +60,21 @@ class Laser:
                     break
 
     def connect(self, port_number, baud_rate=115200, timeout=5, parity=None):
+        """
+        Sets up connection between flight computer and laser
+
+        Parameters
+        ----------
+        port_number : int
+            This is the port number for the laser
+        
+        baud_rate : int
+            Bits per second on serial connection
+        
+        timeout : int
+            A buffer for if connection is not established
+        
+        """
         with self.__lock:
             if port_number not in serial.tools.list_ports.comports():
                 raise ValueError(f"Error: port {port_number} is not available")
@@ -82,6 +106,9 @@ class Laser:
                 self.__startup = False
 
     def fire_laser(self):
+        """
+        Sends commands to laser to have it fire
+        """
         with self.__lock:
             self.__send_command(';LA:FL 1<CR>')
             self.__send_command(';LA:SS?<CR>')
@@ -95,24 +122,29 @@ class Laser:
                 self.__send_command(';LA:FL 0<CR>')
 
     def get_status(self):
+        """Obtains the status of the laser"""
         with self.__lock:
             self.__send_command(';LA:SS?<CR>')   # Check for timeout exceptions when using read function
             return self.__ser.read(2)            # laser is sending status as 2 bytes, so this needs to be read(2), not read() which takes in 1 byte by default
 
     def check_armed(self):
+        """Checks if the laser is armed"""
         with self.__lock:
             self.__send_command(';LA:EN?<CR>')
 
     def arm(self):
+        """Sends command to laser to arm"""
         with self.__lock:
             self.__send_command(';LA:EN 1<CR>')
 
     def disarm(self):
+        """Sends command to laser to disarm"""
         with self.__lock:
             self.__send_command(';LA:EN 0<CR>')
 
     def update_settings(self):
         # cmd format, ignore brackets => ;[Address]:[Command String][Parameters]<CR>
+        """Updates laser settings"""
         with self.__lock:
             cmd_strings = list()
             cmd_strings.append(';LA:PM ' + str(self.pulseMode) + '<CR>')

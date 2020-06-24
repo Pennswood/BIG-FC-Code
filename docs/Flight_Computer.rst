@@ -45,13 +45,6 @@ Repeated Timer
     :undoc-members:
     :special-members: __init__
 
-View Oasis Log
-------------------
-
-.. automodule:: view_oasis_log
-    :members:
-    :undoc-members:
-
 Error Checking
 --------------
 

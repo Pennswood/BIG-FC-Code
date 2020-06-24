@@ -1,16 +1,14 @@
 **Oasis Science Package**
 =========================
 
-Submodules
-----------
-
 science.laser\_control module
 -----------------------------------
 
 .. automodule:: science.laser_control
    :members:
    :undoc-members:
-   :show-inheritance:
+   :special-members: __init__
+   :private-members:
 
 science.testing\_utils module
 -----------------------------------
@@ -18,13 +16,5 @@ science.testing\_utils module
 .. automodule:: science.testing_utils
    :members:
    :undoc-members:
-   :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: science
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   :special-members: __init__
+   :private-members:

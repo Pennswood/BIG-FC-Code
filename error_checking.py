@@ -4,9 +4,26 @@ This should really be refactored into the main code.
 """
 def is_valid_command(laser_status, spec_status, active_errors, cmd):
 	'''
-	Task: checks if the command sent is a valid command
-	Inputs: int for laser status, int for spectrometer status, 21X1 boolean array for active errors, bytes for command
-	Returns: Boolean of whether it's a valid command
+	Checks if the command sent is a valid command
+
+	Parameters
+	----------
+	laser_status : int
+		This integer value contains the current status of the laser
+	
+	spectrometer_status : int
+		This integer value contains the current status of the spectrometer
+	
+	active_errors : list
+		This is a 21x1 boolean array containing all active errors
+
+	cmd : bytes
+		This is the current command recieved from the rover
+	
+	Returns
+	-------
+	is_valid : boolean
+		Boolean of whether it's a valid command
 	'''
 	if cmd == b'\x02': # warm up laser
 		if active_errors[16] or active_errors[19] or active_errors[20]: # Excessive current draw, laser disconnected, temp high
