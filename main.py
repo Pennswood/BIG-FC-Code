@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # pylint: disable=C0103
 """
-main.py
 Contains the main loop and rover command input processing code.
 """
 import threading

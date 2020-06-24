@@ -37,7 +37,9 @@ import struct
 from oasis_config import LOGS_PER_FILE, STATUS_SIZE
 
 class FileManager():
-
+	"""
+	This class manages all the spectrometer data files and log files
+	"""
 	def save_sample(self, timestamp, data):
 		"""
 		After the spectrometer finishes sampling, it will send the data to this function to be saved.
@@ -208,7 +210,6 @@ class FileManager():
 			self.log_file = self.current_log_file_path.open("ab", buffering=STATUS_SIZE)
 
 	def __init__(self, sd_path, flash_path):
-		""" I am the constructor """
 		self.sd_path = sd_path
 		if not sd_path.exists():
 			print("WARNING: SD_PATH " + str(sd_path) + " does not exist! Attempting to create...")

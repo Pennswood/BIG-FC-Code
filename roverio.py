@@ -1,5 +1,4 @@
 """
-roverio.py
 Manages commands that interact with the Rover.
 Such as: pinging, status request, transferring samples.
 """
@@ -30,7 +29,7 @@ class Rover():
 		self.oasis_serial.send_bytes(b'\x01')
 
 	def send_cmd_rejected_response(self, laser_status, spec_status, active_errors, prev_cmd):
-		'''
+		"""
 		Sends the command rejected response for roverio
 
 		Parameters
@@ -46,7 +45,7 @@ class Rover():
 
 		prev_cmd : bytes
 			These hold the most recent command send from the rover
-		'''
+		"""
 		cmd_rejected_array = bytearray()
 
 		if laser_status == 0:
@@ -112,7 +111,7 @@ class Rover():
 
 	# TODO: add comments for what each sendBytes indicates and what inputs are expected
 	def get_status_array(self, laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd):
-		'''
+		"""
 		Organizes all the status logs into a byte array
 
 		Parameters
@@ -132,14 +131,14 @@ class Rover():
 		error_codes : list
 			A boolean array containing error codes
 		
-		prev_cmd : byte
+		prev_cmd : bytes
 			A byte representing the last command send from rover
 
 		Return
 		------
 		byte_array : list
 			A byte array of status log
-		'''
+		"""
 		status_array = bytearray()
 
 		# Laser status | 1 byte
@@ -208,9 +207,9 @@ class Rover():
 		return 1
 
 	def status_dump(self):
-		'''
+		"""
 		Dumps all the status file information to the rover
-		'''
+		"""
 		self.oasis_serial.send_bytes(b'\x14') # send nominal response directory_start
 		self.oasis_serial.send_string("logs/;") # send directory name
 

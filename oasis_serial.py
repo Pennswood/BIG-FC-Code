@@ -1,5 +1,4 @@
 """
-oasis_serial.py
 Module for connecting to either physical serial lines or "virtual" serial lines (UDP sockets) for debugging.
 Handles low level reading of integers, strings, floats, files.
 """
@@ -49,6 +48,13 @@ class OasisSerial():
 	serial data to a UDP port as well"""
 
 	def in_waiting(self):
+		"""
+		Return the number of characters currently in the input buffer
+		
+		Return
+		------
+
+		"""
 		if self.debug:
 			self.rx_buffer_lock.acquire()
 			count = len(self.rx_buffer)
@@ -58,45 +64,120 @@ class OasisSerial():
 		return self.serial_connection.in_waiting
 
 	def send_bytes(self, b):
+		"""
+		Sends bytes over to the dummy rover
+
+		Parameters
+		----------
+		b : bytes
+			Bytes to be sent over to the dummy rover
+		"""
 		if self.debug:
 			self.udp_tx_socket.sendto(b, ("localhost", self.tx_port))
 		else:
 			self.serial_connection.write(b)
 
 	def send_integer(self, i, size=INTEGER_SIZE):
-		"""Sends a signed (positive or negative), big endian integer"""
+		"""
+		Sends a signed (positive or negative), big endian integer
+
+		Parameters
+		----------
+		i : int
+			A signed big endian integer
+
+		size : int
+			The size of the integer (defaults to 4)
+		"""
 		b = i.to_bytes(size, byteorder="big", signed=True)
 		self.send_bytes(b)
 
 	def send_signed_integer(self, i, size=INTEGER_SIZE):
-		"""Sends a signed (positive or negative), big endian integer"""
+		"""
+		Sends a signed (positive or negative), big endian integer
+
+
+		Parameters
+		----------
+		i : int
+			A signed big endian integer
+
+		size : int
+			The size of the integer (defaults to 4)
+		"""
 		b = i.to_bytes(size, byteorder="big", signed=True)
 		self.send_bytes(b)
 
 	def send_unsigned_integer(self, i, size=INTEGER_SIZE):
-		"""Sends an unsigned (positive only), big endian integer"""
+		"""
+		Sends an unsigned (positive only), big endian integer
+
+		Parameters
+		----------
+		i : int
+			An unsigned big endian integer
+
+		size : int
+			The size of the integer (defaults to 4)
+		"""
 		b = i.to_bytes(size, byteorder="big", signed=False)
 		self.send_bytes(b)
 
 	def send_float(self, f):
-		"""This is our "ASCII encoded float" way of sending floats. This may be changed in the future."""
+		"""
+		This is our "ASCII encoded float" way of sending floats. This may be changed in the future.
+
+		Parameters
+		----------
+		f : float
+			A float to be sent over to the dummy rover
+		"""
 		# Please don't touch this, it took like an hour to make. Thank you.
 		s = "{:0=+4d}{:0=-3d}".format(int(f), int(abs(abs(f)-abs(int(f)))*1000))
 		self.send_string(s)
 
 	def send_string(self, s):
-		"""Sends an ASCII string"""
+		"""
+		Sends an ASCII string
+
+		Parameters
+		----------
+		s : str
+			A string to be sent over to the dummy rover
+		"""
 		self.send_bytes(s.encode('ascii'))
 
 	def read_byte(self):
-		"""Returns a single byte read from the serial connection. Returns None if timed out reading the byte"""
+		"""
+		Returns a single byte read from the serial connection. Returns None if timed out reading the byte
+
+		Returns
+		-------
+		b : bytes
+			The byte received from the serial connection
+		"""
 		b, timeout = self.read_bytes(1)
 		if timeout:
 			return None
 		return b
 
 	def read_bytes(self, count):
-		"""Returns a bytearray of length `count` read from the serial connection and a boolean value saying whether or not the read timed out"""
+		"""
+		Returns a bytearray of length `count` read from the serial connection and a boolean value saying whether or not the read timed out
+
+		Parameters
+		----------
+		count : int
+			A float to be sent over to the dummy rover
+
+		Returns
+		-------
+		a : bytearray
+			A byte array of bytes received from the serial connection
+
+		read_timeout : boolean
+			A boolean representing whether the read timed out or not
+		"""
 		if self.debug:
 			timeout_timer = threading.Timer(5.0, _debug_udp_timeout_timer, (self,)) # Default to 5 seconds of waiting before timing out
 			self.read_timeout = False
@@ -116,28 +197,66 @@ class OasisSerial():
 			return None, True
 
 	def read_signed_integer(self, size=INTEGER_SIZE):
-		"""Returns a signed (positive or negative) integer read from the serial connection"""
+		"""
+		Returns a signed (positive or negative) integer read from the serial connection
+
+		Parameters
+		----------
+		size : int
+			The size of the integer (defaults to 4)
+
+		Returns
+		-------
+		int
+			A signed integer from the bytes read
+		"""
 		b, timeout = self.read_bytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 
 	def read_unsigned_integer(self, size=INTEGER_SIZE):
-		"""Returns a signed (positive only) integer read from the serial connection"""
+		"""
+		Returns an unsigned (positive only) integer read from the serial connection
+
+		Parameters
+		----------
+		size : int
+			The size of the integer (defaults to 4)
+
+		Returns
+		-------
+		int
+			An unsigned integer from the bytes read
+		"""
 		b, timeout = self.read_bytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=False)
 
 	def read_integer(self, size=INTEGER_SIZE):
-		"""Returns a signed (positive or negative) integer read from the serial connection"""
+		"""
+		Returns a signed (positive or negative) integer read from the serial connection
+
+		Parameters
+		----------
+		size : int
+			The size of the integer (defaults to 4)
+
+		Returns
+		-------
+		int
+			A signed integer from the bytes read
+		"""
 		b, timeout = self.read_bytes(size)
 		if timeout:
 			return None
 		return int.from_bytes(b, byteorder="big", signed=True)
 
 	def read_float(self):
-		"""Returns a float read from the serial connection that was represented in our special ASCII encoded format"""
+		"""
+		Returns a float read from the serial connection that was represented in our special ASCII encoded format
+		"""
 		b, timeout = bytearray(self.read_bytes(7))
 		if timeout:
 			return None
@@ -152,6 +271,19 @@ class OasisSerial():
 	def send_file(self, f, filename):
 		"""
 		Transmits a file through serial, using error correction and packetization
+
+		Parameters
+		----------
+		f : object
+			A file object based on the filename
+
+		filename : str
+			The name of the file being transmitted
+
+		Returns
+		-------
+		boolean
+			A boolean representing whether or not the file was sent successfully
 		"""
 		if self.sending_file:
 			print("ERROR] Cannot send mutliple files at once!")
@@ -266,6 +398,11 @@ class OasisSerial():
 	def receive_file(self, fname="None"):
 		"""
 		Prepares to receive a file. Mainly used in dummy_rover.py
+
+		Parameters
+		----------
+		fname : str
+			The name of the file
 		"""
 		if self.sending_file or self.receiving_file:
 			print("ERROR] Unable to receive multiple files or receive while sending!")

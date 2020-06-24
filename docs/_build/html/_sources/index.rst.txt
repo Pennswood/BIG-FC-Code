@@ -17,7 +17,7 @@ The BeagleBone and TLC code for NASA's 2020 BIG Idea Challenge, Penn State team.
    Requirements
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Table of Contents:
    :numbered:
 

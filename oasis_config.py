@@ -1,8 +1,7 @@
 """
-config.py
 This module holds all global constants that may change frequently.
 This is meant to be a configuration file that any script can pull from.
-It is to be lightweight and contain only constants.
+It is to be lightweight and contain only constants. (See 7. Oasis Constants)
 """
 from pathlib import Path
 

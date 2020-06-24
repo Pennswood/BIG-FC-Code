@@ -1,7 +1,7 @@
 **Flight Computer Modules**
 ===========================
 
-Main [Inf Loop Issue]
+Main
 -----------------------
 
 
@@ -49,6 +49,13 @@ View Oasis Log
 ------------------
 
 .. automodule:: view_oasis_log
+    :members:
+    :undoc-members:
+
+Error Checking
+--------------
+
+.. automodule:: error_checking
     :members:
     :undoc-members:
 
