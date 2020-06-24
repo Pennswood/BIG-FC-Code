@@ -78,7 +78,7 @@ napoleon_use_admonition_for_notes = False		# Used for note docstrings
 napoleon_use_admonition_for_references = False	# Used for reference docstrings
 napoleon_use_ivar = False					# Used for instance variables
 napoleon_use_param = True					# Used for Parameter type docstrings
-napoleon_use_rtype = True					# Used for return type docstrings
+napoleon_use_rtype = False					# Used for return type docstrings
 
 # -- Intersphinx API Links ----------------------------------------------------
 

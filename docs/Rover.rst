@@ -12,4 +12,6 @@ Roverio
 Dummy Rover
 -----------------------------
 
-
+.. automodule:: roverio
+    :members:
+    :undoc-members:

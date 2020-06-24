@@ -237,15 +237,12 @@ If you need to save a file please use/call functions here</p>
 <dd><p>Returns the two string of the last 2 spectrometer sample files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p>This will be a 2x1 string array containing the data of the last two spectrometer sample files. The first string being the most recent followed by the second string being the second most recent</p>
+<dd class="field-odd"><p><p><em>list</em> – This will be a 2x1 string array containing the data of the last two spectrometer sample files. The first string being the most recent followed by the second string being the second most recent</p>
 <ul class="simple">
 <li><p>Array format: {[most recent file name].[file extension], [next recent file name].[file extension]}</p></li>
 <li><p>If less than 2 files exist, then the second (and possibly the first) string will be left an empty string</p></li>
 </ul>
 </p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -256,10 +253,7 @@ If you need to save a file please use/call functions here</p>
 <dd><p>Returns most recent log file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>log_file</strong> – A string of the file name for the most recent log file recorded.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><strong>log_file</strong> (<em>str</em>) – A string of the file name for the most recent log file recorded.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -270,11 +264,8 @@ If you need to save a file please use/call functions here</p>
 <dd><p>Returns all log files in an array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>log_files</strong> – An array composed of every log file saved on Oasis’ sd card.
+<dd class="field-odd"><p><strong>log_files</strong> (<em>list</em>) – An array composed of every log file saved on Oasis’ sd card.
 The array will be in the format: {[most recent file], [next most recent file], …}</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -285,11 +276,8 @@ The array will be in the format: {[most recent file], [next most recent file], �
 <dd><p>Returns strings of all spectrometer sample files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>sample_files</strong> – A nx1 string array of all n spectrometer files sorted from most recent to least recent.
+<dd class="field-odd"><p><strong>sample_files</strong> (<em>list</em>) – A nx1 string array of all n spectrometer files sorted from most recent to least recent.
 The array will be in the format: {[most recent file name].[file extension], [next recent file name].[file extension], …}</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -306,10 +294,7 @@ The array will be in the format: {[most recent file name].[file extension], [nex
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>number</strong> – 0 = success. Another number = failure to save file (for debugging purposes)</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-even"><p><strong>number</strong> (<em>int</em>) – 0 = success. Another number = failure to save file (for debugging purposes)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -323,10 +308,7 @@ The array will be in the format: {[most recent file name].[file extension], [nex
 <dd class="field-odd"><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Specific file name for an array of spectrometer data at a certain time. This will be formatted as [name].[file extension]</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>data</strong> – A 2 by 3648 data array from the spectrometer (wavelength, intensity)</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dd class="field-even"><p><strong>data</strong> (<em>list</em>) – A 2 by 3648 data array from the spectrometer (wavelength, intensity)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -365,21 +347,21 @@ Handles low level reading of integers, strings, floats, files.</p>
 Passing debug_mode=True will cause this to open up a UDP
 server to receive debug serial data, and will write all
 serial data to a UDP port as well</p>
-<p>When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
-debug_rx_port will be the UDP port that we will listen to for incoming connections
-debug_tx_port will be the UDP port that we will connect to when sending bytes</p>
 <dl class="py method">
 <dt id="oasis_serial.OasisSerial.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">serial_device</span></em>, <em class="sig-param"><span class="n">baud_rate</span><span class="o">=</span><span class="default_value">9600</span></em>, <em class="sig-param"><span class="n">debug_mode</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">debug_rx_port</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">debug_tx_port</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">rx_print_prefix</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#oasis_serial.OasisSerial.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
-debug_rx_port will be the UDP port that we will listen to for incoming connections
-debug_tx_port will be the UDP port that we will connect to when sending bytes</p>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="oasis_serial.OasisSerial.in_waiting">
 <code class="sig-name descname">in_waiting</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#oasis_serial.OasisSerial.in_waiting" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the number of characters currently in the input buffer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>int</em> – Number of characters in input buffer</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -388,10 +370,7 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 <dd><p>Returns a single byte read from the serial connection. Returns None if timed out reading the byte</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>b</strong> – The byte received from the serial connection</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.8)">bytes</a></p>
+<dd class="field-odd"><p><strong>b</strong> (<em>bytes</em>) – The byte received from the serial connection</p>
 </dd>
 </dl>
 </dd></dl>
@@ -406,8 +385,8 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>a</strong> (<em>bytearray</em>) – A byte array of bytes received from the serial connection</p></li>
-<li><p><strong>read_timeout</strong> (<em>boolean</em>) – A boolean representing whether the read timed out or not</p></li>
+<li><p><strong>a</strong> (<em>list</em>) – A byte array of bytes received from the serial connection</p></li>
+<li><p><strong>read_timeout</strong> (<em>bool</em>) – A boolean representing whether the read timed out or not</p></li>
 </ul>
 </p>
 </dd>
@@ -418,6 +397,11 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 <dt id="oasis_serial.OasisSerial.read_float">
 <code class="sig-name descname">read_float</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#oasis_serial.OasisSerial.read_float" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a float read from the serial connection that was represented in our special ASCII encoded format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>float</em>) – A float from the bytes read</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -429,10 +413,7 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 <dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The size of the integer (defaults to 4)</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A signed integer from the bytes read</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-even"><p><em>int</em> – A signed integer from the bytes read</p>
 </dd>
 </dl>
 </dd></dl>
@@ -446,10 +427,7 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 <dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The size of the integer (defaults to 4)</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A signed integer from the bytes read</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-even"><p><em>int</em> – A signed integer from the bytes read</p>
 </dd>
 </dl>
 </dd></dl>
@@ -463,10 +441,7 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 <dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The size of the integer (defaults to 4)</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An unsigned integer from the bytes read</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-even"><p><em>int</em> – An unsigned integer from the bytes read</p>
 </dd>
 </dl>
 </dd></dl>
@@ -505,10 +480,7 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A boolean representing whether or not the file was sent successfully</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>boolean</p>
+<dd class="field-even"><p><em>bool</em> – A boolean representing whether or not the file was sent successfully</p>
 </dd>
 </dl>
 </dd></dl>
@@ -589,10 +561,7 @@ debug_tx_port will be the UDP port that we will connect to when sending bytes</p
 <dd><p>This method returns all log files as a list</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>l</strong> – This contains all log files</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dd class="field-odd"><p><strong>l</strong> (<em>list</em>) – This contains all log files</p>
 </dd>
 </dl>
 </dd></dl>
@@ -646,10 +615,7 @@ This should really be refactored into the main code.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>is_valid</strong> – Boolean of whether it’s a valid command</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-even"><p><strong>is_valid</strong> (<em>bool</em>) – Boolean of whether it’s a valid command</p>
 </dd>
 </dl>
 </dd></dl>

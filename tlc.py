@@ -59,7 +59,7 @@ class TLC():
 
 		Returns
 		-------
-		array
+		list
 			An array of floats representing the temperature (Kelvin)
 		"""
 		self.read_lock.acquire()
@@ -73,7 +73,7 @@ class TLC():
 
 		Returns
 		-------
-		array
+		list
 			An array of unsigned ints (0-255) representing the duty cycle
 		"""
 		self.read_lock.acquire()

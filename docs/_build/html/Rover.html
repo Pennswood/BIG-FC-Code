@@ -94,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Flight_Computer.html">1. <strong>Flight Computer Modules</strong></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">2. <strong>Rover Modules</strong></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-roverio">2.1. Roverio</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dummy-rover">2.2. Dummy Rover</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-0">2.2. Dummy Rover</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="TLC.html">3. <strong>Thermal Logic Controller (TLC) Modules</strong></a></li>
@@ -190,10 +190,7 @@ This should really be refactored.</p>
 <dd><p>Sends all spectrometer data to the rover</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>success</strong> – This will return 0 for success, otherwise this will return other numbers for failure to open file (for debugging purposes)</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><strong>success</strong> (<em>int</em>) – This will return 0 for success, otherwise this will return other numbers for failure to open file (for debugging purposes)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -220,10 +217,7 @@ This should really be refactored.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>byte_array</strong> – A byte array of status log</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dd class="field-even"><p><strong>byte_array</strong> (<em>list</em>) – A byte array of status log</p>
 </dd>
 </dl>
 </dd></dl>
@@ -237,10 +231,7 @@ This should really be refactored.</p>
 <dd class="field-odd"><p><strong>oasis_serial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – An Oasis Serial object</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>successful</strong> – Returns True for success and False for unsuccessful</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>boolean</p>
+<dd class="field-even"><p><strong>successful</strong> (<em>boolean</em>) – Returns True for success and False for unsuccessful</p>
 </dd>
 </dl>
 </dd></dl>
@@ -276,10 +267,7 @@ This should really be refactored.</p>
 <dd class="field-odd"><p><strong>byte_array</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A byte array of status logs</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>success</strong> – integer, 0 for success, other numbers for failure to send data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-even"><p><strong>success</strong> (<em>int</em>) – integer, 0 for success, other numbers for failure to send data</p>
 </dd>
 </dl>
 </dd></dl>
@@ -290,10 +278,7 @@ This should really be refactored.</p>
 <dd><p>Sends the two most recent spectrometer sample files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>success</strong> – 0 for successful completion, 1 for error</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><strong>success</strong> (<em>int</em>) – 0 for successful completion, 1 for error</p>
 </dd>
 </dl>
 </dd></dl>
@@ -301,8 +286,117 @@ This should really be refactored.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="dummy-rover">
-<h2><span class="section-number">2.2. </span>Dummy Rover<a class="headerlink" href="#dummy-rover" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-0">
+<span id="dummy-rover"></span><h2><span class="section-number">2.2. </span>Dummy Rover<a class="headerlink" href="#module-0" title="Permalink to this headline">¶</a></h2>
+<p>Manages commands that interact with the Rover.
+Such as: pinging, status request, transferring samples.</p>
+<dl class="py class">
+<dt id="id0">
+<em class="property">class </em><code class="sig-prename descclassname">roverio.</code><code class="sig-name descname">Rover</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">oasis_serial</span></em>, <em class="sig-param"><span class="n">filemanager</span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class really doesn’t represent the Rover at all.
+It’s just a neat way to organize a bunch of methods.
+This should really be refactored.</p>
+<dl class="py method">
+<dt id="id1">
+<code class="sig-name descname">all_spectrometer_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends all spectrometer data to the rover</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>success</strong> (<em>int</em>) – This will return 0 for success, otherwise this will return other numbers for failure to open file (for debugging purposes)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="id2">
+<code class="sig-name descname">clock_sync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the CLOCK SYNC command code is received. Sets the system clock to the received UNIX timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="id3">
+<code class="sig-name descname">get_status_array</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">temp_data</span></em>, <em class="sig-param"><span class="n">efdc</span></em>, <em class="sig-param"><span class="n">error_codes</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#id3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Organizes all the status logs into a byte array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>laser_status</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – This integer represents the state of the laser</p></li>
+<li><p><strong>spec_status</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – This integer represents the state of the spectrometer</p></li>
+<li><p><strong>temp_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A float array of tempurature data</p></li>
+<li><p><strong>duty_cycle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – An int (0-255) array efdc (etch foil duty cycle)</p></li>
+<li><p><strong>error_codes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A boolean array containing error codes</p></li>
+<li><p><strong>prev_cmd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.8)"><em>bytes</em></a>) – A byte representing the last command send from rover</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>byte_array</strong> (<em>list</em>) – A byte array of status log</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="id4">
+<code class="sig-name descname">ping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a response to the rover.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>oasis_serial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – An Oasis Serial object</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>successful</strong> (<em>boolean</em>) – Returns True for success and False for unsuccessful</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="id5">
+<code class="sig-name descname">send_cmd_rejected_response</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">active_errors</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#id5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the command rejected response for roverio</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>laser_status</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – This integer represents the state of the laser</p></li>
+<li><p><strong>spec_status</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – This integer represents the state of the spectrometer</p></li>
+<li><p><strong>active_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A 21x1 boolean array for active errors</p></li>
+<li><p><strong>prev_cmd</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.8)"><em>bytes</em></a>) – These hold the most recent command send from the rover</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="id6">
+<code class="sig-name descname">status_dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dumps all the status file information to the rover</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="id7">
+<code class="sig-name descname">status_request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">laser_status</span></em>, <em class="sig-param"><span class="n">spec_status</span></em>, <em class="sig-param"><span class="n">temp_data</span></em>, <em class="sig-param"><span class="n">efdc</span></em>, <em class="sig-param"><span class="n">error_codes</span></em>, <em class="sig-param"><span class="n">prev_cmd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#id7" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends back a byte list of status data (in accordance to table III in rover commands)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>byte_array</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A byte array of status logs</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>success</strong> (<em>int</em>) – integer, 0 for success, other numbers for failure to send data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="id8">
+<code class="sig-name descname">transfer_sample</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the two most recent spectrometer sample files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>success</strong> (<em>int</em>) – 0 for successful completion, 1 for error</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 

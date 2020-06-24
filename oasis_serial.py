@@ -37,7 +37,7 @@ def _debug_udp_handler_factory(oserial):
 	return DebugUDPHandler
 
 def _debug_udp_timeout_timer(oserial):
-	"""Callback for when reading bytes from debug serial input timesout"""
+	"""Callback for when reading bytes from debug serial input timeouts"""
 	print("Timeout")
 	oserial.read_timeout = True
 
@@ -51,9 +51,10 @@ class OasisSerial():
 		"""
 		Return the number of characters currently in the input buffer
 		
-		Return
-		------
-
+		Returns
+		-------
+		int
+			Number of characters in input buffer
 		"""
 		if self.debug:
 			self.rx_buffer_lock.acquire()
@@ -172,10 +173,9 @@ class OasisSerial():
 
 		Returns
 		-------
-		a : bytearray
+		a : list
 			A byte array of bytes received from the serial connection
-
-		read_timeout : boolean
+		read_timeout : bool
 			A boolean representing whether the read timed out or not
 		"""
 		if self.debug:
@@ -256,6 +256,11 @@ class OasisSerial():
 	def read_float(self):
 		"""
 		Returns a float read from the serial connection that was represented in our special ASCII encoded format
+
+		Returns
+		-------
+		f : float
+			A float from the bytes read
 		"""
 		b, timeout = bytearray(self.read_bytes(7))
 		if timeout:
@@ -282,7 +287,7 @@ class OasisSerial():
 
 		Returns
 		-------
-		boolean
+		bool
 			A boolean representing whether or not the file was sent successfully
 		"""
 		if self.sending_file:
@@ -521,11 +526,11 @@ class OasisSerial():
 		self.receiving_file = False
 
 	def __init__(self, serial_device, baud_rate=9600, debug_mode=False, debug_rx_port=0, debug_tx_port=0, rx_print_prefix=None):
-		"""
-		When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
-		debug_rx_port will be the UDP port that we will listen to for incoming connections
-		debug_tx_port will be the UDP port that we will connect to when sending bytes
-		"""
+		# """
+		# When debug_mode is set to True, the program will attempt to connect to the UDP port provided by fake_serial.py.
+		# debug_rx_port will be the UDP port that we will listen to for incoming connections
+		# debug_tx_port will be the UDP port that we will connect to when sending bytes
+		# """
 		self.debug = debug_mode
 		self.read_timeout = False
 		self.rx_print_prefix = rx_print_prefix
