@@ -4,7 +4,7 @@
 Main
 -----------------------
 
-.. automodule:: oasis_config
+.. automodule:: main
     :members:
     :undoc-members:
 
