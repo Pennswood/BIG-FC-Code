@@ -92,9 +92,9 @@
 <p class="caption"><span class="caption-text">Table of Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">1. <strong>Flight Computer Modules</strong></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#main">1.1. Main</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-oasis_config">1.1. Main</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-file_manager">1.2. File Manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-oasis_config">1.3. Oasis Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-0">1.3. Oasis Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-oasis_serial">1.4. Oasis Serial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-read_log">1.5. Read Log</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-repeated_timer">1.6. Repeated Timer</a></li>
@@ -174,8 +174,11 @@
             
   <div class="section" id="flight-computer-modules">
 <h1><span class="section-number">1. </span><strong>Flight Computer Modules</strong><a class="headerlink" href="#flight-computer-modules" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="main">
-<h2><span class="section-number">1.1. </span>Main<a class="headerlink" href="#main" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-oasis_config">
+<span id="main"></span><h2><span class="section-number">1.1. </span>Main<a class="headerlink" href="#module-oasis_config" title="Permalink to this headline">¶</a></h2>
+<p>This module holds all global constants that may change frequently.
+This is meant to be a configuration file that any script can pull from.
+It is to be lightweight and contain only constants. (See 7. Oasis Constants)</p>
 </div>
 <div class="section" id="module-file_manager">
 <span id="file-manager"></span><h2><span class="section-number">1.2. </span>File Manager<a class="headerlink" href="#module-file_manager" title="Permalink to this headline">¶</a></h2>
@@ -330,8 +333,8 @@ The array will be in the format: {[most recent file name].[file extension], [nex
 </dd></dl>
 
 </div>
-<div class="section" id="module-oasis_config">
-<span id="oasis-configuration"></span><h2><span class="section-number">1.3. </span>Oasis Configuration<a class="headerlink" href="#module-oasis_config" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-0">
+<span id="oasis-configuration"></span><h2><span class="section-number">1.3. </span>Oasis Configuration<a class="headerlink" href="#module-0" title="Permalink to this headline">¶</a></h2>
 <p>This module holds all global constants that may change frequently.
 This is meant to be a configuration file that any script can pull from.
 It is to be lightweight and contain only constants. (See 7. Oasis Constants)</p>

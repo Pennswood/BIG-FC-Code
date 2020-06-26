@@ -4,7 +4,9 @@
 Main
 -----------------------
 
-
+.. automodule:: oasis_config
+    :members:
+    :undoc-members:
 
 File Manager
 ------------------

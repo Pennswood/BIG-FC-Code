@@ -1,8 +1,8 @@
 """
-laserio.py
 Manages the laser used for LIBS. Reads status/error codes from laser and handles initialization and arming.
 
 Random Notes:
+
 1. Laser Enable – "This enables the laser and readies it for firing. Note: there will be an 8
 second delay between when the laser is first enabled and the laser is able to fire." uJewel manual
 
