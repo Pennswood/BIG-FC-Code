@@ -15,6 +15,7 @@ import laserio
 import spectrometerio
 import error_checking
 import debug
+import ospp
 from tlc import TLC
 
 from oasis_config import ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT,\
@@ -35,17 +36,13 @@ past_two_commands = [b'\x00'] * 2
 
 def main_loop():
 	"""This will be the main loop that checks for and processes commands"""
-	global active_errors, files_transferring, files_transfer_thread
+	global active_errors, files_transferring, files_transfer_thread, packet_manager
 
-	while rover_serial.in_waiting() == 0:
-		if files_transferring: # RS422: Check if still in use
-			if not files_transfer_thread.is_alive(): #finished
-				files_transferring = False
+	while len(packet_manager._rx_buffer) == 0:
+		b = b''
 
-	if files_transferring: # RS422: Check if still in use
-		if not files_transfer_thread.is_alive(): # finished
-			files_transferring = False
-	command = rover_serial.read_byte()
+	packet = packet_manager._rx_buffer.pop()
+	command = packet.code.tobyte(1, byteorder="big", signed=False)
 
 	# Adds the command into the status list
 	past_two_commands.insert(0, command)
@@ -57,13 +54,11 @@ def main_loop():
 	spectrometer.states_spectrometer, active_errors, past_two_commands[0]):
 		rover.send_cmd_rejected_response(laser.states_laser,\
 			spectrometer.states_spectrometer, active_errors, past_two_commands[0])
-
-	elif files_transferring: #Line is in use, nothing you can do but ignore the command.
 		pass
+
 	else:
 		if command == b'\x01':
 			rover.ping()
-
 		elif command == b'\x02':
 			threading.Thread(target=laser.warm_up_laser).start()
 		elif command == b'\x03':
@@ -115,9 +110,11 @@ if DEBUG_MODE:
 else:
 	fm = file_manager.FileManager(SD_PATH, FLASH_PATH)
 
-# Talk to Tyler to learn what this line does :)
+# Set up our serial connection to the rover
 rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE,
 		debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
+# Set up a packet manager to process the OSPP packets we send and recieve
+packet_manager = ospp.PacketManager(rover_serial)
 
 tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE,
 		debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
@@ -140,3 +137,5 @@ log_data_timer.start()
 
 while True:
 	main_loop()
+
+packet_manager.running = False

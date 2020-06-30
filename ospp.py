@@ -16,7 +16,7 @@ class ACKPacket():
 		b += self.magic_number.to_bytes(1, byteorder="big", signed=False)
 		b += zlib.crc32(b).to_bytes(4, byteorder="big", signed=False)
 		return b
-		
+
 	def __str__(self):
 		"""Returns a string representation of the ACK packet. Used for debugging."""
 		return "ACK" + str(self.to_bytes())
