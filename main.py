@@ -42,7 +42,7 @@ def main_loop():
 		b = b''
 
 	packet = packet_manager._rx_buffer.pop()
-	command = packet.code.tobyte(1, byteorder="big", signed=False)
+	command = packet.code.to_bytes(1, byteorder="big", signed=False)
 
 	# Adds the command into the status list
 	past_two_commands.insert(0, command)
