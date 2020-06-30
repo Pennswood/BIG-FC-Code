@@ -44,6 +44,11 @@ ROVER_BAUD_RATE = 250000
 # Baud rate that we communicate with the TLC at
 TLC_BAUD_RATE = 9600
 
+# Number of seconds to wait before retransmitting a DATA packet.
+RETRANSMIT_TIME = 3
+
+ACK_PACKET_CODE = b'\x55'
+
 # Debugging
 # The two value below are for debugging purposes only, they mean nothing to the TLC or BBB
 ROVER_TX_PORT = 420 # Emulate sending to the Rover on this port

@@ -1,9 +1,10 @@
 """
+Oasis Serial Packet Protocol
 Handles sending packets to and from the Rover.
 """
 import zlib
 import threading
-from oasis_config import RETRANSMIT_TIME, INTEGER_SIZE, ACK_PACKET_CODE
+from oasis_config import RETRANSMIT_TIME, INTEGER_SIZE, ACK_PACKET_CODE, DEBUG_MODE
 
 class ACKPacket():
 	"""Represents an ACK packet used to acknowledge that a DATA packet has been received."""
@@ -14,6 +15,10 @@ class ACKPacket():
 		b += self.sequence_number.to_bytes(1, byteorder="big", signed=False)
 		b += zlib.crc32(b).to_bytes(4, byteorder="big", signed=False)
 		return b
+		
+	def __str__(self):
+		"""Returns a string representation of the ACK packet. Used for debugging."""
+		return "ACK" + str(self.to_bytes())
 
 	def __init__(self, sequence_number):
 		self.sequence_number = sequence_number
@@ -30,6 +35,10 @@ class DataPacket():
 		d += data
 		d += zlib.crc32(d).to_bytes(4, byteorder="big", signed=False)
 		return d
+		
+	def __str__(self):
+		"""Returns a string representation of the DATA packet. Used for debugging."""
+		return "DATA " + str(self.code) + " Len: " + str(len(self.data))
 
 	def acknowledge(self):
 		self._acknowledged = True
@@ -94,7 +103,7 @@ class DataPacket():
 		self.code = code
 		self.data = data
 		self._acknowledged = False
-		self._transmission_count = 0'
+		self._transmission_count = 0
 		self._seek_index = 0
 
 class PacketManager():
@@ -113,16 +122,22 @@ class PacketManager():
 	def _rx_loop(pm):
 		"""Internal thread that manages incoming bytes"""
 		while pm.running:
-			while pm.serial_connection.in_waiting() == 0:
+			print("rx loop")
+			while pm.running and pm.serial_connection.in_waiting() == 0:
 				a = b'' # do nothing while there are no incoming bytes
 			
+			if not pm.running:
+				break
 			
-			packet_type = pm.serial_connection.readByte()
+			packet_type, t = pm.serial_connection.read_bytes(1)
 			calc_crc = zlib.crc32(packet_type)
 			seq_num, t = pm.serial_connection.read_bytes(1)
-				if t:
-					continue
+			if t:
+				if DEBUG_MODE:
+						print("Timedout while reading magic number. Packet is a runt.")
+				continue
 			calc_crc = zlib.crc32(seq_num, calc_crc)
+			seq_num = int.from_bytes(seq_num, byteorder="big", signed=False)
 			
 			if packet_type == ACK_PACKET_CODE:
 				rx_crc, t = pm.serial_connection.read_bytes(4)
@@ -131,6 +146,8 @@ class PacketManager():
 
 				rx_crc = int.from_bytes(crc, byteorder="big", signed=False)
 				if calc_crc != rx_crc: # Calculated and received CRC-32 values do not match
+					if DEBUG_MODE:
+						print("Receieved ACK with bad CRC-32")
 					continue
 					
 				seq_num = int.from_bytes(seq_num, byteorder="big", signed=False)
@@ -142,35 +159,47 @@ class PacketManager():
 			else:
 				data_size, t = pm.serial_connection.read_bytes(2)
 				if t:
+					if DEBUG_MODE:
+						print("Timedout while reading data size. Packet is a runt.")
 					continue
+				
+				
 				calc_crc = zlib.crc32(data_size, calc_crc)
 				data_size = int.from_bytes(data_size, byteorder="big", signed=False)
+				if DEBUG_MODE:
+					print("DATA length is: " + str(data_size))
 				
 				data, t = pm.serial_connection.read_bytes(data_size)
 				if t:
+					if DEBUG_MODE:
+						print("Timedout while reading data field. Packet is a runt.")
 					continue
 				calc_crc = zlib.crc32(data, calc_crc)
 				
 				rx_crc, t = pm.serial_connection.read_bytes(4)
 				if t:
+					if DEBUG_MODE:
+						print("Timedout while reading CRC-32. Packet is a runt.")
 					continue
 
-				rx_crc = int.from_bytes(crc, byteorder="big", signed=False)
+				rx_crc = int.from_bytes(rx_crc, byteorder="big", signed=False)
 				if calc_crc != rx_crc: # Calculated and received CRC-32 values do not match
+					if DEBUG_MODE:
+						print("Receieved DATA with bad CRC-32")
 					continue
 				
 				ack_packet = ACKPacket(seq_num)
-				
-				if seq_num < pm._rx_seq_num: # packet is a repeat
-					pm._ack_buffer.append(ack_packet)
-					continue
-				elif seq_num == pm._rx_seq_num: # packet is new
-					pm._ack_buffer.append(ack_packet)
-					pm._rx_seq_num += 1
-					if pm._rx_seq_num >= 255:
-						pm._rx_seq_num = 1
-					data_packet = DataPacket(packet_type, data)
-					pm._rx_buffer.append(data_packet)
+
+				# TODO: Magic number logic
+				pm._ack_buffer.append(ack_packet)
+				pm._rx_seq_num += 1
+				if pm._rx_seq_num >= 255:
+					pm._rx_seq_num = 1
+				data_packet = DataPacket(int.from_bytes(packet_type, byteorder="big", signed=False), data)
+				pm._rx_buffer.append(data_packet)
+
+		if DEBUG_MODE:
+			print("_rx_loop exit")
 
 	@staticmethod
 	def _tx_loop(pm):
@@ -178,18 +207,24 @@ class PacketManager():
 		while pm.running:
 			while len(pm._ack_buffer) != 0: # Send all ACKs that are waiting to be sent
 				a = pm._ack_buffer.pop()
-				pm.serial_connection.sendBytes(a.to_bytes)
+				pm.serial_connection.send_bytes(a.to_bytes())
+				if DEBUG_MODE:
+					print("INFO] Sent ACK " + str(a.sequence_number))
 		
 			if len(pm._tx_buffer) != 0:
+
 				if pm._tx_buffer[0].transmission_count == 0: # Topmost packet has not been sent yet, send it and start counting down to retransmission
 					pm.serial_connection.send_bytes(pm._tx_buffer[0].to_bytes(pm._tx_seq_num))
 					pm._tx_buffer[0].transmission_count += 1
 					pm._tx_buffer[0]._time_up = False # This will be set to true once the retransmission timer finishes
-					pm._tx_buffer[0]._timer = threading.Timer(RETRANSMIT_TIME, DataPacket._retransmit_timer(pm._tx_buffer[0])
+					pm._tx_buffer[0]._timer = threading.Timer(RETRANSMIT_TIME, DataPacket._retransmit_timer(pm._tx_buffer[0]))
 					pm._tx_buffer[0]._timer.start() # Start counting down the retransmission timer
+					if DEBUG_MODE:
+						print("INFO] TX'd DATA packet " + str(pm._tx_buffer[0].sequence_number))
+
 
 				elif pm._tx_buffer[0]._acknowledged: # We got an ACK for the packet, remove it from the buffer and move on to the next packet
-					pm._tx_buffer.pop()
+
 					pm._tx_seq_num += 1
 					if pm._tx_seq_num >= 255: # seq. number only takes up one byte, so it cannot be greater than 255
 						pm._tx_seq_num = 1
@@ -198,11 +233,17 @@ class PacketManager():
 					pm.serial_connection.send_bytes(pm._tx_buffer[0].to_bytes(pm._tx_seq_num))
 					pm._tx_buffer[0].transmission_count += 1
 					pm._tx_buffer[0]._time_up = False
-					pm._tx_buffer[0]._timer = threading.Timer(RETRANSMIT_TIME, DataPacket._retransmit_timer(pm._tx_buffer[0])
+					pm._tx_buffer[0]._timer = threading.Timer(RETRANSMIT_TIME, DataPacket._retransmit_timer(pm._tx_buffer[0]))
 					pm._tx_buffer[0]._timer.start()
+					
+					if DEBUG_MODE:
+						print("INFO] Re-TX'd DATA packet " + str(pm._tx_buffer[0].sequence_number) + " retry # " + str(pm._tx_buffer[0].transmission_count))
+
+		if DEBUG_MODE:
+			print("_tx_loop exit")
 
 	def __init__(self, serial_connection):
-		self.serial = serial_connection
+		self.serial_connection = serial_connection
 		self._tx_buffer = []
 		self._rx_buffer = []
 		self._rx_seq_num = 1 # The sequence number of the next data packet we expect to receive
@@ -212,10 +253,4 @@ class PacketManager():
 		self._rx_thread = threading.Thread(target=PacketManager._rx_loop, args=(self,))
 		self._tx_thread = threading.Thread(target=PacketManager._tx_loop, args=(self,))
 		self._rx_thread.start()
-		self._tx_thread.start()
-
-
-	def __del__(self):
-		self.running = False
-		self._rx_thread.join()
 		self._tx_thread.start()
