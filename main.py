@@ -100,7 +100,7 @@ def main_loop():
 			files_transfer_thread = threading.Thread(target=rover.transfer_sample)
 			files_transfer_thread.start()
 		elif command == b'\x0E':
-			rover.clock_sync()
+			rover.clock_sync(packet)
 
 		elif command == b'\xF0':
 			debug.pi_tune()
@@ -120,7 +120,7 @@ tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE,
 		debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
 
 tlc = TLC(tlc_serial)
-rover = roverio.Rover(rover_serial, fm)
+rover = roverio.Rover(packet_manager, fm)
 laser = laserio.Laser(oasis_serial=rover_serial)
 
 spectrometer = spectrometerio.Spectrometer(serial=rover_serial, file_manager=fm)

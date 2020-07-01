@@ -5,14 +5,15 @@ Handles sending packets to and from the Rover.
 import zlib
 import threading
 import random
-from oasis_config import RETRANSMIT_TIME, INTEGER_SIZE, ACK_PACKET_CODE, DEBUG_MODE
+from oasis_config import RETRANSMIT_TIME, INTEGER_SIZE, ACK_PACKET_CODE, OSPP_PREAMBLE, DEBUG_MODE
 
 class ACKPacket():
 	"""Represents an ACK packet used to acknowledge that a DATA packet has been received."""
 
 	def to_bytes(self):
 		"""Returns the ACK packet as a bytes object for transmission down the serial line."""
-		b = ACK_PACKET_CODE
+		b = OSPP_PREAMBLE
+		b += ACK_PACKET_CODE
 		b += self.magic_number.to_bytes(1, byteorder="big", signed=False)
 		b += zlib.crc32(b).to_bytes(4, byteorder="big", signed=False)
 		return b
@@ -29,7 +30,7 @@ class DataPacket():
 
 	def to_bytes(self, magic_number):
 		"""Returns the data packet as a bytes object for sending down the serial line"""
-		d = b''
+		d = OSPP_PREAMBLE
 		d += self.code
 		d += magic_number.to_bytes(1, byteorder="big", signed=False)
 		d += len(self.data).to_bytes(2, byteorder="big", signed=False)
@@ -120,6 +121,17 @@ class PacketManager():
 		self._tx_buffer.append(packet)
 		
 	@staticmethod
+	def _read_preamble(serial):
+		"""Helper function that reads the 3 bytes preamble on OSPP packets. Returns True if preamble has been read successfully. False otherwise."""
+		for b in OSPP_PREAMBLE:
+			a, t = serial.read_bytes(1)
+			if t or a != b.to_bytes(1, byteorder="big", signed=False):
+				if DEBUG_MODE:
+					print("Failed to read preamble.")
+				return False
+		return True
+		
+	@staticmethod
 	def _rx_loop(pm):
 		"""Internal thread that manages incoming bytes"""
 		while pm.running:
@@ -129,8 +141,12 @@ class PacketManager():
 			if not pm.running:
 				break
 			
+			if not PacketManager._read_preamble(pm.serial_connection): # Don't start reading packets until we successfully read the preamble.
+				continue # Failed to read preamble, drop those three bytes and attempt to read next three bytes
+			
+			calc_crc = zlib.crc32(OSPP_PREAMBLE)
 			packet_type, t = pm.serial_connection.read_bytes(1)
-			calc_crc = zlib.crc32(packet_type)
+			calc_crc = zlib.crc32(packet_type, calc_crc)
 			magic_num, t = pm.serial_connection.read_bytes(1)
 			if t:
 				if DEBUG_MODE:
