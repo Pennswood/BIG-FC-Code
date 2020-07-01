@@ -210,6 +210,56 @@ class FileManager():
 			self.log_file.close()
 			self.log_file = self.current_log_file_path.open("ab", buffering=STATUS_SIZE)
 
+	def ls_samples(self):
+		"""
+		This function is meant to list out all files present in the samples directory
+
+		Returns
+		-------
+		output : list
+			Output is a list containing the file names for all sample files
+
+		"""
+		path = self.sd_path + "/samples/"                           # PATH to samples
+		all_files = os.listdir(path)                                # Puts strings of each file name in a given directory into a list
+		output = []                                                 # This will hold the output of ls as a list
+
+		try:
+			for file in all_files:                                  # Meant to check if each file is indeed a file through checking its file path
+				if os.path.isfile(path + file):
+					output.append(file)                             # If it is indeed a file, then append to output list
+				else:
+					print("The file " + file + " contains an error")
+		except:
+			print("No files")
+			
+		return output
+
+	def ls_logs(self):
+		"""
+		This function is meant to list out all files present in the logs directory
+
+		Returns
+		-------
+		output : list
+			Output is a list containing the file names for all log files
+
+		"""
+		path = self.sd_path + "/logs/"                              # PATH to logs
+		all_files = os.listdir(path)                                # Puts strings of each file name in a given directory into a list
+		output = []                                                 # This will hold the output of ls as a list
+
+		try:
+			for file in all_files:                                  # Meant to check if each file is indeed a file through checking its file path
+				if os.path.isfile(path + file):
+					output.append(file)                             # If it is indeed a file, then append to output list
+				else:
+					print("The file " + file + " contains an error")
+		except:
+			print("No files")
+			
+		return output
+
 	def __init__(self, sd_path, flash_path):
 		self.sd_path = sd_path
 		if not sd_path.exists():
