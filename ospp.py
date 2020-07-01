@@ -47,13 +47,16 @@ class DataPacket():
 		self._time_up = False
 
 	def pack_bytes(self, b):
+		"""Adds the given bytes to the data field of the packet."""
 		self.data += b
 
 	def pack_float(self, f):
+		"""Adds the given float as an ASCII encoded float to the data field of the packet."""
 		s = "{:0=+4d}{:0=-3d}".format(int(f), int(abs(abs(f)-abs(int(f)))*1000))
 		self.data += s.encode('ascii')
 
 	def pack_string(self, s):
+		"""Adds the given string as an ASCII encoded string to the data field of the packet."""
 		self.data += s.encode('ascii')
 
 	def pack_integer(self, i, size=INTEGER_SIZE):
@@ -72,21 +75,25 @@ class DataPacket():
 		self._seek_index = position
 
 	def unpack_bytes(self, count):
+		"""Reads _count_ number of bytes from the data field of the packet."""
 		d = self.data[self._seek_index:self._seek_index+count]
 		self._seek_index += count
 		return d
 
 	def unpack_signed_integer(self, size=INTEGER_SIZE):
+		"""Reads a signed integer from the data field of the packet."""
 		d = self.data[self._seek_index:self._seek_index+size]
 		self._seek_index += size
 		return int.from_bytes(d, byteorder="big", signed=True)
 
 	def unpack_unsigned_integer(self, size=INTEGER_SIZE):
+		"""Reads an unsigned integer from the data field of the packet."""
 		d = self.data[self._seek_index:self._seek_index+size]
 		self._seek_index += size
 		return int.from_bytes(d, byteorder="big", signed=False)
 
 	def unpack_float(self):
+		"""Reads an ASCII encoded float from the data field of the packet."""
 		b = self.data[self._seek_index:self._seek_index+7]
 		self._seek_index += 7
 		s = b.decode("ascii")
@@ -99,6 +106,7 @@ class DataPacket():
 
 	@staticmethod
 	def _retransmit_timer(p):
+		"""Internal callback that marks when the packet is due for retransmission."""
 		p._time_up = True
 
 	def __init__(self, code, data=b''):
@@ -170,7 +178,7 @@ class PacketManager():
 					pm._tx_buffer[0].acknowledge()
 				
 			else:
-				data_size, t = pm.serial_connection.read_bytes(2)
+				data_size, t = pm.serial_connection.read_bytes(2) # Read the expected size of the data field
 				if t:
 					if DEBUG_MODE:
 						print("Timedout while reading data size. Packet is a runt.")
