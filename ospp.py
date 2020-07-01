@@ -174,6 +174,9 @@ class PacketManager():
 				if t:
 					if DEBUG_MODE:
 						print("Timedout while reading data size. Packet is a runt.")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 
 				calc_crc = zlib.crc32(data_size, calc_crc)
@@ -185,6 +188,9 @@ class PacketManager():
 				if t:
 					if DEBUG_MODE:
 						print("Timedout while reading data field. Packet is a runt.")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 				calc_crc = zlib.crc32(data, calc_crc)
 
@@ -192,20 +198,29 @@ class PacketManager():
 				if t:
 					if DEBUG_MODE:
 						print("Timedout while reading CRC-32. Packet is a runt.")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 
 				rx_crc = int.from_bytes(rx_crc, byteorder="big", signed=False)
 				if calc_crc != rx_crc: # Calculated and received CRC-32 values do not match
 					if DEBUG_MODE:
 						print("Received DATA with bad CRC-32")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 
 				ack_packet = ACKPacket(magic_num)
-
+				
 				packet_type = int.from_bytes(packet_type, byteorder="big", signed=False)
 				if pm._last_rx_magic == magic_num and pm._last_rx_packet.code == packet_type and pm._last_rx_packet.data == data:
 					if DEBUG_MODE:
 						print("Dropping DATA packet because magic is the same and is a repeat")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 				
 				if magic_num == pm._last_rx_magic:
