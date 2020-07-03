@@ -19,6 +19,9 @@ jobs:
 
       - name: Build documentation
         run: |
+      - name: Install rsync 📚
+        run: |
+          apt-get update && apt-get install -y rsync
           pip3 install sphinx sphinx-rtd-theme
           python3 -m sphinx -b html -c docs/ -j 4 docs/ docs/_build
       - name: Deploy documentation
@@ -27,5 +30,5 @@ jobs:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           BRANCH: master
-          FOLDER: docs/_build
+          FOLDER: docs/_build/html/
           COMMIT_MESSAGE: Building documentation
