@@ -1,2 +1,4 @@
 pyserial>=3.0
 Adafruit_BBIO>=1.0
+unireedsolomon>=1.0
+seabreeze>=1.0
