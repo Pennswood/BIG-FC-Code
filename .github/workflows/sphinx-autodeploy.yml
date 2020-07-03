@@ -19,8 +19,6 @@ jobs:
 
       - name: Build documentation
         run: |
-      - name: Install rsync 📚
-        run: |
           apt-get update && apt-get install -y rsync
           pip3 install sphinx sphinx-rtd-theme
           python3 -m sphinx -b html -c docs/ -j 4 docs/ docs/_build
