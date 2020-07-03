@@ -18,7 +18,7 @@ jobs:
       - name: Build documentation
         run: |
           pip install sphinx sphinx-rtd-theme
-
+          sphinx-build -b html -c docs/ -j 4 docs/ docs/_build
       - name: Deploy documentation
         uses: JamesIves/github-pages-deploy-action@3.5.6
         env:
