@@ -10,6 +10,8 @@ on:
 jobs:
   release-sphinx:
     runs-on: ubuntu-latest
+    container:
+      image: python: 3.7
 
     steps:
       - name: Checkout code
@@ -17,7 +19,7 @@ jobs:
 
       - name: Build documentation
         run: |
-          pip install sphinx sphinx-rtd-theme
+          pip3 install sphinx sphinx-rtd-theme
           python3 -m sphinx -b html -c docs/ -j 4 docs/ docs/_build
       - name: Deploy documentation
         uses: JamesIves/github-pages-deploy-action@3.5.6
