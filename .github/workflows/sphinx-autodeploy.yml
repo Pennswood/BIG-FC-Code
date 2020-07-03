@@ -21,13 +21,13 @@ jobs:
         run: |
           apt-get update && apt-get install -y rsync
           pip3 install sphinx sphinx-rtd-theme
-          python3 -m sphinx -b html -c docs/ -j 4 docs/ docs/_build
+          python3 -m sphinx -b html -c docsrc/ -j 4 docsrc/ docs/
       - name: Deploy documentation
         uses: JamesIves/github-pages-deploy-action@3.5.6
         env:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           BRANCH: master
-          FOLDER: docs/_build/html
-          TARGET_FOLDER: docs/_build/html
+          FOLDER: docs/
+          TARGET_FOLDER: docs/
           COMMIT_MESSAGE: Building documentation
