@@ -25,5 +25,5 @@ jobs:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           BRANCH: master
-          FOLDER: ./docs/_build
+          FOLDER: docs/_build
           COMMIT_MESSAGE: Building documentation
