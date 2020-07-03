@@ -29,5 +29,5 @@ jobs:
         with:
           BRANCH: master
           FOLDER: docs/_build/html/
-	  TARGET_FOLDER: docs/_build/html/
+          TARGET_FOLDER: docs/_build/html/
           COMMIT_MESSAGE: Building documentation
