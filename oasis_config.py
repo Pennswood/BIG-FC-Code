@@ -58,6 +58,9 @@ RETRANSMIT_TIME = 3
 
 ACK_PACKET_CODE = b'\x55'
 
+# The 3 byte preamble that precedes every OSPP packet.
+OSPP_PREAMBLE = b'\x03\x08\x06'
+
 # Debugging
 # The two value below are for debugging purposes only, they mean nothing to the TLC or BBB
 ROVER_TX_PORT = 420 # Emulate sending to the Rover on this port
