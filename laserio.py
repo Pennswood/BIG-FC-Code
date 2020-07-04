@@ -269,10 +269,11 @@ class Laser():
 
 	"""
 	"""
-	def __init__(self, oasis_serial):
+	def __init__(self, oasis_serial, laser_state):
 		self.oasis_serial = oasis_serial
 		self.laser_commands = laser_control.Laser()
 		self.states_laser = 0
+		self.laser_state = laser_state
 		self.timer = time.time()		# Only to initalize variable, not used.
 		GPIO.setup("P9_42", GPIO.OUT)	# 48V enable is on P9_42. ON = GPIO HIGH. OFF = GPIO LOW.
 		GPIO.output("P9_42", GPIO.LOW)	# make sure the laser is OFF

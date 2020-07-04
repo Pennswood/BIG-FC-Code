@@ -21,11 +21,12 @@ class Spectrometer():
 			If an error occurs
 		"""
 		if seabreeze.spectrometers.list_devices():
-			self.states_spectrometer = 0
+			#self.states_spectrometer = 0
+			self.spectrometer_state.on_standby()
 			spec = seabreeze.spectrometers.Spectrometer.from_first_available()
 			return spec
 
-		self.states_spectrometer = 2
+		#self.states_spectrometer = 2
 		print("ERROR: No spectrometer listed by seabreeze!")
 		return None
 
@@ -40,7 +41,8 @@ class Spectrometer():
 		"""
 		self.spec.trigger_mode = 0 # Setting the trigger mode to normal
 		self.spec.integration_time_micros(milliseconds*1000) # Set integration time for spectrometer
-		self.states_spectrometer = 1 # Spectrometer state is set to sampling
+		#self.states_spectrometer = 1 # Spectrometer state is set to sampling
+		self.spectrometer_state.integrate()
 		self.oasis_serial.sendBytes(b'\x01') # Sending nominal responce
 		try:
 			wavelengths, intensities = self.spec.spectrum() #Returns wavelengths and intensities as a 2D array, and begins sampling
@@ -54,13 +56,15 @@ class Spectrometer():
 
 		timestamp = time.time() # Returns # of seconds since Jan 1, 1970 (since epoch)
 		self.fm.save_sample(timestamp, data) # Function call to create spectrometer file
-		self.states_spectrometer = 0 # Spectrometer state is now on standby
+		#self.states_spectrometer = 0 # Spectrometer state is now on standby
+		self.spectrometer_state.on_standby()
 
 		return None
 
-	def __init__(self, serial, file_manager):
+	def __init__(self, serial, file_manager, spectrometer_state):
 		# 0 = standby, 1 = integrating, 2 = disconnected
 		self.oasis_serial = serial
 		self.states_spectrometer = 0
 		self.fm = file_manager
 		self.spec = self._setupSpectrometer()
+		self.spectrometer_state = spectrometer_state
