@@ -17,6 +17,7 @@ import error_checking
 import debug
 import ospp
 from tlc import TLC
+from statemachine import StateMachine, State
 
 from oasis_config import ROVER_RX_PORT, ROVER_TX_PORT, TLC_RX_PORT,\
 	TLC_TX_PORT, DEBUG_MODE, SD_PATH, DEBUG_FLASH_PATH, FLASH_PATH,\
@@ -141,3 +142,35 @@ if __name__ == "__main__":
     	main_loop()
     
     packet_manager.running = False
+
+### State Classes ###
+
+class Spectrometer_States(StateMachine):
+	standby = State('Spectrometer on Standby', initial = True)
+	integrating = State('Spectrometer Integrating')
+
+	integrate = standby.to(integrating)
+	done_integrating = integrating.to(standby)
+
+class Laser_States(StateMachine):
+	off = State('Laser Off', initial = True)
+	on = State('Laser On')
+	warming_up = State('Laser Warming Up')
+	warmed_up = State('Laser Warmed Up')
+	arming = State('Laser Arming')
+	armed = State('Laser Armed')
+	firing = State('Laser Firing')
+
+	laser_turning_on = off.to(on)
+	warming_command = on.to(warming_up)
+	warming_finished = warming_up.to(warmed_up)
+	arm_command = warmed_up.to(arming)
+	arm_finished = arming.to(armed)
+	fire_command = armed.to(firing)
+	fire_finished = firing.to(armed)
+	disarm_command = StateMachine.current_state.to(warmed_up)
+	laser_off = StateMachine.current_state.to(off)
+
+# Creating laser and spectrometer state objects
+spectrometer_state = Spectrometer_States()
+laser_state = Laser_States()
