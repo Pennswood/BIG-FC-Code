@@ -39,10 +39,10 @@ def emulate_tlc_stream(tlc_serial):
 	"""
 	global THERMISTER_COUNT
 	while not done:
-		tlc_serial.send_string("|")
+		tlc_serial.send_bytes("|".encode('ascii'))
 		for i in range(THERMISTER_COUNT):
-			tlc_serial.send_string(str(random.random() * 400)[0:6] + ",") # send randomized thermister values
-		tlc_serial.send_string(str(random.random())[0:6]) # send randomized duty cycle value
+			tlc_serial.send_bytes((str(random.random() * 400)[0:6] + ",").encode('ascii')) # send randomized thermister values
+		tlc_serial.send_bytes(str(random.random())[0:6].encode('ascii')) # send randomized duty cycle value
 		time.sleep(1)
 		
 def main():

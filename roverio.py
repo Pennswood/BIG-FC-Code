@@ -4,6 +4,7 @@ Such as: pinging, status request, transferring samples.
 """
 import subprocess
 import platform
+from ospp import DataPacket
 
 class Rover():
 	"""
@@ -26,7 +27,9 @@ class Rover():
 			Returns True for success and False for unsuccessful
 		"""
 		print("INFO: Got PING, sending PONG back")
-		self.oasis_serial.send_bytes(b'\x01')
+		ping_response = DataPacket(b'\x01')
+		self.pm.append(ping_response)
+		
 
 	def send_cmd_rejected_response(self, laser_status, spec_status, active_errors, prev_cmd):
 		"""
@@ -76,9 +79,11 @@ class Rover():
 
 		cmd_rejected_array += prev_cmd
 
-		self.oasis_serial.send_bytes(b'\xFF')		# send command rejected
+		rejected_response = DataPacket(b'\xFF') # send command rejected
 		for i in cmd_rejected_array:
-			self.oasis_serial.send_bytes(i)
+			rejected_response.pack_bytes(i)
+			
+		self.pm.append(rejected_response)
 		# maybe check number of bytes in array for error handling?
 
 	def all_spectrometer_data(self):
@@ -90,8 +95,8 @@ class Rover():
 		success : int
 			This will return 0 for success, otherwise this will return other numbers for failure to open file (for debugging purposes)
 		"""
-		self.oasis_serial.send_bytes(b'\x14')			# send nominal response directory_start
-		self.oasis_serial.send_string("samples/;")		# send directory name
+		#self.oasis_serial.send_bytes(b'\x14')			# send nominal response directory_start
+		#self.oasis_serial.send_string("samples/;")		# send directory name
 
 		debug_int = 0									# return 1 if error for debugging purposes
 		file_list = self.fm.list_all_samples()
@@ -99,7 +104,8 @@ class Rover():
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					self.oasis_serial.send_file(f, i)
+					#self.oasis_serial.send_file(f, i)
+					b = b''
 				else:
 					print("ERROR: Unable to read file" + i)
 				f.close()
@@ -196,29 +202,27 @@ class Rover():
 		success : int
 			integer, 0 for success, other numbers for failure to send data
 		"""
-		self.oasis_serial.send_bytes(b'\x10') # send nominal response status_message
+		status_packet = DataPacket(b'\x10')
 		status_array = self.get_status_array(laser_status, spec_status, temp_data, efdc, error_codes, prev_cmd)
-		self.oasis_serial.send_bytes(status_array)
+		status_packet.pack_bytes(status_array)
+		self.pm.append(status_packet)
 
-		# TODO: Why does this if statement exist?
-		if len(status_array) == 72:
-			return 0
-
-		return 1
+		return 0
 
 	def status_dump(self):
 		"""
 		Dumps all the status file information to the rover
 		"""
-		self.oasis_serial.send_bytes(b'\x14') # send nominal response directory_start
-		self.oasis_serial.send_string("logs/;") # send directory name
+		#self.oasis_serial.send_bytes(b'\x14') # send nominal response directory_start
+		#self.oasis_serial.send_string("logs/;") # send directory name
 
 		file_list = self.fm.list_all_logs()
 		for i in file_list:
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					self.oasis_serial.send_file(f, i)
+					#self.oasis_serial.send_file(f, i)
+					b = b'' # Get rid of this line once something gets put here
 				else:
 					print("ERROR: Unable to read file" + i)
 				f.close()
@@ -241,7 +245,8 @@ class Rover():
 			try:
 				f = open(i, 'rb')
 				if f.readable():
-					self.oasis_serial.send_file(f, i)
+					#self.oasis_serial.send_file(f, i)
+					b = b''
 				else:
 					print("ERROR: Unable to read file" + i)
 				f.close()
@@ -250,11 +255,11 @@ class Rover():
 		return 0
 
 
-	def clock_sync(self):
+	def clock_sync(self, packet):
 		"""
 		Called when the CLOCK SYNC command code is received. Sets the system clock to the received UNIX timestamp.
 		"""
-		t = self.oasis_serial.read_signed_integer()
+		t = packet.unpack_signed_integer()
 		if t is None:
 			print("WARNING: Reading timestamp from Rover timed out!")
 			return False
@@ -262,19 +267,22 @@ class Rover():
 		print("INFO: Got time stamp from CLOCK_SYNC: " + str(t))
 		if not platform.system() == "Linux":
 			print("WARNING: Not running actual command because not on Linux system...")
+			nominal_response = DataPacket(b'\x01')
+			self.pm.append(nominal_response)
 			return True
 
 		try:
 			subprocess.run(["date", "+%s", "-s", "@"+str(t)], check=True, timeout=5)
 			print("INFO: Set system time to: " + str(t))
 
-			self.oasis_serial.send_bytes(b'\x01')
+			nominal_response = DataPacket(b'\x01')
+			self.pm.append(nominal_response)
 			return True
 		except:
 			print("ERROR: The set time command failed!")
 			return False
 
 
-	def __init__(self, oasis_serial, filemanager):
-		self.oasis_serial = oasis_serial
+	def __init__(self, packet_manager, filemanager):
+		self.pm = packet_manager
 		self.fm = filemanager

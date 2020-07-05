@@ -1,0 +1,249 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>7. Oasis Constants &mdash; Oasis  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="6. Oasis Science Package" href="Oasis.science.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Oasis
+          
+
+          
+            
+            <img src="_static/sspl.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Components and Requirements:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Components.html"><strong>Components</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Requirements.html"><strong>Requirements</strong></a></li>
+</ul>
+<p class="caption"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Flight_Computer.html">1. <strong>Flight Computer Modules</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rover.html">2. <strong>Rover Modules</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="TLC.html">3. <strong>Thermal Logic Controller (TLC) Modules</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Spectrometer.html">4. <strong>Spectrometer Modules</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Laser.html">5. <strong>Laser Modules</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Oasis.science.html">6. <strong>Oasis Science Package</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. <strong>Oasis Constants</strong></a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Oasis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">7. </span><strong>Oasis Constants</strong></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/config.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="oasis-constants">
+<h1><span class="section-number">7. </span><strong>Oasis Constants</strong><a class="headerlink" href="#oasis-constants" title="Permalink to this headline">¶</a></h1>
+<dl class="simple">
+<dt>THERMISTER_COUNT</dt><dd><p>(<em>int</em>) - This keeps track of the number of thermisters on Oasis. This should default to 9.</p>
+</dd>
+<dt>DUTY_CYCLE_COUNT</dt><dd><p>(<em>int</em>) - This keeps track of the number of duty cycles taking place for our heaters</p>
+</dd>
+<dt>SD_PATH</dt><dd><p>(<em>string</em>) - This is the path to which Oasis’ micro sd card is mounted</p>
+</dd>
+<dt>DEBUG_SD_PATH</dt><dd><p>(<em>string</em>) - For testing</p>
+</dd>
+<dt>FLASH_PATH</dt><dd><p>(<em>string</em>) - Path to where to store files on our debian flash</p>
+</dd>
+<dt>DEBUG_FLASH_PATH</dt><dd><p>(<em>string</em>) - For testing</p>
+</dd>
+<dt>LOGGING_INTERVAL</dt><dd><p>(<em>int</em>) - The interval of time in which Oasis logs its status</p>
+</dd>
+<dt>LOGS_PER_FILE</dt><dd><p>(<em>int</em>) - Number of status logs Oasis can fit into a single log file</p>
+</dd>
+<dt>STATUS_SIZE</dt><dd><p>(<em>int</em>) - Length (in bytes) of a single status log</p>
+</dd>
+<dt>ROVER_BAUD_RATE</dt><dd><p>(<em>int</em>) - Baud rate that Oasis communicates with the Rover at</p>
+</dd>
+<dt>TLC_BAUD_RATE</dt><dd><p>(<em>int</em>) - Baud rate that Oasis communicates with the TLC at</p>
+</dd>
+</dl>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="Oasis.science.html" class="btn btn-neutral float-left" title="6. Oasis Science Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Penn State SSPL
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

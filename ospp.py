@@ -5,14 +5,15 @@ Handles sending packets to and from the Rover.
 import zlib
 import threading
 import random
-from oasis_config import RETRANSMIT_TIME, INTEGER_SIZE, ACK_PACKET_CODE, DEBUG_MODE
+from oasis_config import RETRANSMIT_TIME, INTEGER_SIZE, ACK_PACKET_CODE, OSPP_PREAMBLE, DEBUG_MODE
 
 class ACKPacket():
 	"""Represents an ACK packet used to acknowledge that a DATA packet has been received."""
 
 	def to_bytes(self):
 		"""Returns the ACK packet as a bytes object for transmission down the serial line."""
-		b = ACK_PACKET_CODE
+		b = OSPP_PREAMBLE
+		b += ACK_PACKET_CODE
 		b += self.magic_number.to_bytes(1, byteorder="big", signed=False)
 		b += zlib.crc32(b).to_bytes(4, byteorder="big", signed=False)
 		return b
@@ -29,7 +30,7 @@ class DataPacket():
 
 	def to_bytes(self, magic_number):
 		"""Returns the data packet as a bytes object for sending down the serial line"""
-		d = b''
+		d = OSPP_PREAMBLE
 		d += self.code
 		d += magic_number.to_bytes(1, byteorder="big", signed=False)
 		d += len(self.data).to_bytes(2, byteorder="big", signed=False)
@@ -46,13 +47,16 @@ class DataPacket():
 		self._time_up = False
 
 	def pack_bytes(self, b):
+		"""Adds the given bytes to the data field of the packet."""
 		self.data += b
 
 	def pack_float(self, f):
+		"""Adds the given float as an ASCII encoded float to the data field of the packet."""
 		s = "{:0=+4d}{:0=-3d}".format(int(f), int(abs(abs(f)-abs(int(f)))*1000))
 		self.data += s.encode('ascii')
 
 	def pack_string(self, s):
+		"""Adds the given string as an ASCII encoded string to the data field of the packet."""
 		self.data += s.encode('ascii')
 
 	def pack_integer(self, i, size=INTEGER_SIZE):
@@ -71,21 +75,25 @@ class DataPacket():
 		self._seek_index = position
 
 	def unpack_bytes(self, count):
+		"""Reads _count_ number of bytes from the data field of the packet."""
 		d = self.data[self._seek_index:self._seek_index+count]
 		self._seek_index += count
 		return d
 
 	def unpack_signed_integer(self, size=INTEGER_SIZE):
+		"""Reads a signed integer from the data field of the packet."""
 		d = self.data[self._seek_index:self._seek_index+size]
 		self._seek_index += size
 		return int.from_bytes(d, byteorder="big", signed=True)
 
 	def unpack_unsigned_integer(self, size=INTEGER_SIZE):
+		"""Reads an unsigned integer from the data field of the packet."""
 		d = self.data[self._seek_index:self._seek_index+size]
 		self._seek_index += size
 		return int.from_bytes(d, byteorder="big", signed=False)
 
 	def unpack_float(self):
+		"""Reads an ASCII encoded float from the data field of the packet."""
 		b = self.data[self._seek_index:self._seek_index+7]
 		self._seek_index += 7
 		s = b.decode("ascii")
@@ -98,6 +106,7 @@ class DataPacket():
 
 	@staticmethod
 	def _retransmit_timer(p):
+		"""Internal callback that marks when the packet is due for retransmission."""
 		p._time_up = True
 
 	def __init__(self, code, data=b''):
@@ -120,6 +129,17 @@ class PacketManager():
 		self._tx_buffer.append(packet)
 		
 	@staticmethod
+	def _read_preamble(serial):
+		"""Helper function that reads the 3 bytes preamble on OSPP packets. Returns True if preamble has been read successfully. False otherwise."""
+		for b in OSPP_PREAMBLE:
+			a, t = serial.read_bytes(1)
+			if t or a != b.to_bytes(1, byteorder="big", signed=False):
+				if DEBUG_MODE:
+					print("Failed to read preamble.")
+				return False
+		return True
+		
+	@staticmethod
 	def _rx_loop(pm):
 		"""Internal thread that manages incoming bytes"""
 		while pm.running:
@@ -129,8 +149,12 @@ class PacketManager():
 			if not pm.running:
 				break
 			
+			if not PacketManager._read_preamble(pm.serial_connection): # Don't start reading packets until we successfully read the preamble.
+				continue # Failed to read preamble, drop those three bytes and attempt to read next three bytes
+			
+			calc_crc = zlib.crc32(OSPP_PREAMBLE)
 			packet_type, t = pm.serial_connection.read_bytes(1)
-			calc_crc = zlib.crc32(packet_type)
+			calc_crc = zlib.crc32(packet_type, calc_crc)
 			magic_num, t = pm.serial_connection.read_bytes(1)
 			if t:
 				if DEBUG_MODE:
@@ -154,10 +178,13 @@ class PacketManager():
 					pm._tx_buffer[0].acknowledge()
 				
 			else:
-				data_size, t = pm.serial_connection.read_bytes(2)
+				data_size, t = pm.serial_connection.read_bytes(2) # Read the expected size of the data field
 				if t:
 					if DEBUG_MODE:
 						print("Timedout while reading data size. Packet is a runt.")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 
 				calc_crc = zlib.crc32(data_size, calc_crc)
@@ -169,6 +196,9 @@ class PacketManager():
 				if t:
 					if DEBUG_MODE:
 						print("Timedout while reading data field. Packet is a runt.")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 				calc_crc = zlib.crc32(data, calc_crc)
 
@@ -176,20 +206,29 @@ class PacketManager():
 				if t:
 					if DEBUG_MODE:
 						print("Timedout while reading CRC-32. Packet is a runt.")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 
 				rx_crc = int.from_bytes(rx_crc, byteorder="big", signed=False)
 				if calc_crc != rx_crc: # Calculated and received CRC-32 values do not match
 					if DEBUG_MODE:
 						print("Received DATA with bad CRC-32")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 
 				ack_packet = ACKPacket(magic_num)
-
+				
 				packet_type = int.from_bytes(packet_type, byteorder="big", signed=False)
 				if pm._last_rx_magic == magic_num and pm._last_rx_packet.code == packet_type and pm._last_rx_packet.data == data:
 					if DEBUG_MODE:
 						print("Dropping DATA packet because magic is the same and is a repeat")
+					if pm._last_rx_magic != -1:
+						last_ack_packet = ACKPacket(pm._last_rx_magic)
+						pm._ack_buffer.append(last_ack_packet)
 					continue
 				
 				if magic_num == pm._last_rx_magic:
