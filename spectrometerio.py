@@ -6,6 +6,17 @@ import time
 import seabreeze
 import seabreeze.spectrometers
 
+"""
+IGNORE:		Spectrometer Error Bits (spec_error_bits)
+										Bit 2: Spectrometer Data Failure (SDF)
+										Bit 1: Spectrometer Disconnected (SDD)
+										Bit 0: No Spectrometer Listed (NSL)
+IGNORE
+"""
+spec_error_bits = [0, 1, 0]			# Spectrometer disconnected is a default state
+
+# TODO: Thread timer/wdt checking if spectrometer is still connected and if not set error bit to 1 (True)
+
 class Spectrometer():
 	"""Class for interacting with the spectrometer through seabreeze."""
 
@@ -22,10 +33,12 @@ class Spectrometer():
 		"""
 		if seabreeze.spectrometers.list_devices():
 			#self.states_spectrometer = 0
+			spec_error_bits[0] = 0
 			self.spectrometer_state.on_standby()
 			spec = seabreeze.spectrometers.Spectrometer.from_first_available()
 			return spec
 
+		spec_error_bits[0] = 1
 		#self.states_spectrometer = 2
 		print("ERROR: No spectrometer listed by seabreeze!")
 		return None
@@ -46,7 +59,9 @@ class Spectrometer():
 		self.oasis_serial.sendBytes(b'\x01') # Sending nominal responce
 		try:
 			wavelengths, intensities = self.spec.spectrum() #Returns wavelengths and intensities as a 2D array, and begins sampling
+			#spec_error_bits[2] = 0
 		except:
+			#spec_error_bits[2] = 1
 			return 'An error occurred while attempting to sample' # Command to sample didn't work properly
 
 		data = wavelengths, intensities # Saving 2D array to variable data

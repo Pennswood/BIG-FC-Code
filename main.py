@@ -50,7 +50,7 @@ def main_loop():
 	if len(past_two_commands) > 2:
 		past_two_commands.pop(2)
 
-	if not error_checking.is_valid_command(laser.states_laser,\
+	if not states_manager.is_valid_command(laser.states_laser,\
 	spectrometer.states_spectrometer, active_errors, past_two_commands[0]):
 		rover.send_cmd_rejected_response(laser.states_laser,\
 			spectrometer.states_spectrometer, active_errors, past_two_commands[0])
