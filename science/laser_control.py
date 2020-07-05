@@ -7,15 +7,21 @@ import serial.tools.list_ports
 class Laser:
     def __init__(self):
         self.__ser = serial.Serial()
-        self.pulseMode = None
-        self.repRate = None
+        self.pulseMode = 2 # Burst mode
+
+        #To be decided by Science
+        self.repRate = 5
         self.burstCount = None
-        self.diodeCurrent = None
-        self.energyMode = None
+
+        # Depends on ATP documents, units in microseconds
         self.pulseWidth = None
-        self.diodeTrigger = None
-        self.autoArm = False
-        self.burstDuration = 0
+
+        # self.diodeTrigger = None  (Note: Stick with default "internal trigger")
+
+        # Note: not real laser settings
+
+        # units in seconds
+        self.burstDuration = self.burstCount / self.repRate
 
         self.__kicker_control = False  # False = off, True = On. Controls kicker for shots longer than 2 seconds
         self.__startup = True
@@ -150,8 +156,6 @@ class Laser:
             cmd_strings.append(';LA:PM ' + str(self.pulseMode) + '<CR>')
             cmd_strings.append(';LA:RR ' + str(self.repRate) + '<CR>')
             cmd_strings.append(';LA:BC ' + str(self.pulseMode) + '<CR>')
-            cmd_strings.append(';LA:DC ' + str(self.diodeCurrent) + '<CR>')
-            cmd_strings.append(';LA:EM ' + str(self.energyMode) + '<CR>')
             cmd_strings.append(';LA:PM ' + str(self.pulseMode) + '<CR>')
             cmd_strings.append(';LA:DW ' + str(self.pulseWidth) + '<CR>')
             cmd_strings.append(';LA:DT ' + str(self.pulseMode) + '<CR>')
