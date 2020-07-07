@@ -31,15 +31,15 @@ class Spectrometer():
 		None
 			If an error occurs
 		"""
-		if seabreeze.spectrometers.list_devices():
-			#self.states_spectrometer = 0
+		devices = seabreeze.spectrometers.list_devices()
+		if devices != None:
 			spec_error_bits[0] = 0
 			self.spectrometer_state.on_standby()
-			spec = seabreeze.spectrometers.Spectrometer.from_first_available()
+			spec = seabreeze.spectrometers.Spectrometer(devices[0])
 			return spec
 
 		spec_error_bits[0] = 1
-		#self.states_spectrometer = 2
+		self.spectrometer_state.spec_disconnect()
 		print("ERROR: No spectrometer listed by seabreeze!")
 		return None
 
@@ -52,28 +52,49 @@ class Spectrometer():
 		milliseconds : int
 			Inputted integration time for spectrometer
 		"""
-		self.spec.trigger_mode = 0 # Setting the trigger mode to normal
-		self.spec.integration_time_micros(milliseconds*1000) # Set integration time for spectrometer
-		#self.states_spectrometer = 1 # Spectrometer state is set to sampling
-		self.spectrometer_state.integrate()
-		self.oasis_serial.sendBytes(b'\x01') # Sending nominal responce
+		
 		try:
-			wavelengths, intensities = self.spec.spectrum() #Returns wavelengths and intensities as a 2D array, and begins sampling
-			#spec_error_bits[2] = 0
-		except:
-			#spec_error_bits[2] = 1
-			return 'An error occurred while attempting to sample' # Command to sample didn't work properly
+			self.spec.trigger_mode = 0 									# Setting the trigger mode to normal
+			self.spec.integration_time_micros(milliseconds*1000) 		# Set integration time for spectrometer
+			self.spectrometer_state.integrate()
+			self.oasis_serial.sendBytes(b'\x01') 						# Sending nominal responce
+			try:
+				wavelengths, intensities = self.spec.spectrum() 		# Returns wavelengths and intensities as a 2D array, and begins sampling
+				#spec_error_bits[2] = 0
+			except:
+				#spec_error_bits[2] = 1
+				
+				return 'An error occurred while attempting to sample' 	# Command to sample didn't work properly
 
-		data = wavelengths, intensities # Saving 2D array to variable data
-		if data == []:
-			return 'No data entered' # Error handling for no data collected
-		self.oasis_serial.sendBytes(b'\x30') # Code sent to spectrometer signaling sampling has successfully finished
+			data = wavelengths, intensities 							# Saving 2D array to variable data
+			if data == []:
+				return 'No data entered' 								# Error handling for no data collected
+			self.oasis_serial.sendBytes(b'\x30') 						# Code sent to spectrometer signaling sampling has successfully finished
 
-		timestamp = time.time() # Returns # of seconds since Jan 1, 1970 (since epoch)
-		self.fm.save_sample(timestamp, data) # Function call to create spectrometer file
-		#self.states_spectrometer = 0 # Spectrometer state is now on standby
-		self.spectrometer_state.on_standby()
+			timestamp = time.time() 									# Returns # of seconds since Jan 1, 1970 (since epoch)
+			self.fm.save_sample(timestamp, data) 						# Function call to create spectrometer file
+			self.spectrometer_state.on_standby()
+		else:
+			self.spec_check_connection()
+			return 'Attempting to Reconnect Spectrometer'
+		return None
 
+	def spec_check_connection(self):
+		"""
+		This function checks the connection between the FC and the spectrometer. If the spectrometer is disconnected, \
+			we will try 3 times to reconnect it to the FC.
+		"""
+		if self.spec == None:												# Checking if no spectrometer is listed
+			self.spectrometer_state.spec_disconnect()
+			for _ in range(3):
+				import seabreeze
+				import seabreeze.spectrometers								# Reimporting seabreeze libraries to get updated listings
+				try:
+					self.spec = self._setupSpectrometer()					# Try setting up our spectrometer again
+					if not self.spectrometer_state.is_spec_disconnected:	# If it's on standby, then our spectrometer is set up
+						break
+				except:
+					continue
 		return None
 
 	def __init__(self, serial, file_manager, spectrometer_state):

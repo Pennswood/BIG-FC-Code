@@ -13,8 +13,8 @@ class Spectrometer_States(StateMachine):
 	integrating = State('Spectrometer Integrating')
 
 	integrate = standby.to(integrating)
-	on_standby = integrating.to(standby)
-	spec_disconnect = spec_disconnected.from_(integrating, standby)
+	on_standby = standby.from_(spec_disconnected, integrating)
+	spec_disconnect = spec_disconnected.from_(integrating, standby, spec_disconnected)
 
 class Laser_States(StateMachine):
 	laser_disconnected = State('Laser Disconnected', initial = True)
@@ -75,27 +75,30 @@ def is_valid_command(laser_status, spec_status, active_errors, cmd):
 			return False
 	'''
 	elif cmd == b'\x03':	# arm command
-		if laser.laser_state.is_off() or laser.laser_state.is_warming_up() or laser.laser_state.is_firing() or laser.laser_state.is_laser_disconnected():
+		if laser.laser_state.is_off or laser.laser_state.is_warming_up or laser.laser_state.is_firing or laser.laser_state.is_laser_disconnected:
 			return False
 
 	elif cmd == b'\x04':	# disarm command
-		if laser.laser_state.is_off() or laser.laser_state.is_warming_up() or laser.laser_state.is_warmed_up() or laser.laser_state.is_arming() or laser.laser_state.is_laser_disconnected():
+		if laser.laser_state.is_off or laser.laser_state.is_warming_up or laser.laser_state.is_warmed_up or laser.laser_state.is_arming or laser.laser_state.is_laser_disconnected:
 			return False
 
 	elif cmd == b'\x05': # Fire laser
-		if not laser.laser_state.is_armed(): # Laser is not in armed state
+		if not laser.laser_state.is_armed: # Laser is not in armed state
 			return False
 
 	elif cmd == b'\x06': # Laser off
 		# TODO in laserio: This command should be allowed in any state (as long as laser is not disconnected)
 		# NOTE: Original is "If the laser is not warmed up, or if it is in the process of warming up, this command will be rejected"
 		# Now it's only "if the laser is disconnected, this command will be rejected", it will be allowed in any state
-		if laser.laser_state.is_laser_disconnected(): # Laser is disconnected
+		if laser.laser_state.is_laser_disconnected: # Laser is disconnected
 			return False
-	elif cmd == b'\x07' or cmd == b'\x08': # Sample
-		if spectrometer.spectrometer_state.is_integrating or active_errors[16] or active_errors[18]: #Sampling, excessive current draw, or temp high.
+	elif cmd == b'\x07': # Sample
+		if spectrometer.spectrometer_state.is_spec_disconnected:
+			spectrometer.spec_check_connection()
+			return False
+		elif spectrometer.spectrometer_state.is_integrating or active_errors[16] or active_errors[18]: #Sampling, excessive current draw, or temp high.
 			return False
 	elif cmd == b'\x09' or cmd == b'\x0B' or cmd == b'\x0D': # Send files
-		if not laser.laser_state.is_off() or spectrometer.spectrometer_state.is_integrating(): # laser not turned off or spectrometer integrating
+		if not laser.laser_state.is_off or spectrometer.spectrometer_state.is_integrating: # laser not turned off or spectrometer integrating
 			return False
 	return True
