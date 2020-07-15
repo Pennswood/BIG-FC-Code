@@ -116,37 +116,37 @@ class Laser:
         Sends commands to laser to have it fire
         """
         with self.__lock:
-            self.__send_command(';LA:FL 1<CR>')
-            self.__send_command(';LA:SS?<CR>')
+            self.__send_command(b';LA:FL 1<CR>')
+            self.__send_command(b';LA:SS?<CR>')
             if self.__ser.readline() != '3075<CR>':
-                self.__send_command(';LA:FL 0<CR>')  # aborts if laser fails to fire
+                self.__send_command(b';LA:FL 0<CR>')  # aborts if laser fails to fire
                 raise RuntimeError('Laser Failed to Fire')
             else:
                 if self.burstDuration >= 2:
                     self.__kicker_control = True
                 time.sleep(self.burstDuration)
-                self.__send_command(';LA:FL 0<CR>')
+                self.__send_command(b';LA:FL 0<CR>')
 
     def get_status(self):
         """Obtains the status of the laser"""
         with self.__lock:
-            self.__send_command(';LA:SS?<CR>')   # Check for timeout exceptions when using read function
+            self.__send_command(b';LA:SS?<CR>')   # Check for timeout exceptions when using read function
             return self.__ser.read(2)            # laser is sending status as 2 bytes, so this needs to be read(2), not read() which takes in 1 byte by default
 
     def check_armed(self):
         """Checks if the laser is armed"""
         with self.__lock:
-            self.__send_command(';LA:EN?<CR>')
+            self.__send_command(b';LA:EN?<CR>')
 
     def arm(self):
         """Sends command to laser to arm"""
         with self.__lock:
-            self.__send_command(';LA:EN 1<CR>')
+            self.__send_command(b';LA:EN 1<CR>')
 
     def disarm(self):
         """Sends command to laser to disarm"""
         with self.__lock:
-            self.__send_command(';LA:EN 0<CR>')
+            self.__send_command(b';LA:EN 0<CR>')
 
     def update_settings(self):
         # cmd format, ignore brackets => ;[Address]:[Command String][Parameters]<CR>
@@ -161,7 +161,7 @@ class Laser:
             cmd_strings.append(';LA:DT ' + str(self.pulseMode) + '<CR>')
 
             for i in cmd_strings:
-                self.__send_command(i)
+                self.__send_command(i.encode('latin-1'))
 
 
 def list_available_ports():
