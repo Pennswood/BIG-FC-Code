@@ -5,23 +5,16 @@ import serial
 import serial.tools.list_ports
 
 class Laser:
-    def __init__(self):
+    def __init__(self, pulseMode = 2, repRate = 10, burstCount = 10000, diodeCurrent = .1, energyMode = 2, pulseWidth = 10, diodeTrigger = 0):
         self.__ser = serial.Serial()
-        self.pulseMode = 2 # Burst mode
-
-        #To be decided by Science
-        self.repRate = 5
-        self.burstCount = None
-
-        # Depends on ATP documents, units in microseconds
-        self.pulseWidth = None
-
-        # self.diodeTrigger = None  (Note: Stick with default "internal trigger")
-
-        # Note: not real laser settings
-
-        # units in seconds
-        self.burstDuration = self.burstCount / self.repRate
+        self.pulseMode = pulseMode
+        self.repRate = repRate
+        self.burstCount = burstCount
+        self.diodeCurrent = diodeCurrent
+        self.energyMode = energyMode
+        self.pulseWidth = pulseWidth
+        self.diodeTrigger = diodeTrigger
+        self.burstDuration = burstCount / repRate
 
         self.__kicker_control = False  # False = off, True = On. Controls kicker for shots longer than 2 seconds
         self.__startup = True
@@ -137,6 +130,10 @@ class Laser:
         """Checks if the laser is armed"""
         with self.__lock:
             self.__send_command(b';LA:EN?<CR>')
+            if self.__ser.read() == 0:
+                return False
+            else:
+                return True
 
     def arm(self):
         """Sends command to laser to arm"""
