@@ -1,0 +1,3 @@
+[submodule "laser"]
+	path = laser
+	url = https://github.com/nschaffin/OASIS-Laser.git
