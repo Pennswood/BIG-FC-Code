@@ -97,11 +97,14 @@ class Spectrometer():
 					continue
 		return None
 
-	# this function should be threaded to run in main, use the repeatedTimer already implemented for logging, insert at line 129 at a later time
+	# this function should be threaded to run in main, use the repeatedTimer already implemented for logging, inserted at line 129 at a later time
 	def check_spec_conn(self, milliseconds):
 		"""
 		This function will repeatedly check if the spectrometer is connected. If it's not, it will attempt to reconnect it.
 		"""
+		if self.spectrometer_state.is_integrating:
+			return None
+
 		try:
 			self.spec.integration_time_micros(milliseconds * 1000)
 			'''
@@ -116,7 +119,8 @@ class Spectrometer():
 			except Exception as e:	# This should never happen
 				print('Something is wrong with the setup Spectrometer function!!!')  # There should be no errors... hopefully
 				print("The ERROR is: ", end = '')
-				print(e)  # if the error does occur, it should be printed
+				print(e)  # if the error does occur, it should be printed for debugging
+		return None
 
 	def __init__(self, serial, file_manager, spectrometer_state):
 		# 0 = standby, 1 = integrating, 2 = disconnected

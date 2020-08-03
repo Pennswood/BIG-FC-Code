@@ -107,37 +107,40 @@ def main_loop():
 
 
 if __name__ == "__main__":
-    if DEBUG_MODE:
-    	fm = file_manager.FileManager(DEBUG_SD_PATH, DEBUG_FLASH_PATH)
-    else:
-    	fm = file_manager.FileManager(SD_PATH, FLASH_PATH)
-    
-    # Set up our serial connection to the rover
-    rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE,
-    		debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
-    # Set up a packet manager to process the OSPP packets we send and recieve
-    packet_manager = ospp.PacketManager(rover_serial)
-    
-    tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE,
-    		debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
-    
-    tlc = TLC(tlc_serial)
-    rover = roverio.Rover(packet_manager, fm)
-    laser = laserio.Laser(oasis_serial=rover_serial, laser_state=Laser_States())
-    
-    spectrometer = spectrometerio.Spectrometer(serial=rover_serial, file_manager=fm, spectrometer_state=Spectrometer_States())
-    
-    def log_timer_callback():
-    	"""This is the callback function that repeatedly logs the current status to the status log."""
-    	status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer,
-    			tlc.get_temperatures(), tlc.get_duty_cycles(),
-    			active_errors, past_two_commands[1])
-    	fm.log_status(status_array, 0)
-    
-    log_data_timer = RepeatedTimer(LOGGING_INTERVAL, log_timer_callback)
-    log_data_timer.start()
-    
-    while True:
-    	main_loop()
-    
-    packet_manager.running = False
+	if DEBUG_MODE:
+		fm = file_manager.FileManager(DEBUG_SD_PATH, DEBUG_FLASH_PATH)
+	else:
+		fm = file_manager.FileManager(SD_PATH, FLASH_PATH)
+	
+	# Set up our serial connection to the rover
+	rover_serial = oasis_serial.OasisSerial("/dev/ttyS1", debug_mode=DEBUG_MODE,
+			debug_tx_port=ROVER_TX_PORT, debug_rx_port=ROVER_RX_PORT, rx_print_prefix="BBB RX] ")
+	# Set up a packet manager to process the OSPP packets we send and recieve
+	packet_manager = ospp.PacketManager(rover_serial)
+	
+	tlc_serial = oasis_serial.OasisSerial("/dev/ttyS2", debug_mode=DEBUG_MODE,
+			debug_tx_port=TLC_TX_PORT, debug_rx_port=TLC_RX_PORT)
+	
+	tlc = TLC(tlc_serial)
+	rover = roverio.Rover(packet_manager, fm)
+	laser = laserio.Laser(oasis_serial=rover_serial, laser_state=Laser_States())
+	
+	spectrometer = spectrometerio.Spectrometer(serial=rover_serial, file_manager=fm, spectrometer_state=Spectrometer_States())
+	# create a constant in oasis_config to replace 10
+	check_spec_timer = RepeatedTimer(10, spectrometer.check_spec_conn, oasis_config.SPECTROMETER_SAMPLE_DURATION_MS)
+	check_spec_timer.start()
+
+	def log_timer_callback():
+		"""This is the callback function that repeatedly logs the current status to the status log."""
+		status_array = rover.get_status_array(laser.states_laser, spectrometer.states_spectrometer,
+				tlc.get_temperatures(), tlc.get_duty_cycles(),
+				active_errors, past_two_commands[1])
+		fm.log_status(status_array, 0)
+	
+	log_data_timer = RepeatedTimer(LOGGING_INTERVAL, log_timer_callback)
+	log_data_timer.start()
+	
+	while True:
+		main_loop()
+	
+	packet_manager.running = False
