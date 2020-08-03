@@ -33,8 +33,9 @@ class Laser_States(StateMachine):
 	arm_finished = arming.to(armed)
 	fire_command = armed.to(firing)
 	fire_finished = firing.to(armed)
-	disarm_command = StateMachine.current_state.to(warmed_up)
-	laser_off = StateMachine.current_state.to(off)
+	# need to find correct syntax for disarm and laser off command, StateMachine.current_state.to() doesn't work
+	# disarm_command = StateMachine.current_state.to(warmed_up)
+	# laser_off = StateMachine.current_state.to(off)
 
 def is_valid_command(laser_status, spec_status, active_errors, cmd):
 	'''
@@ -65,15 +66,16 @@ def is_valid_command(laser_status, spec_status, active_errors, cmd):
 		# TODO: What happens if laser warming up state is active?
 		elif active_errors[16] or active_errors[19] or active_errors[20]: # Excessive current draw, laser disconnected, temp high
 			return False
-	'''
-	elif cmd == b'\x03' or cmd == b'\x04': # Arm/disarm laser
-		# TODO in laserio: this (arm) command should be allowed even if you are already armed or arming.
-		# TODO in laserio: Considering allowing this (arm) state to be called even when firing, in which case it will stop the firing but stay armed.
-		# TODO in laserio: this (disarm) command should be allowed for all states except for "warming up" or "off.
-		# NOTE: If the laser is off, disconnected, or warming up, this command will be rejected
-		if laser_status == 0 or laser_status == 1 or laser_status == 6: # Laser is not in warmed up state
-			return False
-	'''
+	# Can't use docstrings to comment out elif statements, causes a syntax error
+	# '''
+	# elif cmd == b'\x03' or cmd == b'\x04': # Arm/disarm laser
+	# 	# TODO in laserio: this (arm) command should be allowed even if you are already armed or arming.
+	# 	# TODO in laserio: Considering allowing this (arm) state to be called even when firing, in which case it will stop the firing but stay armed.
+	# 	# TODO in laserio: this (disarm) command should be allowed for all states except for "warming up" or "off.
+	# 	# NOTE: If the laser is off, disconnected, or warming up, this command will be rejected
+	# 	if laser_status == 0 or laser_status == 1 or laser_status == 6: # Laser is not in warmed up state
+	# 		return False
+	# '''
 	elif cmd == b'\x03':	# arm command
 		if laser.laser_state.is_off or laser.laser_state.is_warming_up or laser.laser_state.is_firing or laser.laser_state.is_laser_disconnected:
 			return False
