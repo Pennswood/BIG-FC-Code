@@ -33,9 +33,8 @@ class Laser_States(StateMachine):
 	arm_finished = arming.to(armed)
 	fire_command = armed.to(firing)
 	fire_finished = firing.to(armed)
-	# need to find correct syntax for disarm and laser off command, StateMachine.current_state.to() doesn't work
-	# disarm_command = StateMachine.current_state.to(warmed_up)
-	# laser_off = StateMachine.current_state.to(off)
+	laser_off = off.from_(laser_disconnected, on, warming_up, warmed_up, arming, armed, firing)
+	disarm_command = warmed_up.from_(arming, armed, firing)
 
 def is_valid_command(laser_status, spec_status, active_errors, cmd):
 	'''
