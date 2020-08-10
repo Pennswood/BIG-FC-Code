@@ -30,7 +30,7 @@ class Rover():
 		ping_response = DataPacket(b'\x01')
 		self.pm.append(ping_response)
 		
-
+	# TODO: add in tlc
 	def send_cmd_rejected_response(self, laser_status, spec_status, active_errors, prev_cmd):
 		"""
 		Sends the command rejected response for roverio
@@ -51,25 +51,30 @@ class Rover():
 		"""
 		cmd_rejected_array = bytearray()
 
-		if laser_status == 0:
+		if laser_status.is_off:
 			cmd_rejected_array += (b'\x20')			# Laser status | 1 byte
-		elif laser_status == 1:
+		elif laser_status.is_warming_up:
 			cmd_rejected_array += (b'\x21')
-		elif laser_status == 2:
+		elif laser_status.is_warmed_up:
 			cmd_rejected_array += (b'\x22')
-		elif laser_status == 3:
+		elif laser_status.is_arming:
 			cmd_rejected_array += (b'\x23')
-		elif laser_status == 4:
+		elif laser_status.is_armed:
 			cmd_rejected_array += (b'\x24')
-		elif laser_status == 5:
+		elif laser_status.is_firing:
 			cmd_rejected_array += (b'\x25')
+		elif laser_stats.is_laser_disconnected:
+			cmd_rejected_array += (b'\x26')
+		# note there are more laser states, need to review if they could be errors rather than states
 
-		if spec_status == 0:						# Spectrometer status | 1 byte
+		if spec_status.is_standby:						# Spectrometer status | 1 byte
 			cmd_rejected_array += (b'\x01')
-		elif spec_status == 1:
+		elif spec_status.is_integrating:
 			cmd_rejected_array += (b'\x02')
-		elif spec_status == 2:
+		elif spec_status.is_spec_disconnected:
 			cmd_rejected_array += (b'\xFC')
+
+		# TODO: insert duty cycle info
 
 		errors = 0									# Error codes | 3 bytes
 		for index, error in enumerate(active_errors):		# Convert bits into int to bytes

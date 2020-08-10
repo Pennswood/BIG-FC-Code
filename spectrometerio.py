@@ -96,33 +96,20 @@ class Spectrometer():
 				except:
 					continue
 		return None
-
-	# this function should be threaded to run in main, use the repeatedTimer already implemented for logging, inserted at line 129 at a later time
+		
 	def check_spec_conn(self, milliseconds):
 		"""
 		This function will repeatedly check if the spectrometer is connected. If it's not, it will attempt to reconnect it.
 		"""
 		# to avoid interrupting the integration
-		if self.spectrometer_state.is_integrating:
-			return None
+		# if self.spectrometer_state.is_integrating:
+		# 	return None
 
 		try:
 			self.spec.integration_time_micros(milliseconds * 1000)
-			'''
-			There's another function is_open in the API backend. It's currently untested but may be a better alternative.
-			It could mean an if else instead of try except
-			'''
 		except Exception as e:
 			print(e)
 			self.spec = self._setupSpectrometer
-			# try:
-			# 	# Would this possibly solve the issue of connecting the spectrometer twice
-			# 	# self.spec = None  
-			# 	self.spec = self._setupSpectrometer()
-			# except Exception as e:	# This should never happen
-			# 	print('Something is wrong with the setup Spectrometer function!!!')  # There should be no errors... hopefully
-			# 	print("The ERROR is: ", end = '')
-			# 	print(e)  # if the error does occur, it should be printed for debugging
 		return None
 
 	def __init__(self, serial, file_manager, spectrometer_state):

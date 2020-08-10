@@ -13,7 +13,8 @@ import oasis_serial
 import oasis_config
 import laserio
 import spectrometerio
-from states_manager import *
+import states_manager
+from states_manager import Spectrometer_States, Laser_States
 import debug
 import ospp
 from tlc import TLC
@@ -50,8 +51,7 @@ def main_loop():
 	if len(past_two_commands) > 2:
 		past_two_commands.pop(2)
 
-	if not states_manager.is_valid_command(laser.states_laser,\
-	spectrometer.states_spectrometer, active_errors, past_two_commands[0]):
+	if not states_manager.is_valid_command(laser, spectrometer, active_errors, past_two_commands[0]):
 		rover.send_cmd_rejected_response(laser.states_laser,\
 			spectrometer.states_spectrometer, active_errors, past_two_commands[0])
 		pass
@@ -64,7 +64,7 @@ def main_loop():
 		elif command == b'\x03':
 			threading.Thread(target=laser.laser_arm).start()
 		elif command == b'\x04':
-			laser.laser_disarm()
+			laser.laser_disarm()	# this looks like it's being called twice
 			threading.Thread(target=laser.laser_disarm).start()
 		elif command == b'\x05':
 			t1 = threading.Thread(target=spectrometer.sample, args=(10,))
@@ -88,8 +88,10 @@ def main_loop():
 			files_transfer_thread.start()
 
 		elif command == b'\x0A':
+			# spectrometer.check_spec_conn(oasis_config.SPECTROMETER_SAMPLE_DURATION_MS)
 			rover.status_request(laser.states_laser, spectrometer.states_spectrometer,
 					tlc.get_temperatures(), tlc.get_duty_cycles(), active_errors, past_two_commands[1])
+
 		elif command == b'\x0B':  # RS422: Begin to use the rover line for extended period of time
 			files_transferring = True
 			files_transfer_thread = threading.Thread(target=rover.status_dump)
@@ -99,7 +101,7 @@ def main_loop():
 			files_transferring = True
 			files_transfer_thread = threading.Thread(target=rover.transfer_sample)
 			files_transfer_thread.start()
-		elif command == b'\x0E':
+		elif command == b'\x10':
 			rover.clock_sync(packet)
 
 		elif command == b'\xF0':
@@ -126,9 +128,6 @@ if __name__ == "__main__":
 	laser = laserio.Laser(oasis_serial=rover_serial, laser_state=Laser_States())
 	
 	spectrometer = spectrometerio.Spectrometer(serial=rover_serial, file_manager=fm, spectrometer_state=Spectrometer_States())
-	# create a constant in oasis_config to replace 10
-	check_spec_timer = RepeatedTimer(10, spectrometer.check_spec_conn, oasis_config.SPECTROMETER_SAMPLE_DURATION_MS)
-	check_spec_timer.start()
 
 	def log_timer_callback():
 		"""This is the callback function that repeatedly logs the current status to the status log."""
