@@ -60,12 +60,12 @@ def is_valid_command(laser, spectrometer, active_errors, cmd):
 		Boolean of whether it's a valid command
 	'''
 	if cmd == b'\x02': # warm up laser
-		if not laser.laser_state.is_off():
+		if not laser.laser_state.is_off:
 			return False
 		# TODO: What happens if laser warming up state is active?
 		elif active_errors[16] or active_errors[19] or active_errors[20]: # Excessive current draw, laser disconnected, temp high
 			return False
-		spectrometer.check_spec_conn()	# syntax error due to lack of parameters, needs integration time in milliseconds
+		spectrometer.check_spec_conn()
 
 	# Can't use docstrings to comment out elif statements, causes a syntax error
 	# '''
@@ -96,7 +96,7 @@ def is_valid_command(laser, spectrometer, active_errors, cmd):
 		if laser.laser_state.is_laser_disconnected: # Laser is disconnected
 			return False
 	elif cmd == b'\x07': # Sample
-		spectrometer.check_spec_conn()	# syntax error due to lack of parameters, needs integration time in milliseconds
+		spectrometer.check_spec_conn()
 		if spectrometer.spectrometer_state.is_spec_disconnected:
 			return False
 		elif spectrometer.spectrometer_state.is_integrating or active_errors[16] or active_errors[18]: #Sampling, excessive current draw, or temp high.
@@ -105,6 +105,6 @@ def is_valid_command(laser, spectrometer, active_errors, cmd):
 		if not laser.laser_state.is_off or spectrometer.spectrometer_state.is_integrating: # laser not turned off or spectrometer integrating
 			return False
 	elif cmd == b'\x0A':  # Status request
-		spectrometer.check_spec_conn()	# syntax error due to lack of parameters, needs integration time in milliseconds
+		spectrometer.check_spec_conn()
 
 	return True
