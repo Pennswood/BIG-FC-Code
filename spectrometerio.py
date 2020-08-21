@@ -44,6 +44,9 @@ class Spectrometer():
 		self.software_time_keeper_stop = False
 		self.read_delay = 0
 
+		self.conn_wdt_thread = None
+		self.software_timer_thread = None
+
 	def _setup_spectrometer(self):
 		"""
 		Set up method for the spectrometer.
@@ -80,7 +83,7 @@ class Spectrometer():
 			else:
 				self.reconnect_counter = 0
 
-			if response = True:
+			if response == True:
 				self.reconnect_counter = 0
 				self.reconnect = False
 				self.oasis_serial.sendBytes(b'\x00')		# TODO: Determine a connection secured code to send to rover
@@ -94,9 +97,9 @@ class Spectrometer():
 			while time.time() - start_time < (self.integration_time + self.read_delay):
 				if self.acquire_time_left == True:
 					self.integration_time_left = self.integration_time - (time.time() - start_time) 			# TODO: How is this going to work?
-				if self.software_time_keeper_stop = True:
+				if self.software_time_keeper_stop == True:
 					break
-			if self.software_time_keeper_stop = True:
+			if self.software_time_keeper_stop == True:
 				break
 
 	def thread_controller(self, action):
@@ -164,7 +167,7 @@ class Spectrometer():
 	def set_trigger(self, num=0):
 		self.spec.trigger_mode(num)
 
-	def set_integration_time_micros(self,time):
+	def set_integration_time_micros(self,milliseconds):
 		self.integration_time = milliseconds * 1000
 		self.spec.integration_time_micros(milliseconds*1000)
 		return self.integration_time
