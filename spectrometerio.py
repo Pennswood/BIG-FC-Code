@@ -72,6 +72,10 @@ class Spectrometer():
 		return None
 
 	def _connection_wdt(self):
+		"""
+		This method is meant to be threaded and always running in the background.
+		It continuously checks the status of our spectromter's connection to the BBB.
+		"""
 		while True:
 			if self.wdt_stop == True:
 				break
@@ -91,6 +95,10 @@ class Spectrometer():
 			time.sleep(1)
 
 	def _software_trigger_time_keeper(self):
+		"""
+		This method is meant to be threaded and running continuously in the background as a software trigger is initiated.
+		This will keep track of where our software trigger's continuous integration cycle is at with the self.integration_time_left variable.
+		"""
 		self.spec.spectrum()								# Getting software trigger on track for integration cycle
 		while True:
 			start_time = time.time()
@@ -165,17 +173,39 @@ class Spectrometer():
 		return None
 
 	def set_trigger(self, num=0):
+		"""
+		This function allows for the user to set the trigger mode on the Flame-T spectrometer. 
+
+		0 = Normal (Free-Running), 1 = Software, 2 = External Hardware Level Trigger, 3 = Normal (Shutter) Mode, 4 = External Hardware Edge Trigger
+		"""
 		self.spec.trigger_mode(num)
 
 	def set_integration_time_micros(self,milliseconds):
+		"""
+		This function allows for the user to set the integration time on the Flame-T spectrometer.
+
+		Parameters
+		----------
+		milliseconds : float
+			The integration period the user specifies
+		"""
 		self.integration_time = milliseconds * 1000
 		self.spec.integration_time_micros(milliseconds*1000)
-		return self.integration_time
 
 	def _spectrometer_integration_boundries(self):
+		"""
+		This function allows for the user to set up their spectrometer class with the appropriate integration time limits.
+		Also, you may extract a tuple of the min and max values from this function's return statement.
+
+		Returns
+		-------
+		min_max : tuple
+			A tuple with the minimum and maximum values as integers shown here: (min, max)
+		"""
 		min_max = self.spec.integration_time_micros_limits
 		self.min_integration_time = min_max[0]
 		self.max_integration_time = min_max[1]
+		return min_max
 		
 	def check_spec_conn(self):
 		"""
