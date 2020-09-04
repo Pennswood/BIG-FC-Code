@@ -145,7 +145,7 @@ class Spectrometer():
 			raise SpecConnWDT("Action command is invalid")
 
 	# TODO: check if parts of this function should be refactored (i.e. saving errors into the sample data)
-	def sample(self, milliseconds):
+	def sample(self):	# NOTE: Deleted milliseconds as it was not used in this function
 		"""
 		This function is used to signal the spectrometer to integrate for a set amount of time.
 
@@ -156,9 +156,9 @@ class Spectrometer():
 		"""
 		try:
 			self.spectrometer_state.integrate()
-			self.oasis_serial.sendBytes(b'\x01') 						# Sending nominal responce
+			self.oasis_serial.sendBytes(b'\x01') 						# Sending nominal response
+			# NOTE: The proper delay must be added before this to ensure that the data retrieved is correct during external trigger
 			wavelengths, intensities = self.spec.spectrum() 			# Returns wavelengths and intensities as a 2D array, and begins sampling
-			print('An error occurred while attempting to sample')  		# Command to sample didn't work properly
 			data = wavelengths, intensities 							# Saving 2D array to variable data
 			if intensities == [] or intensities == None:
 				print('No data entered')								# Error handling for no data collected
@@ -168,6 +168,7 @@ class Spectrometer():
 			self.fm.save_sample(timestamp, data) 						# Function call to create spectrometer file
 			self.spectrometer_state.on_standby()
 		except:
+			print('An error occurred while attempting to sample')  		# Command to sample didn't work properly
 			self.reconnect = True
 			return 'Checking spectrometer connection'
 		return None
