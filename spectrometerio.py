@@ -16,12 +16,14 @@ IGNORE:		Spectrometer Error Bits (spec_error_bits)
 IGNORE
 """
 spec_error_bits = [0, 1, 0]			# Spectrometer disconnected is a default state
+ACQUISITION_DELAY = 0					# move this to a different file later on?
 
 # TODO: Thread timer/wdt checking if spectrometer is still connected and if not set error bit to 1 (True)
 
 class SpecConnWDT(Exception):
 	pass
 
+#TODO: Create some sort of error or boolean to know that external trigger is inactive
 class Spectrometer():
 	"""Class for interacting with the spectrometer through seabreeze."""
 
@@ -31,8 +33,8 @@ class Spectrometer():
 		# self.states_spectrometer = 0
 		self.fm = file_manager
 		self.devices = []
-		self.spec = self._setup_spectrometer()
 		self.spectrometer_state = spectrometer_state
+		self.spec = self._setup_spectrometer()
 		self.reconnect_counter = 0
 		self._threads = []
 		self.wdt_stop = False
@@ -44,9 +46,12 @@ class Spectrometer():
 		self.software_time_keeper_stop = False
 		self.read_delay = 0
 
+		self.past_data = []
+
 		self.conn_wdt_thread = None
 		self.software_timer_thread = None
 
+	#TODO: initialize spectrometer integration time micros or create a default for it in the method
 	def _setup_spectrometer(self):
 		"""
 		Set up method for the spectrometer.
@@ -64,6 +69,11 @@ class Spectrometer():
 			spec_error_bits[0] = 0
 			spec = seabreeze.spectrometers.Spectrometer(self.devices[0])
 			self.spectrometer_state.on_standby()
+
+			# initialize initial values for spectrometer
+			# self.set_acquisition_delay()
+			# self.set_trigger()
+			# self.set_integration_time_micros()
 			return spec
 
 		spec_error_bits[0] = 1
@@ -160,6 +170,8 @@ class Spectrometer():
 			# NOTE: The proper delay must be added before this to ensure that the data retrieved is correct during external trigger
 			wavelengths, intensities = self.spec.spectrum() 			# Returns wavelengths and intensities as a 2D array, and begins sampling
 			data = wavelengths, intensities 							# Saving 2D array to variable data
+			self.past_data = data 										# Store data for checking external trigger
+			# This may not be necessary but to check if it's repeating instead
 			if intensities == [] or intensities == None:
 				print('No data entered')								# Error handling for no data collected
 			self.oasis_serial.sendBytes(b'\x30') 						# Code sent to spectrometer signaling sampling has successfully finished
@@ -173,15 +185,19 @@ class Spectrometer():
 			return 'Checking spectrometer connection'
 		return None
 
-	def set_trigger(self, num=0):
+	def set_trigger(self, num=3):	# 3 is probably the external hardware edge trigger in the seabreeze library
 		"""
 		This function allows for the user to set the trigger mode on the Flame-T spectrometer. 
 
 		0 = Normal (Free-Running), 1 = Software, 2 = External Hardware Level Trigger, 3 = Normal (Shutter) Mode, 4 = External Hardware Edge Trigger
 		"""
+		if num > 3:
+			return None
+		elif num < 0:
+			return None
 		self.spec.trigger_mode(num)
 
-	def set_integration_time_micros(self,milliseconds):
+	def set_integration_time_micros(self, milliseconds):
 		"""
 		This function allows for the user to set the integration time on the Flame-T spectrometer.
 
@@ -192,6 +208,20 @@ class Spectrometer():
 		"""
 		self.integration_time = milliseconds * 1000
 		self.spec.integration_time_micros(milliseconds*1000)
+
+	#TODO: Check this function
+	def set_acquisition_delay(self, microseconds=ACQUISITION_DELAY):
+		"""
+		This function allows for the user to set the acquisition delay in microseconds.
+		"""
+		self.spec.f.spectrometer.set_delay_microseconds(microseconds)
+
+	#TODO: Will handle after unittests are complete
+	def check_external_trigger(self):
+		"""
+		This function checks if the external trigger is working properly. It does so by comparing the past dataset to the new one
+		"""
+		pass
 
 	def _spectrometer_integration_boundries(self):
 		"""

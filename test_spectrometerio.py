@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import Mock, patch
-from base_spec_code import Spectrometer
+from spectrometerio import Spectrometer
 import seabreeze.spectrometers
 
 class TestSpectrometer(unittest.TestCase):
@@ -13,7 +13,8 @@ class TestSpectrometer(unittest.TestCase):
 		"""
 		self.mock_fm = Mock()
 		self.mock_serial = Mock()
-		self.spec = Spectrometer(self.mock_serial, self.mock_fm)
+		self.mock_spec_state = Mock()
+		self.spec = Spectrometer(self.mock_serial, self.mock_fm, self.mock_spec_state)
 
 
 	def tearDown(self):
@@ -38,10 +39,10 @@ class TestSpectrometer(unittest.TestCase):
 		self.assertTrue(self.spec.devices == [])
 		self.assertIsNone(self.spec.spec)
 
-
+	#NOTE: do we want to return a value for _setup_spectrometer or do we want to directly set it inside the function
 	# allow these methods to be mock methods and returns specified values
-	@patch('base_spec_code.seabreeze.spectrometers.list_devices', return_value=['Spec1'])
-	@patch('base_spec_code.seabreeze.spectrometers.Spectrometer', return_value=['SPEC'])  # need an object example to test this later
+	@patch('spectrometerio.seabreeze.spectrometers.Spectrometer', return_value=['SPEC'])  # need an object example to test this later
+	@patch('spectrometerio.seabreeze.spectrometers.list_devices', return_value=['Spec1'])
 	def test_setup_with_spec(self, mock, mock2):
 		"""
 		This test checks that setup will be successful if there's something on the list
@@ -49,6 +50,9 @@ class TestSpectrometer(unittest.TestCase):
 		# spectrometer was initialized before mock patch since it was in setUp
 		self.assertTrue(self.spec.devices == [])
 		self.assertIsNone(self.spec.spec)
+
+		# mock_spec = Mock()
+		# self.spec.spec = Mock()
 
 		# sets up the spectrometer again with an actual list
 		self.assertTrue(self.spec._setup_spectrometer() != None)
@@ -67,8 +71,8 @@ class TestSpectrometer(unittest.TestCase):
 		"""
 		mock_trigger = Mock()
 		self.spec.spec = mock_trigger
-		self.spec.set_trigger(4)
-		mock_trigger.trigger_mode.assert_called_with(4)
+		self.spec.set_trigger(3)
+		mock_trigger.trigger_mode.assert_called_with(3)
 
 
 	def test_set_integration_time_micros(self):
@@ -88,15 +92,15 @@ class TestSpectrometer(unittest.TestCase):
 		"""
 		This test checks that the serial port is receiving the right value sent out by the Flight computer
 		"""
-		self.spec.oasis_serial = self.mock_serial
+		# self.spec.oasis_serial = self.mock_serial
 		self.spec.sample()
 		self.spec.oasis_serial.sendBytes.assert_called_with(b'\x01')
 		# self.spec.oasis_serial.sendBytes.assert_called_with(b'\x30')  # Needs a successful sample to work, should be tested in test_sample()
 
 
 	# NOTE: check spectrum, see if there's a way to test and if it's correctly implemented from documentation
-	@unittest.skip("Testing sample function needs some research and more work")
-	def test_sample(self):
+	@patch('spectrometerio.time.time', return_value=100)
+	def test_sample(self, mock):
 		"""
 		This test checks that the data is being retrieved properly.
 		"""
@@ -104,12 +108,13 @@ class TestSpectrometer(unittest.TestCase):
 		# self.assertTrue(self.spec.sample() == 'Checking spectrometer connection')
 
 		mock_spec = Mock()
+		mock_spec.spectrum.return_value = [0], [0]
 		self.spec.spec = mock_spec
-		self.spec.oasis_serial = self.mock_serial
 		self.spec.sample()
 		# check serial to make sure the correct bytes are being sent
-		self.spec.oasis_serial.sendBytes.assert_called_with(b'\x01')
+		# self.spec.oasis_serial.sendBytes.assert_called_with(b'\x01')		# not sure why this won't work, maybe the second call overwrites it
 		self.spec.spec.spectrum.assert_called_with()
+		self.spec.fm.save_sample.assert_called_with(100, self.spec.spec.spectrum())
 		self.spec.oasis_serial.sendBytes.assert_called_with(b'\x30')
 
 
